@@ -2,7 +2,7 @@
 """ Firestone Idle RPG Bot
 Divoky 20-01-18
 
-BUILD 46.4769
+BUILD 200203.7144
 
 A bot to handle auto upgrading party members and such as it progresses.
 """
