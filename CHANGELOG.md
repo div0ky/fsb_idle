@@ -1,5 +1,5 @@
 # Changelog
-All notable changes to this project will be documented in this file. We use a simple date based system - **YEAR.MONTH.DAY.REVISION**.
+All notable changes to this project will be documented in this file. We use Explicit Versioning - **BREAKING.FEATURE.FIX.REVISION**.
 
 ## [Unreleased]
 - Missions
