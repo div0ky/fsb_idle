@@ -6,7 +6,7 @@ A bot to play the idle RPG "Firestone" for you while you're AFK.
 
 This app is written in Python 3.
 
-### Prerequisites
+### Dependencies
 
 Here are the modules you'll need to install to work with this script.
 
