@@ -58,7 +58,7 @@ def main():
     logging.info("Program started. Press Ctrl-C to abort at any time.")
     logging.info("To interrupt mouse movement, move mouse to upper left corner.")
     messagebox.showinfo(title=f"Firestone Bot {version}",
-                        message=f"Starting the bot...\nMove mouse to upper-left corner of screen to stop.")
+                        message=f"Click OK to start the bot.\nWithin 5sec after clicking OK, make sure the game is the main window on screen.\nMove mouse to upper-left corner of screen to stop.")
     getGameRegion()
     setupCoordinates()
     startPlaying()

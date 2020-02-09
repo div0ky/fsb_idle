@@ -6,13 +6,14 @@ A bot to play the idle RPG "Firestone" for you while you're AFK. This is very mu
 
 This app is written in Python 3.
 
-### Dependencies
+### Prerequisites
 
 Here are the modules you'll need to install to work with this script.
 
 ```
 pyautogui
 pytesseract
+opencv-python
 tesseract-ocr https://github.com/UB-Mannheim/tesseract/wiki
 ```
 
