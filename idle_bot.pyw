@@ -99,7 +99,7 @@ def getGameRegion():
     logging.info("Finding game region...")
     game = gw.getWindowsWithTitle("Firestone")
     game[0].activate()
-    sleep(1.5)
+    sleep(6.5)
     if gw.getActiveWindowTitle() == "Firestone":
         pass
     else:
