@@ -174,25 +174,26 @@ def getGameRegion():
     # calculate the region of the entire game
     topLeftX = region[0]
     topLeftY = region[1]  # top
-    GAME_REGION = (topLeftX, topLeftY, 1920, 1080)
+    sWidth, sHeight = pyautogui.size()
+    GAME_REGION = (topLeftX, topLeftY, sWidth, sHeight)
     logging.info("Game region found: %s" % (GAME_REGION,))
 
 
 def setupCoordinates():
     UPGRADE_COORDS = (GAME_REGION[0] + (0.96 * GAME_REGION[2]), GAME_REGION[1] + (0.61 * GAME_REGION[3]))
     CLICK_COORDS = (GAME_REGION[2] / 2, GAME_REGION[3] / 2)
-    CLOSE_COORDS = (0.98 * GAME_REGION[2], 99)
+    CLOSE_COORDS = (0.98 * GAME_REGION[2], 0.09 * GAME_REGION[3])
 
 
 def buyUpgrades():
     global CLICK_COORDS, UPGRADE_COORDS, CLOSE_COORDS
-    # button = pyautogui.locateOnScreen(imPath("upgrades.png"), region=(1770, 605, 150, 130))
+    # button = pyautogui.locateOnScreen(imPath("upgrades.png"), region=(0.92 * GAME_REGION[2], 0.56 * GAME_REGION[3]), 0.08 * GAME_REGION[2], 0.12 * GAME_REGION[3]))
     pyautogui.click(UPGRADE_COORDS)
     pyautogui.moveTo(CLICK_COORDS)
     pause()
     logging.info("Buying any available upgrades.")
     while True:
-        button = pyautogui.locateAllOnScreen(imPath("can_buy.png"), region=(1630, 140, 110, 800), confidence=0.96)
+        button = pyautogui.locateAllOnScreen(imPath("can_buy.png"), region=(0.85 * GAME_REGION[2], 0.13 * GAME_REGION[3], 0.06 * GAME_REGION[2], 0.74 * GAME_REGION[3]), confidence=0.96)
         button = list(button)
         if len(button) == 0:
             logging.info("No more upgrades available.")
@@ -211,14 +212,14 @@ def guildMission():
 
     if now() > GUILD_MISSION_TIME_LEFT:
         pause()
-        click(1840, 258)
+        click(0.96 * GAME_REGION[2], 0.24 * GAME_REGION[3])
         pause()
-        click(1510, 195)
+        click(0.79 * GAME_REGION[2], 0.18 * GAME_REGION[3])
         pause()
-        click(175, 380)
+        click(0.09 * GAME_REGION[2], 0.35 * GAME_REGION[3])
         pause()
 
-        pyautogui.screenshot(imPath("ss.png"), region=(600, 345, 195, 40))
+        pyautogui.screenshot(imPath("ss.png"), region=(0.31 * GAME_REGION[2], 0.32 * GAME_REGION[3], 0.1 * GAME_REGION[2], 0.04 * GAME_REGION[3]))
         pause()
         result = ocr(imPath("ss.png"))
         if result != "Completed" and result != "":
@@ -232,42 +233,42 @@ def guildMission():
                 # logging.info(GUILD_MISSION_TIME_LEFT)
                 logging.info(f"Current mission will complete in {time_left}min.")
                 logging.info("Exiting Guild...")
-                click(1820, 78, clicks=3, interval=0.5)
+                click(0.95 * GAME_REGION[2], 0.07 * GAME_REGION[3], clicks=3, interval=0.5)
                 return
             except Exception as e:
                 logging.info(e)
                 logging.warning("Not sure what the status is.")
-                click(1335, 340)
+                click(0.7 * GAME_REGION[2], 0.31 * GAME_REGION[3])
                 logging.info("Attempted to stat new expedition. Will check back later.")
                 pause()
                 logging.info("Exiting Guild...")
-                click(1820, 78, clicks=3, interval=0.5)
+                click(0.95 * GAME_REGION[2], 0.07 * GAME_REGION[3], clicks=3, interval=0.5)
                 pause()
                 return
 
         elif result == "Completed":
             logging.info("Mission completed.")
-            moveTo(1335, 335, 0.5)
-            click(1335, 335)
+            moveTo(0.7 * GAME_REGION[2], 0.31 * GAME_REGION[3], 0.5)
+            click(0.7 * GAME_REGION[2], 0.31 * GAME_REGION[3])
             sleep(1.5)
-            moveTo(1180, 720, 0.5)
-            click(1180, 720)
+            moveTo(0.61 * GAME_REGION[2], 0.67 * GAME_REGION[3], 0.5)
+            click(0.61 * GAME_REGION[2], 0.67 * GAME_REGION[3])
             logging.info("Claimed.")
             pause()
-
-        pyautogui.screenshot(imPath("ss.png"), region=(620, 520, 680, 67))
+            
+        pyautogui.screenshot(imPath("ss.png"), region=(0.32 * GAME_REGION[2], 0.48 * GAME_REGION[3], 0.35 * GAME_REGION[2], 0.06 * GAME_REGION[3]))
         pause()
         result = ocr(imPath("ss.png"))
         if result != "There are no pending expeditions.":
-            moveTo(1335, 340, 0.5)
-            click(1335, 340)
+            moveTo(0.7 * GAME_REGION[2], 0.31 * GAME_REGION[3], 0.5)
+            click(0.7 * GAME_REGION[2], 0.31 * GAME_REGION[3])
             logging.info("Attempted to stat new expedition. Will check back later.")
             pause()
             logging.info("Exiting Guild...")
-            click(1820, 78, clicks=3, interval=0.5)
+            click(0.95 * GAME_REGION[2], 0.07 * GAME_REGION[3], clicks=3, interval=0.5)
         else:
             logging.info("No missions left.")
-            pyautogui.screenshot(imPath("ss.png"), region=(1035, 140, 145, 43))
+            pyautogui.screenshot(imPath("ss.png"), region=(0.54 * GAME_REGION[2], 0.13 * GAME_REGION[3], 0.08 * GAME_REGION[2], 0.04 * GAME_REGION[3]))
             pause()
             result = ocr(imPath("ss.png"))
             result = result.partition(":")[0]
@@ -276,7 +277,7 @@ def guildMission():
             GUILD_MISSION_TIME_LEFT = now() + (time_left * 60)
             logging.info(f"More missions available in {time_left}min.")
             logging.info("Exiting Guild...")
-            click(1820, 78, clicks=3, interval=0.5)
+            click(0.95 * GAME_REGION[2], 0.07 * GAME_REGION[3], clicks=3, interval=0.5)
     return
 
 
@@ -284,7 +285,7 @@ def farmGold(levels):
 
     global UPGRADE_LOWERED, UPGRADE_COORDS, CLOSE_COORDS
 
-    pyautogui.click(693, 40, clicks=levels, interval=0.5)
+    pyautogui.click(0.36 * GAME_REGION[2], 0.04 * GAME_REGION[3], clicks=levels, interval=0.5)
     logging.info("Going back %s levels to farm." % levels)
 
     if UPGRADE_LOWERED is False:
@@ -292,7 +293,7 @@ def farmGold(levels):
         logging.info("Lowering upgrade progression to x1.")
         pyautogui.click(UPGRADE_COORDS)
         pause()
-        pyautogui.click(1700, 1015, clicks=2, interval=0.5)
+        pyautogui.click(0.89 * GAME_REGION[2], 0.94 * GAME_REGION[3], clicks=2, interval=0.5)
         pyautogui.click(CLOSE_COORDS)
     return
 
@@ -349,7 +350,7 @@ def prestige():
             logging.info("Raise upgrade progression to 'Next Milestone.'")
             pyautogui.click(UPGRADE_COORDS)
             pause()
-            pyautogui.click(1700, 1015, clicks=3, interval=0.5)
+            pyautogui.click(0.89 * GAME_REGION[2], 0.94 * GAME_REGION[3], clicks=3, interval=0.5)
             pyautogui.click(CLOSE_COORDS)
     return
 
@@ -361,36 +362,36 @@ def freshSetup():
         logging.info("Fresh start detected. Checking how long it's been.")
         if now() > (LAST_PRESTIGE + 120):
             logging.info("We should have enough gold to buy party now.")
-            pyautogui.click(1842, 523)  # Open party menu
+            pyautogui.click(0.96 * GAME_REGION[2], 0.48 * GAME_REGION[3])  # Open party menu
             pause()
             logging.info("Buying first party slot.")
-            pyautogui.click(795, 860)  # Buy fist party slot
+            pyautogui.click(0.41 * GAME_REGION[2], 0.8 * GAME_REGION[3])  # Buy fist party slot
             pause()
             logging.info("Putting Ranger in first slot.")
-            pyautogui.click(1660, 645)  # Put Ranger in first slot
+            pyautogui.click(0.86 * GAME_REGION[2], 0.6 * GAME_REGION[3])  # Put Ranger in first slot
             pause()
             logging.info("Buying second party slot.")
-            pyautogui.click(765, 615)  # Buy second slot
+            pyautogui.click(0.4 * GAME_REGION[2], 0.57 * GAME_REGION[3])  # Buy second slot
             pause()
             logging.info("Putting Warrior in second slot.")
-            pyautogui.click(1475, 635)  # Put warrior in first slot
+            pyautogui.click(0.77 * GAME_REGION[2], 0.59 * GAME_REGION[3])  # Put warrior in first slot
             pause()
             logging.info("Buying third party slot.")
-            pyautogui.click(565, 900)  # Buying third party slot
+            pyautogui.click(0.29 * GAME_REGION[2], 0.83 * GAME_REGION[3])  # Buying third party slot
             pause()
             logging.info("Putting mage in third slot.")
-            pyautogui.click(1660, 445)  # Putting mage in third slot
+            pyautogui.click(0.86 * GAME_REGION[2], 0.41 * GAME_REGION[3])  # Putting mage in third slot
             pause()
             logging.info("Buying fourth party slot.")
-            pyautogui.click(545, 520)  # Buying fourth party slot
+            pyautogui.click(0.28 * GAME_REGION[2], 0.48 * GAME_REGION[3])  # Buying fourth party slot
             pause()
             logging.info("Putting tank in fourth party slot.")
-            pyautogui.click(1480, 440)  # Put tank in fourth slot
+            pyautogui.click(0.77 * GAME_REGION[2], 0.41 * GAME_REGION[3])  # Put tank in fourth slot
             logging.info("Saving party changes.")
-            pyautogui.click(1150, 95)  # Save changes
+            pyautogui.click(0.6 * GAME_REGION[2], 0.09 * GAME_REGION[3])  # Save changes
             pause()
             logging.info("Done configuring party.")
-            pyautogui.click(1850, 65)  # Close party screen
+            pyautogui.click(0.96 * GAME_REGION[2], 0.06 * GAME_REGION[3])  # Close party screen
 
             logging.info("Fresh setup complete. Fresh start status removed.")
             FRESH_START = False
