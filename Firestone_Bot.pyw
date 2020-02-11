@@ -303,8 +303,11 @@ class FirestoneBot():
 
                 result = self.ocr(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png")
                 result = result.partition(":")[0]
-
-                if isinstance(int(result), int):
+                try:
+                    result = int(result)
+                except:
+                    self.log.exception("Doesn't look like a number. We can't act on this.")
+                if isinstance(result, int):
                     time_left = int(result) + 1
                     self.GUILD_MISSION_TIME_LEFT = time() + (time_left * 60)
                     self.log.info(f"More missions available in {time_left}min. Going home.")
