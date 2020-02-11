@@ -3,6 +3,7 @@ ocr.py
 updater.py
 debug.log
 fsb_ver.txt
-images/ss.png
+Data\Images\ss.jpg
 setup.iss
 setup.txt
+Data\Scripts
