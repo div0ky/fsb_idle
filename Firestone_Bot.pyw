@@ -31,8 +31,8 @@ DEFINE VERSION INFO
 
 vMajor = 2  # Increments on a BREAKING change
 vMinor = 0  # Increments on a FEATURE change
-vPatch = 1  # Increments on a FIX
-vRevision = 1798  # Calculated by Ceil(HHmmss / 24)
+vPatch = 2  # Increments on a FIX
+vRevision = 1830  # Calculated by Ceil(HHmmss / 24)
 vStage = "Alpha"
 version = f"{vMajor}.{vMinor}.{vPatch}.{vRevision} {vStage}"  # Should be self explanatory
 
@@ -315,6 +315,7 @@ class FirestoneBot():
                     return
                 else:
                     self.log.error("Wasn't able to determine renewal time.")
+                    click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)
                     return
 
     def run(self):

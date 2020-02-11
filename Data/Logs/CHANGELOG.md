@@ -7,6 +7,11 @@ All notable changes to this project will be documented in this file. We use Expl
 - Auto-Prestige
 - Open Chests
 
+## [2.0.2.1830] - 2020-02-11
+### Fixed
+- After the previous fix, the bot wouldn't crash, but wouldn't exit back to home
+- Rapid deployment can be finicky, sorry.
+
 ## [2.0.1.1798] - 2020-02-11
 ### Fixed
 - Bot would crash if it couldn't read the timer when no guild expeditions were available
