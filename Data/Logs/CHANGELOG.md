@@ -6,9 +6,8 @@ All notable changes to this project will be documented in this file. We use Expl
 - Tavern
 - Auto-Prestige
 - Open Chests
-- Better logging
 
-## [2.0.0.1076] - 2020-02-11
+## [2.0.0.1755] - 2020-02-11
 ### Added
 - Support for multi-thredding, some fun features to come with this
 - Mouse lockdown feature, if the most goes out of game it'll rebound
