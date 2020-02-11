@@ -1,19 +1,21 @@
+import configparser
 import os
 import sys
-import configparser
 import time
-import threading
+from threading import Thread
 
 
 class ConfigManager:
     def __init__(self):
         self.config_file = os.path.join(os.getcwd(), 'bot.ini')
         self.config_last_modified = round(os.path.getmtime(self.config_file))
+        self.sentinel = False
 
         # General options - can be overriden from config
         self.auto_prestige = True
         self.in_guild = True
         self.guardian = "Dragon"
+        self.logging = True
 
         # Party settings. Can be overriden via config
         self.party_size = 5
@@ -34,7 +36,7 @@ class ConfigManager:
 
         self._set_ini_options(config)
 
-        threading.Thread(target=self.reload_ini, name="ConfigMonitor").start()
+        Thread(target=self.reload_ini, name="ConfigMonitor", daemon=True).start()
 
     def reload_ini(self):
         """
@@ -48,6 +50,8 @@ class ConfigManager:
                 config.read(self.config_file)
                 self._set_ini_options(config)
                 self.config_last_modified = round(os.path.getmtime(self.config_file))
+            if self.sentinel is True:
+                return
             time.sleep(3)
 
     def _set_ini_options(self, config):

@@ -3,29 +3,27 @@
 
 Firestone Idle RPG Bot
 
-Alpha 2.1.0.5967
-
 A bot to handle auto upgrading party members and such as it progresses.
 
 """
 
 import logging
 import os
-import tkinter
-import configparser
-from logging.handlers import TimedRotatingFileHandler
-from time import sleep as sleep
-from time import time as now
-from tkinter import messagebox
 import threading
-from Data.Includes import ConfigManager
+import tkinter
+from logging.handlers import TimedRotatingFileHandler
+from time import sleep
+from time import time
+from tkinter import messagebox
 
 import pyautogui
-import pygetwindow as gw
 import pytesseract
 from PIL import Image
 from pyautogui import click
 from pyautogui import moveTo
+
+from Data.Includes.ConfigManager import ConfigManager
+from Data.Includes.Lock import MouseLock
 
 """
 DEFINE VERSION INFO
@@ -38,22 +36,53 @@ vRevision = 6906  # Calculated by Ceil(HHmmss / 24)
 vStage = "Alpha"
 version = f"{vMajor}.{vMinor}.{vPatch}.{vRevision} {vStage}"  # Should be self explanatory
 
-"""
-SETUP OUR USER CONFIG
-"""
+# Define where the tesseract engine is installed
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
+
+
+def imPath(filename):
+    # A shortcut for joining the 'images/' file path
+    return os.path.join(r"Data\Images", filename)
+
 
 class FirestoneBot():
     def __init__(self):
         os.system("cls")
-        self.config = ConfigManager()
+
         self._setup_logging()
+        self.sentinel = False
+
+        # Init config and logging
+        self.config = ConfigManager()
+        self.mouseLock = MouseLock()
+
+        self.root = tkinter.Tk()
+        self.root.withdraw()
+
+        # Setup some common variables
+        self.GAME_REGION = None
+        self.GUARDIAN_CLICK_COORDS = None
+        self.UPGRADE_COORDS = None
+        self.CLOSE_COORDS = None
+        self.PAUSE_LENGTH = 0.5
+        self.GUILD_MISSION_TIME_LEFT = time() - 5
+        self.SMALL_CLOSE_COORDS = None
+        self.BIG_CLOSE_COORDS = None
+        self.GUILD_COORDS = None
+        self.GUILD_EXPEDITIONS_COORDS = None
+        self.TOWN_COORDS = None
+        self.UPGRADES_LOWERED = False
+        self.FRESH_START = False
+        self.BOSS_FAILED = False
+        self.BACK_ARROW_COORDS = None
+        self.UPGRADES_BUTTON_COORDS = None
 
     def _check_thread_status(self):
         """ Check status of threads. If they're not running, start them.
         :return:
         """
 
-        thread_names = ["configmonitor"]
+        thread_names = ["configmonitor", "mouselock"]
 
         for thread in threading.enumerate():
             if thread.name.lower() in thread_names:
@@ -62,419 +91,262 @@ class FirestoneBot():
         for i in thread_names:
 
             if i == "configmonitor":
-                msg = "Config Monitor Thread Crashed"
-                self._output_error(msg)
+                self.log.warning("Config Monitor Thread Crashed")
                 self.config = ConfigManager()
+                continue
+            if i == "mouselock":
+                self.log.warning("Mouse Lockdown Thread Chrashed")
+                self.mouseLock = MouseLock()
                 continue
 
     def _setup_logging(self):
-        if self.config.logging:
-            # Create a custom logger
-            self.log = logging.getLogger(__name__)
-            self.log.setLevel(logging.INFO)
+        # Create a custom logger
+        self.log = logging.getLogger(__name__)
+        self.log.setLevel(logging.INFO)
 
-            # Create formatters
-            file_format = logging.Formatter('%(asctime)s.%(msecs)03d | %(levelname)s | %(name)s | %(message)s',
-                                            datefmt='%Y-%m-%d | %H:%M:%S')
-            console_format = logging.Formatter('%(asctime)s.%(msecs)03d | %(levelname)s | %(name)s | %(message)s',
-                                               datefmt='%Y-%m-%d | %H:%M:%S')
+        # Create formatters
+        file_format = logging.Formatter('%(asctime)s.%(msecs)03d | %(levelname)s | %(name)s | %(message)s',
+                                        datefmt='%Y-%m-%d | %H:%M:%S')
+        console_format = logging.Formatter('%(asctime)s.%(msecs)03d | %(levelname)s | %(name)s | %(message)s',
+                                           datefmt='%Y-%m-%d | %H:%M:%S')
 
-            # Create console handler
-            c_handler = logging.StreamHandler()
-            c_handler.setLevel(logging.DEBUG)
-            c_handler.setFormatter(console_format)
+        # Create console handler
+        c_handler = logging.StreamHandler()
+        c_handler.setLevel(logging.DEBUG)
+        c_handler.setFormatter(console_format)
 
-            # Create debug handler
-            f_handler = TimedRotatingFileHandler("debug.log", when="midnight", backupCount=7, interval=1)
-            f_handler.setLevel(logging.DEBUG)
-            f_handler.setFormatter(file_format)
+        # Create debug handler
+        f_handler = TimedRotatingFileHandler("debug.log", when="midnight", backupCount=7, interval=1)
+        f_handler.setLevel(logging.DEBUG)
+        f_handler.setFormatter(file_format)
 
-            # Add handlers to the logger
-            log.addHandler(c_handler)
-            log.addHandler(f_handler)
+        # Add handlers to the logger
+        self.log.addHandler(c_handler)
+        self.log.addHandler(f_handler)
 
-    def _output_error(self, msg, output=True):
-        """
-        convenience method to log and/or print an error
-        :param msg:
-        :param output:
-        :return:
-        """
+    def getGameRegion(self):
+        # Calculate the game region based on screen resolution.
+        sWidth, sHeight = pyautogui.size()
+        self.GAME_REGION = (0, 0, sWidth, sHeight)
+        self.log.info("##########  PROGRAM STARTED  ##########\n\n")
+        self.log.info(f"Screen resolution detected as: {sWidth}x{sHeight}")
 
-        if output:
-            print(msg)
-            if self.config.logging:
-                self.log.info(msg)
+    def setupCoordinates(self):
+        # TODO: This is going to need considerable expansion if all clicks are to be dynamic
+        self.UPGRADE_COORDS = (self.GAME_REGION[0] + (round(0.96 * self.GAME_REGION[2])), self.GAME_REGION[1] + (round(0.61 * self.GAME_REGION[3])))
+        self.GUARDIAN_CLICK_COORDS = (self.GAME_REGION[2] / 2, self.GAME_REGION[3] / 2)
+        self.SMALL_CLOSE_COORDS = (round(0.98 * self.GAME_REGION[2]), 99)
+        self.BIG_CLOSE_COORDS = round(0.95 * self.GAME_REGION[2]), round(0.07 * self.GAME_REGION[3])
+        self.GUILD_EXPEDITIONS_COORDS = (round(0.09 * self.GAME_REGION[2]), round(0.35 * self.GAME_REGION[3]))
+        self.GUILD_COORDS = (round(0.79 * self.GAME_REGION[2]), round(0.18 * self.GAME_REGION[3]))
+        self.TOWN_COORDS = (round(0.96 * self.GAME_REGION[2]), round(0.24 * self.GAME_REGION[3]))
+        self.BACK_ARROW_COORDS = (round(0.36 * self.GAME_REGION[2]), round(0.04 * self.GAME_REGION[3]))
+        self.UPGRADES_BUTTON_COORDS = (round(0.89 * self.GAME_REGION[2]), round(0.94 * self.GAME_REGION[3]))
 
+    def pause(self):
+        sleep(self.PAUSE_LENGTH)
 
+    def ocr(self, file):
+        # CONVERTS AN IMAGE INTO A STRING
+        self.log.info("Reading...")
+        im = Image.open(file).convert("LA")
+        im.save(imPath("ss.png"))
+        text = pytesseract.image_to_string(Image.open(file), lang="eng")
+        self.log.info(f"I think it says: {text}")
+        return text
 
-"""
-CLEAN UP TK'S WINDOWS
-"""
+    def changeUpgradeProgression(self, way):
+        if way == 1:  # go down to x1
+            click(self.UPGRADE_COORDS)
+            click(self.UPGRADES_BUTTON_COORDS, clicks=2, interval=0.5)
+            click(self.SMALL_CLOSE_COORDS)
+            return
+        elif way == 2:  # go up to milestone
+            click(self.UPGRADE_COORDS)
+            click(self.UPGRADES_BUTTON_COORDS, clicks=3, interval=0.5)
+            click(self.SMALL_CLOSE_COORDS)
+            return
+        return
 
-root = tkinter.Tk()
-root.withdraw()
+    def guardianClick(self, clicks):
+        self.log.info("Resuming Guardian duties. Clicking %s times." % clicks)
+        click(self.GUARDIAN_CLICK_COORDS, clicks=clicks, interval=1.0)
 
+    def buyUpgrades(self):
+        click(self.UPGRADE_COORDS)  # Open the upgrade menu
+        moveTo(self.GUARDIAN_CLICK_COORDS)
+        self.log.info("Buying any available upgrades.")
+        self.pause()
+        while True:
+            button = pyautogui.locateAllOnScreen(imPath("can_buy.png"), region=(round(0.85 * self.GAME_REGION[2]), round(0.13 * self.GAME_REGION[3]), round(0.06 * self.GAME_REGION[2]), round(0.74 * self.GAME_REGION[3])), confidence=0.96)
+            button = list(button)
+            if len(button) == 0:
+                self.log.info("No upgrades available.")
+                break
+            else:
+                # log.info("At least %s upgrade(s) available." % len(button))
+                for i in button:
+                    pyautogui.click(x=i[0] + i[2] / 2, y=i[1] + i[3] / 2, interval=0.01)
+                pyautogui.moveTo(self.GUARDIAN_CLICK_COORDS)
+        pyautogui.click(self.SMALL_CLOSE_COORDS)
+        return
 
-"""
-Setup all user configurable variables
-"""
-
-"""
-Setup Logging
-"""
-
-log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
-
-# Create formatters
-file_format = logging.Formatter('%(asctime)s.%(msecs)03d | %(levelname)s | %(name)s | %(message)s',
-                                datefmt='%Y-%m-%d | %H:%M:%S')
-console_format = logging.Formatter('%(asctime)s.%(msecs)03d | %(levelname)s | %(name)s | %(message)s',
-                                   datefmt='%Y-%m-%d | %H:%M:%S')
-
-# Create console handler
-c_handler = logging.StreamHandler()
-c_handler.setLevel(logging.DEBUG)
-c_handler.setFormatter(console_format)
-
-# Create debug handler
-f_handler = TimedRotatingFileHandler("debug.log", when="midnight", backupCount=7, interval=1)
-f_handler.setLevel(logging.DEBUG)
-f_handler.setFormatter(file_format)
-
-# Add handlers to the logger
-log.addHandler(c_handler)
-log.addHandler(f_handler)
-
-"""
-Define all the primary variables we'll be using for now
-"""
-
-# Various coordinates of objects in the game
-GAME_REGION = ()  # left, top, width, height
-FARM_TIME = 60
-AUTO_PRESTIGE = False
-GUILD_MISSION_TIME_LEFT = now() - 5
-BOSS_FAILED = False
-UPGRADE_LOWERED = True
-FRESH_START = False
-FARMING = False
-LAST_BOSS_ATTEMPT = now() - FARM_TIME
-LAST_PRESTIGE = now()
-GUARDIAN_CLICK_COORDS = None
-UPGRADE_COORDS = None
-CLOSE_COORDS = None
-PRIME_COORDS = None
-GUARD_COORDS = None
-PARTY1_COORDS = None
-PARTY2_COORDS = None
-PARTY3_COORDS = None
-PARTY4_COORDS = None
-
-"""
-Begin defining functions
-"""
-
-
-# RUNS EVERYTHING
-def main():
-    log.info("\n\n###############  PROGRAM STARTED  ###############")
-    messagebox.showinfo(title=f"Firestone Bot {version}",
-                        message=f"Click OK to start the bot.\nWithin 5sec after clicking OK, make sure the game is the main window on screen.\nMove mouse to upper-left corner of screen to stop.")
-
-    getGameRegion()
-    setupCoordinates()
-    startPlaying()
-
-
-# FOR CODE READABILITY
-def pause():
-    sleep(0.5)
-
-
-# Define where the tesseract engine is installed
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
-
-
-def ocr(file):
-    # CONVERTS AN IMAGE INTO A STRING
-    log.info("Reading...")
-    im = Image.open(file).convert("LA")
-    im.save(imPath("ss.png"))
-    text = pytesseract.image_to_string(Image.open(file))
-    log.info(f"I think it says: {text}")
-    return text
-
-
-def imPath(filename):
-    # A shortcut for joining the 'images/' file path
-    return os.path.join(r"Data\Images", filename)
-
-
-def getGameRegion():
-    # Obtains the region that the game is on the screen and assigns variables
-    global GAME_REGION
-
-    # Attempt to find the games window so we can switch to it, and make sure it's up before starting.
-    game = gw.getWindowsWithTitle("Firestone")
-
-    # Attempt to bring the game into focus
-    # TODO: This seems to be buggy. Need to find a better solution.
-    game[0].activate()
-    sleep(3.5)  # Pause a moment so the user can activate the game window
-
-    # Check to see if the game window is active.
-    if gw.getActiveWindowTitle() == "Firestone":
-        pass
-    else:
-        log.error("Could not find game. Is the game open?")
-        # Let the user know we have a problem.
-        messagebox.showerror(title=f"Firestone Bot {version}", message=f"Could not find game. Is the game open?")
-        exit()
-
-    # Calculate the game region based on screen resolution.
-    sWidth, sHeight = pyautogui.size()
-    GAME_REGION = (0, 0, sWidth, sHeight)
-    log.info(f"Screen resolution detected as: {sWidth}x{sHeight}")
-
-
-def setupCoordinates():
-    global UPGRADE_COORDS, GUARDIAN_CLICK_COORDS, CLOSE_COORDS
-
-    # TODO: This is going to need considerable expansion if all clicks are to be dynamic
-    UPGRADE_COORDS = (GAME_REGION[0] + (0.96 * GAME_REGION[2]), GAME_REGION[1] + (0.61 * GAME_REGION[3]))
-    GUARDIAN_CLICK_COORDS = (GAME_REGION[2] / 2, GAME_REGION[3] / 2)
-    CLOSE_COORDS = (0.98 * GAME_REGION[2], 99)
-
-
-def buyUpgrades():
-    global GAME_REGION, GUARDIAN_CLICK_COORDS, UPGRADE_COORDS, CLOSE_COORDS
-
-    pyautogui.click(UPGRADE_COORDS)  # Open the upgrade menu
-    pyautogui.moveTo(GUARDIAN_CLICK_COORDS)
-    pause()
-    log.info("Buying any available upgrades.")
-    while True:
-        button = pyautogui.locateAllOnScreen(imPath("can_buy.png"), region=(round(0.85 * GAME_REGION[2]), round(0.13 * GAME_REGION[3]), round(0.06 * GAME_REGION[2]), round(0.74 * GAME_REGION[3])), confidence=0.96)
-        button = list(button)
-        if len(button) == 0:
-            log.info("No more upgrades available.")
-            break
-        else:
-            # log.info("At least %s upgrade(s) available." % len(button))
-            for i in button:
-                pyautogui.click(x=i[0] + i[2]/2, y=i[1] + i[3]/2, interval=0.01)
-            pyautogui.moveTo(GUARDIAN_CLICK_COORDS)
-    pyautogui.click(CLOSE_COORDS)
-    return
-
-
-def guildMission():
-    global GUILD_MISSION_TIME_LEFT
-
-    if now() > GUILD_MISSION_TIME_LEFT:
-        log.info("Checking on Guild Expedition status.")
-        pause()
-        click(0.96 * GAME_REGION[2], 0.24 * GAME_REGION[3])
-        pause()
-        click(0.79 * GAME_REGION[2], 0.18 * GAME_REGION[3])
-        pause()
-        click(0.09 * GAME_REGION[2], 0.35 * GAME_REGION[3])
-        pause()
-
-        pyautogui.screenshot(imPath("ss.png"), region=(0.31 * GAME_REGION[2], 0.32 * GAME_REGION[3], 0.1 * GAME_REGION[2], 0.04 * GAME_REGION[3]))
-        pause()
-        result = ocr(imPath("ss.png"))
-        if result != "Completed" and result != "":
-            pause()
-            try:
-                result = result.partition(":")[0]
-                time_left = int(result) + 1
-                GUILD_MISSION_TIME_LEFT = now() + (time_left * 60)
-                # log.info(now())
-                # log.info(GUILD_MISSION_TIME_LEFT)
-                log.info(f"Current mission will complete in {time_left}min.")
-                log.info("Exiting Guild...")
-                click(0.95 * GAME_REGION[2], 0.07 * GAME_REGION[3], clicks=3, interval=0.5)
-                return
-            except Exception as e:
-                log.exception("Not sure what the status is.")
-                click(0.7 * GAME_REGION[2], 0.31 * GAME_REGION[3])
-                log.info("Attempted to start new expedition. Will check back later.")
-                pause()
-                log.info("Exiting Guild...")
-                click(0.95 * GAME_REGION[2], 0.07 * GAME_REGION[3], clicks=3, interval=0.5)
-                pause()
-                return
-
-        elif result == "Completed":
-            log.info("Mission completed.")
-            moveTo(0.7 * GAME_REGION[2], 0.31 * GAME_REGION[3], 0.5)
-            click(0.7 * GAME_REGION[2], 0.31 * GAME_REGION[3])
-            sleep(1.5)
-            moveTo(0.61 * GAME_REGION[2], 0.67 * GAME_REGION[3], 0.5)
-            click(0.61 * GAME_REGION[2], 0.67 * GAME_REGION[3])
-            log.info("Claimed.")
-            pause()
-            
-        pyautogui.screenshot(imPath("ss.png"), region=(0.32 * GAME_REGION[2], 0.48 * GAME_REGION[3], 0.35 * GAME_REGION[2], 0.06 * GAME_REGION[3]))
-        pause()
-        result = ocr(imPath("ss.png"))
-        if result != "There are no pending expeditions.":
-            moveTo(0.7 * GAME_REGION[2], 0.31 * GAME_REGION[3], 0.5)
-            click(0.7 * GAME_REGION[2], 0.31 * GAME_REGION[3])
-            log.info("Attempted to stat new expedition. Will check back later.")
-            pause()
-            log.info("Exiting Guild...")
-            click(0.95 * GAME_REGION[2], 0.07 * GAME_REGION[3], clicks=3, interval=0.5)
-        else:
-            log.info("No missions left.")
-            pyautogui.screenshot(imPath("ss.png"), region=(0.54 * GAME_REGION[2], 0.13 * GAME_REGION[3], 0.08 * GAME_REGION[2], 0.04 * GAME_REGION[3]))
-            pause()
-            result = ocr(imPath("ss.png"))
-            result = result.partition(":")[0]
-            time_left = int(result) + 1
-            GUILD_MISSION_TIME_LEFT = now() + (time_left * 60)
-            log.info(f"More missions available in {time_left}min.")
-            log.info("Exiting Guild...")
-            click(0.95 * GAME_REGION[2], 0.07 * GAME_REGION[3], clicks=3, interval=0.5)
-    return
-
-
-def farmGold(levels):
-
-    global UPGRADE_LOWERED, UPGRADE_COORDS, CLOSE_COORDS
-
-    pyautogui.click(0.36 * GAME_REGION[2], 0.04 * GAME_REGION[3], clicks=levels, interval=0.5)
-    log.info("Going back %s levels to farm." % levels)
-
-    if UPGRADE_LOWERED is False:
-        UPGRADE_LOWERED = True
-        log.info("Lowering upgrade progression to x1.")
-        pyautogui.click(UPGRADE_COORDS)
-        pause()
-        pyautogui.click(0.89 * GAME_REGION[2], 0.94 * GAME_REGION[3], clicks=2, interval=0.5)
-        pyautogui.click(CLOSE_COORDS)
-    return
-
-
-def fightBoss():
-    global LAST_BOSS_ATTEMPT, BOSS_FAILED, FARMING, FARM_TIME
-
-    if now() > (LAST_BOSS_ATTEMPT + FARM_TIME):
-        FARMING = False
-
+    def farmGold(self, levels):
         button = pyautogui.locateCenterOnScreen(imPath("boss.png"))
         if button is None:
             return
         else:
-            # log.info("Attempting to fight boss.")
-            LAST_BOSS_ATTEMPT = now()
-            BOSS_FAILED = True
-            FARMING = True
-            farmGold(20)
-            sleep(1)
-            pyautogui.click(button)
-    return
+            self.log.info("We seem to have hit a wall.")
+            count = levels
+            self.log.info("Going back %s levels to farm." % levels)
+            while count >= 0:
+                click(self.BACK_ARROW_COORDS)
+                sleep(0.5)
+                count -= 1
+            click(button)
+            if self.UPGRADES_LOWERED is False:
+                self.UPGRADES_LOWERED = True
+                self.log.info("Lowering upgrade progression to x1.")
+                self.changeUpgradeProgression(1)
+
+    def guildMissions(self):
+        if time() > self.GUILD_MISSION_TIME_LEFT:
+            self.log.info("Checking on Guild Expedition status.")
+            self.pause()
+            click(self.TOWN_COORDS)
+            self.pause()
+            click(self.GUILD_COORDS)
+            self.pause()
+            click(self.GUILD_EXPEDITIONS_COORDS)
+            self.pause()
+            # Take a screenshot of the mission timer
+            pyautogui.screenshot(imPath("ss.png"), region=(0.31 * self.GAME_REGION[2], 0.32 * self.GAME_REGION[3], 0.1 * self.GAME_REGION[2], 0.04 * self.GAME_REGION[3]))
+            self.pause()
+            # Attempt to read the time using OCR
+            result = self.ocr(imPath("ss.png"))
+            # If it doesn't say "Completed" but it's also not blank... it's probably a number?
+
+            if result != "Completed" and result != "":
+                self.pause()
+
+                try:
+                    result = result.partition(":")[0]  # Get rid of the seconds
+                    time_left = int(result) + 1  # Add one minute to whatever minutes are left to be safe
+                    self.GUILD_MISSION_TIME_LEFT = time() + (time_left * 60)  # Set time to check back
+                    self.log.info(f"Current mission should complete in {time_left}min. Going Home.")
+                    click(round(0.95 * self.GAME_REGION[2]), round(0.07 * self.GAME_REGION[3]), clicks=3, interval=0.3)  # Go back to main screen
+                    return
+                except:
+                    # OCR failed for some reason, let's just try to start a mission and check back later
+                    self.log.warning("Can't figure out the current status.")
+                    self.log.info("Attempting to start a new expedition just in case. Will check back soon.")
+                    # Click where new expedition should be
+                    click(round(0.7 * self.GAME_REGION[2]), round(0.31 * self.GAME_REGION[3]))
+                    self.pause()
+                    self.log.info("Going Home.")
+                    # Head back to home screen
+                    self.log.info(f"Clicking at {self.BIG_CLOSE_COORDS[0]}, {self.BIG_CLOSE_COORDS[1]}")
+                    click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)
+                    self.pause()
+                    return
+            # OCR seems to think the mission timer reads "Completed"
+            elif result == "Completed":
+                self.log.info("Current mission was completed.")
+                # Click on the "Claim" button
+                click(round(0.7 * self.GAME_REGION[2]), round(0.31 * self.GAME_REGION[3]))
+                sleep(1.5)  # Wait for it to process
+                # Click OK on the popup that occurs
+                click(round(0.61 * self.GAME_REGION[2]), round(0.67 * self.GAME_REGION[3]))
+                self.log.info("Claimed.")
+                self.pause()
+
+            # If we're out of missions it'll say so on the screen, let's check for it
+            pyautogui.screenshot(imPath("ss.png"), region=(round(0.32 * self.GAME_REGION[2]), round(0.48 * self.GAME_REGION[3]), round(0.35 * self.GAME_REGION[2]), round(0.06 * self.GAME_REGION[3])))
+            self.pause()  # Give it time to save the image
+            result = self.ocr(imPath("ss.png"))  # attempt to read it
+
+            if result != "There are no pending expeditions.":
+                click(round(0.07 * self.GAME_REGION[2]), round(0.31 * self.GAME_REGION[3]))
+                self.log.info("Attempted to start a new expedition.")
+                sleep(1.5)  # Give it a moment to process
+                # Check how much time is left on mission
+                pyautogui.screenshot(imPath("ss.png"), region=(round(0.31 * self.GAME_REGION[2]), round(0.32 * self.GAME_REGION[3]), round(0.1 * self.GAME_REGION[2]), round(0.04 * self.GAME_REGION[3])))
+                self.pause()
+                # Attempt to read the time using OCR
+                result = self.ocr(imPath("ss.png"))
+
+            elif result != "" and result != "There are no pending expeditions.":
+                self.pause()
+
+                try:
+                    result = result.partition(":")[0]  # Get rid of the seconds
+                    time_left = int(result) + 1  # Add one minute to whatever minutes are left to be safe
+                    self.GUILD_MISSION_TIME_LEFT = time() + (time_left * 60)  # Set time to check back
+                    self.log.info(f"Current mission should complete in {time_left}min.\nGoing Home.")
+                    click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
+                    return
+                except:
+                    # OCR failed for some reason, let's just try to start a mission and check back later
+                    self.log.warning("Can't figure out the current status.")
+                    self.log.info("Attempting to start a new expedition just in case. Will check back soon.")
+                    # Click where new expedition should be
+                    click(round(0.7 * self.GAME_REGION[2]), round(0.31 * self.GAME_REGION[3]))
+                    self.pause()
+                    self.log.info("Going Home.")
+                    # Head back to home screen
+                    click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)
+                    self.pause()
+                    return
+            else:
+                self.log.info("There are no missions available right now.")
+                pyautogui.screenshot(imPath("ss.png"), region=(round(0.54 * self.GAME_REGION[2]), round(0.13 * self.GAME_REGION[3]), round(0.08 * self.GAME_REGION[2]), round(0.04 * self.GAME_REGION[3])))
+                self.pause()
+
+                result = self.ocr(imPath("ss.png"))
+                result = result.partition(":")[0]
+
+                if isinstance(int(result), int):
+                    time_left = int(result) + 1
+                    self.GUILD_MISSION_TIME_LEFT = time() + (time_left * 60)
+                    self.log.info(f"More missions available in {time_left}min. Going home.")
+                    click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)
+                    return
+                else:
+                    self.log.error("Wasn't able to determine renewal time.")
+                    return
+
+    def run(self):
+        cycles = 0
+
+        self.getGameRegion()
+        self.setupCoordinates()
+
+        messagebox.showinfo(title=f"Firestone Bot {version}",
+                            message=f"Click OK to start the bot.\nWithin 5sec after clicking OK, make sure the game is the main window on screen.\nMove mouse to upper-left corner of screen to stop.")
+
+        while True:
+            # os.system("cls")
+            try:
+                self.buyUpgrades()
+                self.guildMissions()
+                self.farmGold(5)
+                self.guardianClick(10)
+            except:
+                self.log.exception("Something went wrong.")
+                self.config.sentinel = True
+                self.mouseLock.sentinel = True
+                exit(1)
+
+            cycles += 1
+            self.log.info(f"Main loop has cycled {cycles} time(s).")
+
+            self._check_thread_status()
 
 
-def guardianClick(clicks):
-    global GUARDIAN_CLICK_COORDS
-
-    log.info("Clicking %s times." % clicks)
-    pyautogui.click(x=GUARDIAN_CLICK_COORDS[0], y=GUARDIAN_CLICK_COORDS[1], clicks=clicks, interval=1.0)
+def main():
+    bot = FirestoneBot()
+    bot.run()
 
 
-def prestige():
-    global AUTO_PRESTIGE, LAST_PRESTIGE, FRESH_START, UPGRADE_LOWERED, CLOSE_COORDS
-
-    if AUTO_PRESTIGE is True:
-        button = pyautogui.locateCenterOnScreen(imPath("prestige.png"), confidence=0.9)
-        if button is None:
-            return
-        log.info("READY TO PRESTIGE! Doing so now.")
-        pyautogui.click(button)
-        sleep(1)
-        button = pyautogui.locateCenterOnScreen(imPath("choose_prestige.png"))
-        pyautogui.click(button)
-        sleep(1)
-        log.info("Choosing the FREE prestige option.")
-        button = pyautogui.locateCenterOnScreen(imPath("free_prestige.png"))
-        pyautogui.click(button)
-        LAST_PRESTIGE = now()
-        FRESH_START = True
-        sleep(20)
-
-        if UPGRADE_LOWERED is True:
-            UPGRADE_LOWERED = False
-            log.info("Raise upgrade progression to 'Next Milestone.'")
-            pyautogui.click(UPGRADE_COORDS)
-            pause()
-            pyautogui.click(0.89 * GAME_REGION[2], 0.94 * GAME_REGION[3], clicks=3, interval=0.5)
-            pyautogui.click(CLOSE_COORDS)
-    return
-
-
-def freshSetup():
-    global LAST_PRESTIGE, FRESH_START, UPGRADE_LOWERED, UPGRADE_COORDS, CLOSE_COORDS
-
-    if FRESH_START is True:
-        log.info("Fresh start detected. Checking how long it's been.")
-        if now() > (LAST_PRESTIGE + 120):
-            log.info("We should have enough gold to buy party now.")
-            pyautogui.click(0.96 * GAME_REGION[2], 0.48 * GAME_REGION[3])  # Open party menu
-            pause()
-            log.info("Buying first party slot.")
-            pyautogui.click(0.41 * GAME_REGION[2], 0.8 * GAME_REGION[3])  # Buy fist party slot
-            pause()
-            log.info("Putting Ranger in first slot.")
-            pyautogui.click(0.86 * GAME_REGION[2], 0.6 * GAME_REGION[3])  # Put Ranger in first slot
-            pause()
-            log.info("Buying second party slot.")
-            pyautogui.click(0.4 * GAME_REGION[2], 0.57 * GAME_REGION[3])  # Buy second slot
-            pause()
-            log.info("Putting Warrior in second slot.")
-            pyautogui.click(0.77 * GAME_REGION[2], 0.59 * GAME_REGION[3])  # Put warrior in first slot
-            pause()
-            log.info("Buying third party slot.")
-            pyautogui.click(0.29 * GAME_REGION[2], 0.83 * GAME_REGION[3])  # Buying third party slot
-            pause()
-            log.info("Putting mage in third slot.")
-            pyautogui.click(0.86 * GAME_REGION[2], 0.41 * GAME_REGION[3])  # Putting mage in third slot
-            pause()
-            log.info("Buying fourth party slot.")
-            pyautogui.click(0.28 * GAME_REGION[2], 0.48 * GAME_REGION[3])  # Buying fourth party slot
-            pause()
-            log.info("Putting tank in fourth party slot.")
-            pyautogui.click(0.77 * GAME_REGION[2], 0.41 * GAME_REGION[3])  # Put tank in fourth slot
-            log.info("Saving party changes.")
-            pyautogui.click(0.6 * GAME_REGION[2], 0.09 * GAME_REGION[3])  # Save changes
-            pause()
-            log.info("Done configuring party.")
-            pyautogui.click(0.96 * GAME_REGION[2], 0.06 * GAME_REGION[3])  # Close party screen
-
-            log.info("Fresh setup complete. Fresh start status removed.")
-            FRESH_START = False
-
-    return
-
-
-def startPlaying():
-    global UPGRADE_COORDS, GUARDIAN_CLICK_COORDS
-    while True:
-        try:
-            buyUpgrades()
-            guildMission()
-            guardianClick(15)
-            freshSetup()
-            fightBoss()
-            prestige()
-        except pyautogui.FailSafeException:
-            log.exception("Fail safe detected! Terminating.")
-            messagebox.showerror(title=f"Firestone Bot {version}", message="Fail safe detected! Exiting.")
-            exit()
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
