@@ -116,7 +116,7 @@ class FirestoneBot():
         c_handler.setFormatter(console_format)
 
         # Create debug handler
-        f_handler = TimedRotatingFileHandler("debug.log", when="midnight", backupCount=7, interval=1)
+        f_handler = TimedRotatingFileHandler(os.path.expanduser("~") + "/Documents/Firestone Bot/debug.log", when="midnight", backupCount=7, interval=1)
         f_handler.setLevel(logging.DEBUG)
         f_handler.setFormatter(file_format)
 
@@ -150,7 +150,7 @@ class FirestoneBot():
         # CONVERTS AN IMAGE INTO A STRING
         self.log.info("Reading...")
         im = Image.open(file).convert("LA")
-        im.save(imPath("ss.png"))
+        im.save(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png")
         text = pytesseract.image_to_string(Image.open(file), lang="eng")
         self.log.info(f"I think it says: {text}")
         return text
@@ -220,10 +220,10 @@ class FirestoneBot():
             click(self.GUILD_EXPEDITIONS_COORDS)
             self.pause()
             # Take a screenshot of the mission timer
-            pyautogui.screenshot(imPath("ss.png"), region=(0.31 * self.GAME_REGION[2], 0.32 * self.GAME_REGION[3], 0.1 * self.GAME_REGION[2], 0.04 * self.GAME_REGION[3]))
+            pyautogui.screenshot(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png", region=(0.31 * self.GAME_REGION[2], 0.32 * self.GAME_REGION[3], 0.1 * self.GAME_REGION[2], 0.04 * self.GAME_REGION[3]))
             self.pause()
             # Attempt to read the time using OCR
-            result = self.ocr(imPath("ss.png"))
+            result = self.ocr(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png")
             # If it doesn't say "Completed" but it's also not blank... it's probably a number?
 
             if result != "Completed" and result != "":
@@ -245,7 +245,6 @@ class FirestoneBot():
                     self.pause()
                     self.log.info("Going Home.")
                     # Head back to home screen
-                    self.log.info(f"Clicking at {self.BIG_CLOSE_COORDS[0]}, {self.BIG_CLOSE_COORDS[1]}")
                     click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)
                     self.pause()
                     return
@@ -261,19 +260,19 @@ class FirestoneBot():
                 self.pause()
 
             # If we're out of missions it'll say so on the screen, let's check for it
-            pyautogui.screenshot(imPath("ss.png"), region=(round(0.32 * self.GAME_REGION[2]), round(0.48 * self.GAME_REGION[3]), round(0.35 * self.GAME_REGION[2]), round(0.06 * self.GAME_REGION[3])))
+            pyautogui.screenshot(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png", region=(round(0.32 * self.GAME_REGION[2]), round(0.48 * self.GAME_REGION[3]), round(0.35 * self.GAME_REGION[2]), round(0.06 * self.GAME_REGION[3])))
             self.pause()  # Give it time to save the image
-            result = self.ocr(imPath("ss.png"))  # attempt to read it
+            result = self.ocr(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png")  # attempt to read it
 
             if result != "There are no pending expeditions.":
                 click(round(0.07 * self.GAME_REGION[2]), round(0.31 * self.GAME_REGION[3]))
                 self.log.info("Attempted to start a new expedition.")
                 sleep(1.5)  # Give it a moment to process
                 # Check how much time is left on mission
-                pyautogui.screenshot(imPath("ss.png"), region=(round(0.31 * self.GAME_REGION[2]), round(0.32 * self.GAME_REGION[3]), round(0.1 * self.GAME_REGION[2]), round(0.04 * self.GAME_REGION[3])))
+                pyautogui.screenshot(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png", region=(round(0.31 * self.GAME_REGION[2]), round(0.32 * self.GAME_REGION[3]), round(0.1 * self.GAME_REGION[2]), round(0.04 * self.GAME_REGION[3])))
                 self.pause()
                 # Attempt to read the time using OCR
-                result = self.ocr(imPath("ss.png"))
+                result = self.ocr(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png")
 
             elif result != "" and result != "There are no pending expeditions.":
                 self.pause()
@@ -299,10 +298,10 @@ class FirestoneBot():
                     return
             else:
                 self.log.info("There are no missions available right now.")
-                pyautogui.screenshot(imPath("ss.png"), region=(round(0.54 * self.GAME_REGION[2]), round(0.13 * self.GAME_REGION[3]), round(0.08 * self.GAME_REGION[2]), round(0.04 * self.GAME_REGION[3])))
+                pyautogui.screenshot(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png", region=(round(0.54 * self.GAME_REGION[2]), round(0.13 * self.GAME_REGION[3]), round(0.08 * self.GAME_REGION[2]), round(0.04 * self.GAME_REGION[3])))
                 self.pause()
 
-                result = self.ocr(imPath("ss.png"))
+                result = self.ocr(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png")
                 result = result.partition(":")[0]
 
                 if isinstance(int(result), int):
@@ -335,6 +334,7 @@ class FirestoneBot():
                 self.log.exception("Something went wrong.")
                 self.config.sentinel = True
                 self.mouseLock.sentinel = True
+                messagebox.showerror(title=f"Firestone Bot {version}", message="Fail safe detected! Exiting.")
                 exit(1)
 
             cycles += 1
