@@ -29,10 +29,10 @@ from Data.Includes.Lock import MouseLock
 DEFINE VERSION INFO
 """
 
-vMajor = 1  # Increments on a BREAKING change
-vMinor = 1  # Increments on a FEATURE change
+vMajor = 2  # Increments on a BREAKING change
+vMinor = 0  # Increments on a FEATURE change
 vPatch = 0  # Increments on a FIX
-vRevision = 6906  # Calculated by Ceil(HHmmss / 24)
+vRevision = 1076  # Calculated by Ceil(HHmmss / 24)
 vStage = "Alpha"
 version = f"{vMajor}.{vMinor}.{vPatch}.{vRevision} {vStage}"  # Should be self explanatory
 
