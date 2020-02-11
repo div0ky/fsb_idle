@@ -7,7 +7,11 @@ All notable changes to this project will be documented in this file. We use Expl
 - Auto-Prestige
 - Open Chests
 
-## [2.0.0.1755] - 2020-02-11
+## [2.0.1.1798] - 2020-02-11
+### Fixed
+- Bot would crash if it couldn't read the timer when no guild expeditions were available
+
+## [2.0.0.1755] - 2020-02-10
 ### Added
 - Support for multi-thredding, some fun features to come with this
 - Mouse lockdown feature, if the most goes out of game it'll rebound
