@@ -1,5 +1,5 @@
 ﻿.idea
-Data\Images\ss.jpg
+Data/Images/ss.jpg
 setup.iss
-Data\Scripts
+Data/Scripts/*
 Data/Includes/__pycache__
