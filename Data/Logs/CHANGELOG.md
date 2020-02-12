@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file. We use Expl
 - Auto-Prestige
 - Open Chests
 
+## [2.0.3.5455] 0 2019-02-12
+### Fixed
+- Guild Missions shouldn't randomly confuse the bot now
+
 ## [2.0.2.1830] - 2020-02-11
 ### Fixed
 - After the previous fix, the bot wouldn't crash, but wouldn't exit back to home

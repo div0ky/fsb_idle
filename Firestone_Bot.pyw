@@ -31,8 +31,8 @@ DEFINE VERSION INFO
 
 vMajor = 2  # Increments on a BREAKING change
 vMinor = 0  # Increments on a FEATURE change
-vPatch = 2  # Increments on a FIX
-vRevision = 1830  # Calculated by Ceil(HHmmss / 24)
+vPatch = 3  # Increments on a FIX
+vRevision = 5455  # Calculated by Ceil(HHmmss / 24)
 vStage = "Alpha"
 version = f"{vMajor}.{vMinor}.{vPatch}.{vRevision} {vStage}"  # Should be self explanatory
 

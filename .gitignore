@@ -1,10 +1,5 @@
 ﻿.idea
-ocr.py
-updater.py
-debug.log
-fsb_ver.txt
 Data\Images\ss.jpg
 setup.iss
-setup.txt
 Data\Scripts
 Data/Includes/__pycache__
