@@ -146,6 +146,14 @@ class FirestoneBot():
     def pause(self):
         sleep(self.PAUSE_LENGTH)
 
+    def isNum(self, num):
+        check = num.partition(":")[0]
+        try:
+            check = int(check)
+        except ValueError:
+            pass
+        return isinstance(check, int)
+
     def ocr(self, file):
         # CONVERTS AN IMAGE INTO A STRING
         self.log.info("Reading...")
@@ -181,7 +189,7 @@ class FirestoneBot():
             button = pyautogui.locateAllOnScreen(imPath("can_buy.png"), region=(round(0.85 * self.GAME_REGION[2]), round(0.13 * self.GAME_REGION[3]), round(0.06 * self.GAME_REGION[2]), round(0.74 * self.GAME_REGION[3])), confidence=0.96)
             button = list(button)
             if len(button) == 0:
-                self.log.info("No upgrades available.")
+                self.log.info("No (more) upgrades available.")
                 break
             else:
                 # log.info("At least %s upgrade(s) available." % len(button))
@@ -226,97 +234,62 @@ class FirestoneBot():
             result = self.ocr(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png")
             # If it doesn't say "Completed" but it's also not blank... it's probably a number?
 
-            if result != "Completed" and result != "":
-                self.pause()
-
-                try:
-                    result = result.partition(":")[0]  # Get rid of the seconds
-                    time_left = int(result) + 1  # Add one minute to whatever minutes are left to be safe
-                    self.GUILD_MISSION_TIME_LEFT = time() + (time_left * 60)  # Set time to check back
-                    self.log.info(f"Current mission should complete in {time_left}min. Going Home.")
-                    click(round(0.95 * self.GAME_REGION[2]), round(0.07 * self.GAME_REGION[3]), clicks=3, interval=0.3)  # Go back to main screen
-                    return
-                except:
-                    # OCR failed for some reason, let's just try to start a mission and check back later
-                    self.log.warning("Can't figure out the current status.")
-                    self.log.info("Attempting to start a new expedition just in case. Will check back soon.")
-                    # Click where new expedition should be
-                    click(round(0.7 * self.GAME_REGION[2]), round(0.31 * self.GAME_REGION[3]))
-                    self.pause()
-                    self.log.info("Going Home.")
-                    # Head back to home screen
-                    click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)
-                    self.pause()
-                    return
-            # OCR seems to think the mission timer reads "Completed"
-            elif result == "Completed":
+            if result == "Completed":
                 self.log.info("Current mission was completed.")
-                # Click on the "Claim" button
+                # Click on the "Claim" button.
                 click(round(0.7 * self.GAME_REGION[2]), round(0.31 * self.GAME_REGION[3]))
-                sleep(1.5)  # Wait for it to process
-                # Click OK on the popup that occurs
-                click(round(0.61 * self.GAME_REGION[2]), round(0.67 * self.GAME_REGION[3]))
+                sleep(2)  # Wait for it to process
+                click(round(0.61 * self.GAME_REGION[2]), round(0.67 * self.GAME_REGION[3]))  # Click OK on the popup that occurs
                 self.log.info("Claimed.")
+                sleep(2)  # Wait for it to process.
+                click(round(0.7 * self.GAME_REGION[2]), round(0.32 * self.GAME_REGION[3]))  # Click to start new expedition
                 self.pause()
+                click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
+                return
 
-            # If we're out of missions it'll say so on the screen, let's check for it
-            pyautogui.screenshot(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png", region=(round(0.32 * self.GAME_REGION[2]), round(0.48 * self.GAME_REGION[3]), round(0.35 * self.GAME_REGION[2]), round(0.06 * self.GAME_REGION[3])))
-            self.pause()  # Give it time to save the image
-            result = self.ocr(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png")  # attempt to read it
-
-            if result != "There are no pending expeditions.":
-                click(round(0.07 * self.GAME_REGION[2]), round(0.31 * self.GAME_REGION[3]))
-                self.log.info("Attempted to start a new expedition.")
-                sleep(1.5)  # Give it a moment to process
-                # Check how much time is left on mission
-                pyautogui.screenshot(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png", region=(round(0.31 * self.GAME_REGION[2]), round(0.32 * self.GAME_REGION[3]), round(0.1 * self.GAME_REGION[2]), round(0.04 * self.GAME_REGION[3])))
+            elif self.isNum(result):
+                time_left = int(result.partition(":")[0]) + 1
+                self.GUILD_MISSION_TIME_LEFT = time() + (time_left * 60)  # Add one minute to whatever minutes are left to be safe
+                self.log.info(f"Current mission should complete in {time_left}min. Going Home.")
+                click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                 self.pause()
-                # Attempt to read the time using OCR
-                result = self.ocr(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png")
+                return
 
-            elif result != "" and result != "There are no pending expeditions.":
-                self.pause()
+            elif result != "":
+                # If we can't tell, let's make sure it's not saying there are none.
+                pyautogui.screenshot(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png", region=(
+                round(0.32 * self.GAME_REGION[2]), round(0.48 * self.GAME_REGION[3]), round(0.35 * self.GAME_REGION[2]),
+                round(0.06 * self.GAME_REGION[3])))
+                self.pause()  # Give it time to save the image
+                result = self.ocr(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png")  # attempt to read it
 
-                try:
-                    result = result.partition(":")[0]  # Get rid of the seconds
-                    time_left = int(result) + 1  # Add one minute to whatever minutes are left to be safe
-                    self.GUILD_MISSION_TIME_LEFT = time() + (time_left * 60)  # Set time to check back
-                    self.log.info(f"Current mission should complete in {time_left}min.\nGoing Home.")
-                    click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
-                    return
-                except:
-                    # OCR failed for some reason, let's just try to start a mission and check back later
-                    self.log.warning("Can't figure out the current status.")
-                    self.log.info("Attempting to start a new expedition just in case. Will check back soon.")
-                    # Click where new expedition should be
-                    click(round(0.7 * self.GAME_REGION[2]), round(0.31 * self.GAME_REGION[3]))
+                if result == "There are no pending expeditions.":
+                    self.log.info("There are no more expeditions available right now.")
+                    pyautogui.screenshot(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png", region=(
+                    round(0.54 * self.GAME_REGION[2]), round(0.13 * self.GAME_REGION[3]),
+                    round(0.08 * self.GAME_REGION[2]), round(0.04 * self.GAME_REGION[3])))
                     self.pause()
-                    self.log.info("Going Home.")
-                    # Head back to home screen
-                    click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)
-                    self.pause()
-                    return
-            else:
-                self.log.info("There are no missions available right now.")
-                pyautogui.screenshot(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png", region=(round(0.54 * self.GAME_REGION[2]), round(0.13 * self.GAME_REGION[3]), round(0.08 * self.GAME_REGION[2]), round(0.04 * self.GAME_REGION[3])))
-                self.pause()
+                    result = self.ocr(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png")
 
-                result = self.ocr(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png")
-                result = result.partition(":")[0]
-                try:
-                    result = int(result)
-                except:
-                    self.log.exception("Doesn't look like a number. We can't act on this.")
-                if isinstance(result, int):
-                    time_left = int(result) + 1
-                    self.GUILD_MISSION_TIME_LEFT = time() + (time_left * 60)
-                    self.log.info(f"More missions available in {time_left}min. Going home.")
-                    click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)
-                    return
-                else:
-                    self.log.error("Wasn't able to determine renewal time.")
-                    click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)
-                    return
+                    if self.isNum(result):
+                        time_left = int(result.partition(":")[0]) + 1
+                        self.GUILD_MISSION_TIME_LEFT = time() + (time_left * 60)  # Add one minute to whatever minutes are left to be safe
+                        self.log.info(f"More missions available in {time_left}min. Returning home.")
+                        click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
+                        return
+                    else:
+                        self.log.warning("We weren't able to determine exepidtion renewal time. Returning home.")
+                        click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
+                        return
+
+                self.log.warning("Unable to ascertain the current mission status.")
+                self.log.info("Trying to start a new expedition anyway.")
+                click(round(0.7 * self.GAME_REGION[2]), round(0.32 * self.GAME_REGION[3]))  # Click to start new expedition
+                self.pause()
+                self.log.info("Returning home.")
+                click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
+                self.pause()
+                return
 
     def run(self):
         cycles = 0
@@ -325,8 +298,9 @@ class FirestoneBot():
         self.setupCoordinates()
 
         messagebox.showinfo(title=f"Firestone Bot {version}",
-                            message=f"Click OK to start the bot.\nWithin 5sec after clicking OK, make sure the game is the main window on screen.\nMove mouse to upper-left corner of screen to stop.")
+                            message=f"Click OK to start the bot.\n\nWithin 5sec after clicking OK, make sure the game is the main window on screen.\n\nMove mouse to upper-left corner of screen to stop.")
 
+        sleep(5)
         while True:
             # os.system("cls")
             try:
@@ -338,7 +312,7 @@ class FirestoneBot():
                 self.log.exception("Something went wrong.")
                 self.config.sentinel = True
                 self.mouseLock.sentinel = True
-                messagebox.showerror(title=f"Firestone Bot {version}", message="Fail safe detected! Exiting.")
+                messagebox.showerror(title=f"Firestone Bot {version}", message="Oops! Bot must terminate.\n\nCheck log for more.")
                 exit(1)
 
             cycles += 1
