@@ -19,7 +19,7 @@ tesseract-ocr https://github.com/UB-Mannheim/tesseract/wiki
 
 ## Versioning
 
-We use Explicit Versioning - BREAKING.FEATURE.FIX.REVISION
+We are attempting to use [Semantic Versioning](https://semver.org/)
 
 Check out the [Changelog](https://github.com/div0ky/fsb_idle/blob/master/CHANGELOG.md) for more information.
 

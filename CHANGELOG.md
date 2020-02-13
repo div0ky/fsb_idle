@@ -1,5 +1,5 @@
 # Changelog
-All notable changes to this project will be documented in this file. We use Explicit Versioning - **BREAKING.FEATURE.FIX.REVISION**.
+All notable changes to this project will be documented in this file. We are attempting to use [Semantic Versioning](https://semver.org/)
 
 ## [Unreleased]
 - Missions
