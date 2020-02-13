@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file. We use Expl
 - Auto-Prestige
 - Open Chests
 
+## [2.0.4-stable] - 2020-02-13
+### Added
+- Some interal code for better debugging
+### Fixed
+- Guild Missions are now stable
+
 ## [2.0.4.1010] - 2020-02-12
 ### Added
 - More user config options and verification for the new options
