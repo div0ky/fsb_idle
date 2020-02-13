@@ -62,6 +62,8 @@ class FirestoneBot():
         # Setup some check variables
         self.ocr_fail_count = 0
         self.ocr_succeed_count = 0
+        self.ocr_f_pct = 0
+        self.ocr_s_pct = 0
 
         # Setup some common variables
         self.GAME_REGION = None
@@ -109,9 +111,9 @@ class FirestoneBot():
         self.log.setLevel(logging.INFO)
 
         # Create formatters
-        file_format = logging.Formatter('%(asctime)s.%(msecs)03d | %(levelname)s | %(name)s | %(message)s',
-                                        datefmt='%Y-%m-%d | %H:%M:%S')
-        console_format = logging.Formatter('%(asctime)s.%(msecs)03d | %(levelname)s | %(name)s | %(message)s',
+        file_format = logging.Formatter(f'%(asctime)s.%(msecs)03d  |  %(levelname)s     |  %(name)s  |  {version}  |  %(message)s',
+                                           datefmt='%Y-%m-%d | %H:%M:%S')
+        console_format = logging.Formatter(f'%(asctime)s.%(msecs)03d  |  %(levelname)s     |  %(name)s  |  {version}  |  %(message)s',
                                            datefmt='%Y-%m-%d | %H:%M:%S')
 
         # Create console handler
@@ -169,13 +171,13 @@ class FirestoneBot():
 
     def ocr_check(self):
         ocr_total = self.ocr_fail_count + self.ocr_succeed_count
-        f_pct = round(((self.ocr_fail_count / ocr_total) * 100), 2)
-        s_pct = round(((self.ocr_succeed_count / ocr_total) * 100), 2)
-        ocr_status = f"{f_pct}% Failure. {s_pct}% Success."
-        if f_pct >= 20:
-            self.log.warning(f"OCR currently has a {f_pct}% failure rate.")
+        self.ocr_f_pct = round(((self.ocr_fail_count / ocr_total) * 100), 2)
+        self.ocr_s_pct = round(((self.ocr_succeed_count / ocr_total) * 100), 2)
+        ocr_status = f"{self.ocr_f_pct}% Failure. {self.ocr_s_pct}% Success."
+        if self.ocr_f_pct >= 20:
+            self.log.warning(f"OCR currently has a {self.ocr_f_pct}% failure rate.")
         else:
-            self.log.info(f"OCR currently has a {s_pct}% success rate.")
+            self.log.info(f"OCR currently has a {self.ocr_s_pct}% success rate.")
         return ocr_status
 
     def changeUpgradeProgression(self, way):
@@ -299,11 +301,16 @@ class FirestoneBot():
                         return
                     else:
                         self.ocr_fail_count += 1
+                        if self.ocr_f_pct > 50:
+                            pyautogui.screenshot(os.path.expanduser("~") + f"/Documents/Firestone Bot/OCR/Fail_{self.ocr_fail_count}.png")
                         self.log.warning("We weren't able to determine exepidtion renewal time. Returning home.")
                         click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                         return
 
             self.ocr_fail_count += 1
+            if self.ocr_f_pct > 50:
+                pyautogui.screenshot(
+                    os.path.expanduser("~") + f"/Documents/Firestone Bot/OCR/Fail_{self.ocr_fail_count}.png")
             self.log.warning("Unable to ascertain the current mission status.")
             self.log.info("Trying to start a new expedition anyway.")
             click(round(0.7 * self.GAME_REGION[2]), round(0.32 * self.GAME_REGION[3]))  # Click to start new expedition
