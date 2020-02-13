@@ -1,5 +1,5 @@
 # Changelog
-All notable changes to this project will be documented in this file. We are attempting to use [Semantic Versioning](https://semver.org/)
+All notable changes to this project will be documented in this file. We are attempting to use [Semantic Versioning](https://semver.org/). We are also attempting to follow the guidelines laid out at [keep a changelog](https://keepachangelog.com).
 
 ## [Unreleased]
 - Missions
