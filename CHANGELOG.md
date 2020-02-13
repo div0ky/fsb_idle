@@ -7,9 +7,10 @@ All notable changes to this project will be documented in this file. We use Expl
 - Auto-Prestige
 - Open Chests
 
-## [2.0.4.8140] - 2020-02-12
+## [2.0.4.1010] - 2020-02-12
 ### Added
 - More user config options and verification for the new options
+- Logging support for OCR success rate
 ### Fixed
 - Okay, now Guild Missions really shouldn't confuse the bot. Seriously. We mean it.
 

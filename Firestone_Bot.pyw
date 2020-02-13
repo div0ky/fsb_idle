@@ -32,9 +32,9 @@ DEFINE VERSION INFO
 vMajor = 2  # Increments on a BREAKING change
 vMinor = 0  # Increments on a FEATURE change
 vPatch = 4  # Increments on a FIX
-vRevision = 8140  # Calculated by Ceil(HHmmss / 24)
+vBuild = 1010  # Incremented on any changes
 vStage = "Alpha"
-version = f"{vMajor}.{vMinor}.{vPatch}.{vRevision} {vStage}"  # Should be self explanatory
+version = f"{vMajor}.{vMinor}.{vPatch}.{vBuild} {vStage}"  # Should be self explanatory
 
 # Define where the tesseract engine is installed
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
@@ -58,6 +58,10 @@ class FirestoneBot():
 
         self.root = tkinter.Tk()
         self.root.withdraw()
+
+        # Setup some check variables
+        self.ocr_fail_count = 0
+        self.ocr_succeed_count = 0
 
         # Setup some common variables
         self.GAME_REGION = None
@@ -163,6 +167,17 @@ class FirestoneBot():
         self.log.info(f"I think it says: {text}")
         return text
 
+    def ocr_check(self):
+        ocr_total = self.ocr_fail_count + self.ocr_succeed_count
+        f_pct = round(((self.ocr_fail_count / ocr_total) * 100), 2)
+        s_pct = round(((self.ocr_succeed_count / ocr_total) * 100), 2)
+        ocr_status = f"{f_pct}% Failure. {s_pct}% Success."
+        if f_pct >= 20:
+            self.log.warning(f"OCR currently has a {f_pct}% failure rate.")
+        else:
+            self.log.info(f"OCR currently has a {s_pct}% success rate.")
+        return ocr_status
+
     def changeUpgradeProgression(self, way):
         if way == 1:  # go down to x1
             click(self.UPGRADE_COORDS)
@@ -235,6 +250,7 @@ class FirestoneBot():
             # If it doesn't say "Completed" but it's also not blank... it's probably a number?
 
             if result == "Completed":
+                self.ocr_succeed_count += 1
                 self.log.info("Current mission was completed.")
                 # Click on the "Claim" button.
                 click(round(0.7 * self.GAME_REGION[2]), round(0.31 * self.GAME_REGION[3]))
@@ -248,6 +264,7 @@ class FirestoneBot():
                 return
 
             elif self.isNum(result):
+                self.ocr_succeed_count += 1
                 time_left = int(result.partition(":")[0]) + 1
                 self.GUILD_MISSION_TIME_LEFT = time() + (time_left * 60)  # Add one minute to whatever minutes are left to be safe
                 self.log.info(f"Current mission should complete in {time_left}min. Going Home.")
@@ -265,6 +282,7 @@ class FirestoneBot():
                 result = self.ocr(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png")  # attempt to read it
 
                 if result == "There are no pending expeditions.":
+                    self.ocr_succeed_count += 1
                     self.log.info("There are no more expeditions available right now.")
                     pyautogui.screenshot(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png", region=(
                     round(0.54 * self.GAME_REGION[2]), round(0.13 * self.GAME_REGION[3]),
@@ -273,16 +291,19 @@ class FirestoneBot():
                     result = self.ocr(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png")
 
                     if self.isNum(result):
+                        self.ocr_succeed_count += 1
                         time_left = int(result.partition(":")[0]) + 1
                         self.GUILD_MISSION_TIME_LEFT = time() + (time_left * 60)  # Add one minute to whatever minutes are left to be safe
                         self.log.info(f"More missions available in {time_left}min. Returning home.")
                         click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                         return
                     else:
+                        self.ocr_fail_count += 1
                         self.log.warning("We weren't able to determine exepidtion renewal time. Returning home.")
                         click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                         return
 
+            self.ocr_fail_count += 1
             self.log.warning("Unable to ascertain the current mission status.")
             self.log.info("Trying to start a new expedition anyway.")
             click(round(0.7 * self.GAME_REGION[2]), round(0.32 * self.GAME_REGION[3]))  # Click to start new expedition
@@ -309,6 +330,7 @@ class FirestoneBot():
                 self.guildMissions()
                 self.farmGold(5)
                 self.guardianClick(10)
+                self.ocr_check()
             except:
                 self.log.exception("Something went wrong.")
                 self.config.sentinel = True
