@@ -7,6 +7,11 @@ All notable changes to this project will be documented in this file. We use Expl
 - Auto-Prestige
 - Open Chests
 
+## [2.1.0-alpha] - 2020-02-13
+### Added
+- You can now press the Escape key to kill the bot
+- The bot now automatically switches focus to the game
+
 ## [2.0.4-stable] - 2020-02-13
 ### Added
 - Some interal code for better debugging
