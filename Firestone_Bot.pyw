@@ -30,11 +30,10 @@ DEFINE VERSION INFO
 """
 
 vMajor = 2  # Increments on a BREAKING change
-vMinor = 0  # Increments on a FEATURE change
-vPatch = 4  # Increments on a FIX / PATCH
-vBuild = 1011  # Incremented on any RELEASED changes
-vStage = "Stable"
-version = f"{vMajor}.{vMinor}.{vPatch}.{vBuild} {vStage}"  # Should be self explanatory
+vMinor = 1  # Increments on a FEATURE change
+vPatch = 0  # Increments on a FIX / PATCH
+vStage = "alpha"
+version = f"{vMajor}.{vMinor}.{vPatch}-{vStage}"  # Should be self explanatory
 
 # Define where the tesseract engine is installed
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
@@ -42,7 +41,8 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\t
 
 def imPath(filename):
     # A shortcut for joining the 'images/' file path
-    return os.path.join(r"Data\Images", filename)
+    return os.path.join(r"C:\Program Files\Firestone Bot\Data\Images", filename)
+    # return os.path.join(os.path.dirname(__file__), "/Data/Images/" + filename)
 
 
 class FirestoneBot():
