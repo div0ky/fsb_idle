@@ -15,6 +15,7 @@ class ConfigManager:
         self.auto_prestige = True
         self.in_guild = True
         self.guardian = "Dragon"
+        self.guild_missions = True
         self.logging = True
 
         # Party settings. Can be overriden via config
@@ -59,21 +60,42 @@ class ConfigManager:
         Set the optional values found in the ini
         """
         # Load options from config
+        if "auto_prestige" in config['OPTIONS']:
+            self.in_guild = config['OPTIONS'].getboolean("auto_prestige")
         if "in_guild" in config['OPTIONS']:
             self.in_guild = config['OPTIONS'].getboolean("in_guild")
+        if "guardian" in config['OPTIONS']:
+            self.guardian = config['OPTIONS'].getint("guardian")
+        if "guild_missions" in config['OPTIONS']:
+            self.guild_missions = config['OPTIONS'].getboolean("guild_missions")
+
+        if "party_size" in config['PARTY']:
+            self.party_size = config['PARTY'].getint("party_size")
+        if "party_leader" in config['PARTY']:
+            self.party_leader = config['PARTY']['party_leader'].lower()
+        if "party_slot_2" in config['PARTY']:
+            self.party_slot_2 = config['PARTY']['party_slot_2'].lower()
+        if "party_slot_3" in config['PARTY']:
+            self.party_slot_3 = config['PARTY']['party_slot_3'].lower()
+        if "party_slot_4" in config['PARTY']:
+            self.party_slot_4 = config['PARTY']['party_slot_4'].lower()
+        if "party_slot_5" in config['PARTY']:
+            self.party_slot_5 = config['PARTY']['party_slot_5'].lower()
 
     def _verify_ini(self, config_file=None):
         """
         Make sure all required fields are in the config file. If they aren't, abort.
         """
 
-        general_values = ["auto_prestige", "in_guild", "guardian"]
+        general_values = ["auto_prestige", "in_guild", "guardian", "guild_missions"]
         party_values = ["party_size", "party_leader", "party_slot_2", "party_slot_3", "party_slot_4", "party_slot_5"]
+        party_members = ["ranger", "tank", "mage", "warrior", "priest", "rogue"]
+        incorrect_values = []
         missing_values = []
 
         if not config_file:
             print("No config file supplied. Aborting.")
-            sys.exit(1)
+            raise Exception("No config file supplied. Aborting.")
 
         for val in general_values:
             if val not in config_file["OPTIONS"]:
@@ -83,8 +105,24 @@ class ConfigManager:
             if val not in config_file["PARTY"]:
                 missing_values.append("PARTY: " + val)
 
+        for val in party_values[1:]:
+            val = config_file['PARTY'][val]
+            if val.lower() not in party_members:
+                incorrect_values.append("PARTY: " + val)
+
         if missing_values:
             print("Config file is missing required values. \n Missing values:")
             for val in missing_values:
                 print(val)
-            sys.exit(1)
+            raise Exception(f"Config file is missing required values: {missing_values}.")
+
+        if incorrect_values:
+            print("Config file has unusable values. \n Incorrect values:")
+            for val in incorrect_values:
+                print(val)
+            raise Exception(f"Config file has unusable values: {incorrect_values}.")
+
+        if config_file['OPTIONS'].getboolean("guild_missions"):
+            if config_file['OPTIONS'].getboolean("in_guild") is False:
+                raise Exception("Config file is set to do guild expeditions, but also says we're not in a guild.")
+

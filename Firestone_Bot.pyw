@@ -31,8 +31,8 @@ DEFINE VERSION INFO
 
 vMajor = 2  # Increments on a BREAKING change
 vMinor = 0  # Increments on a FEATURE change
-vPatch = 3  # Increments on a FIX
-vRevision = 5455  # Calculated by Ceil(HHmmss / 24)
+vPatch = 4  # Increments on a FIX
+vRevision = 8140  # Calculated by Ceil(HHmmss / 24)
 vStage = "Alpha"
 version = f"{vMajor}.{vMinor}.{vPatch}.{vRevision} {vStage}"  # Should be self explanatory
 
@@ -218,7 +218,7 @@ class FirestoneBot():
                 self.changeUpgradeProgression(1)
 
     def guildMissions(self):
-        if time() > self.GUILD_MISSION_TIME_LEFT:
+        if time() > self.GUILD_MISSION_TIME_LEFT and self.config.guild_missions:
             self.log.info("Checking on Guild Expedition status.")
             self.pause()
             click(self.TOWN_COORDS)
@@ -257,6 +257,7 @@ class FirestoneBot():
 
             elif result != "":
                 # If we can't tell, let's make sure it's not saying there are none.
+                self.log.info("Checking to see if we're out of guild expeditions.")
                 pyautogui.screenshot(os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png", region=(
                 round(0.32 * self.GAME_REGION[2]), round(0.48 * self.GAME_REGION[3]), round(0.35 * self.GAME_REGION[2]),
                 round(0.06 * self.GAME_REGION[3])))
@@ -282,14 +283,14 @@ class FirestoneBot():
                         click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                         return
 
-                self.log.warning("Unable to ascertain the current mission status.")
-                self.log.info("Trying to start a new expedition anyway.")
-                click(round(0.7 * self.GAME_REGION[2]), round(0.32 * self.GAME_REGION[3]))  # Click to start new expedition
-                self.pause()
-                self.log.info("Returning home.")
-                click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
-                self.pause()
-                return
+            self.log.warning("Unable to ascertain the current mission status.")
+            self.log.info("Trying to start a new expedition anyway.")
+            click(round(0.7 * self.GAME_REGION[2]), round(0.32 * self.GAME_REGION[3]))  # Click to start new expedition
+            self.pause()
+            self.log.info("Returning home.")
+            click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
+            self.pause()
+            return
 
     def run(self):
         cycles = 0
