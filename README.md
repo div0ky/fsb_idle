@@ -26,7 +26,7 @@ We are attempting to use [Semantic Versioning](https://semver.org/)
 
 - Stable releases are packaged with an installer and tagged `-stable`
 - Pre-releases of new features or fixes are tagged either `-alpha` or `-beta`
-- An `-alpha` pre-release means the feature / fix is being worked on, is likely incomplete, and likely buggy.
+- An `-alpha` pre-release means the feature / fix is being worked on, is incomplete, and likely buggy.
 - A `-beta` pre-release means the feature is considered *complete*, but needs more testing and likely made more efficient
 - We do not use `-rc` releases. If it makes it out of beta it becomes the latest `-stable` release
 
