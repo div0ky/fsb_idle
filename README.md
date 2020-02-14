@@ -32,6 +32,13 @@ We are attempting to use [Semantic Versioning](https://semver.org/)
 
 Check out the [CHANGELOG](https://github.com/div0ky/fsb_idle/blob/master/CHANGELOG.md) for more information.
 
+## Launching the bot
+1) Adjust the configuration file `bot.ini` to suit your needs
+2) Load the game up
+3) Ensure your upgrades are set to *milestones*
+4) Make sure your leader abilities are enabled - if applicable
+5) Launch Firestone Bot.exe
+
 ## Author
 
 - **Aaron J. Spurlock** - [div0ky](https://github.com/div0ky)
