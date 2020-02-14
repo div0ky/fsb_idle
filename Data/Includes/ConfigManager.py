@@ -17,6 +17,8 @@ class ConfigManager:
         self.in_guild = True
         self.guardian = "Dragon"
         self.guild_missions = True
+        self.farm_gold = True
+        self.farm_levels = 5
         self.logging = True
 
         # Party settings. Can be overriden via config
@@ -63,12 +65,18 @@ class ConfigManager:
         # Load options from config
         if "auto_prestige" in config['OPTIONS']:
             self.in_guild = config['OPTIONS'].getboolean("auto_prestige")
+        if "prestige_level" in config['OPTIONS']:
+            self.prestige_level = round(float(config['OPTIONS']['prestige_level']), 2)
         if "in_guild" in config['OPTIONS']:
             self.in_guild = config['OPTIONS'].getboolean("in_guild")
         if "guardian" in config['OPTIONS']:
             self.guardian = config['OPTIONS'].getint("guardian")
         if "guild_missions" in config['OPTIONS']:
             self.guild_missions = config['OPTIONS'].getboolean("guild_missions")
+        if "farm_gold" in config['OPTIONS']:
+            self.farm_gold = config['OPTIONS'].getboolean("farm_gold")
+        if "farm_levels" in config['OPTIONS']:
+            self.farm_levels = config['OPTIONS'].getint("farm_levels")
 
         if "party_size" in config['PARTY']:
             self.party_size = config['PARTY'].getint("party_size")
@@ -88,7 +96,7 @@ class ConfigManager:
         Make sure all required fields are in the config file. If they aren't, abort.
         """
 
-        general_values = ["auto_prestige", "in_guild", "guardian", "guild_missions"]
+        general_values = ["auto_prestige", "in_guild", "guardian", "guild_missions", "farm_gold", "farm_levels", "prestige_level"]
         party_values = ["party_size", "party_leader", "party_slot_2", "party_slot_3", "party_slot_4", "party_slot_5"]
         party_members = ["ranger", "tank", "mage", "warrior", "priest", "rogue"]
         incorrect_values = []

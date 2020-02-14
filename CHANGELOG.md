@@ -4,10 +4,16 @@ All notable changes to this project will be documented in this file. We are atte
 ## [Unreleased]
 - Missions
 - Tavern
-- Auto-Prestige
 - Open Chests
 
-## [2.1.0-alpha] - 2020-02-13
+## [2.1.0-beta.0] - 2020-02-14
+### Added
+- The bot can now auto-prestige. How about that? Needs more testing, though.
+- User config is now fully implemented. Modify `bot.ini` to set user options.
+- Launcher now checks to make sure the game is running - if it can't find it, it exists.
+- Comments to `bot.ini` to explain the settings / options.
+
+## [2.1.0-alpha.0] - 2020-02-13
 ### Added
 - You can now press the Escape key to kill the bot
 - The bot now automatically switches focus to the game
