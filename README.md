@@ -39,6 +39,8 @@ Check out the [CHANGELOG](https://github.com/div0ky/fsb_idle/blob/master/CHANGEL
 4) Make sure your leader abilities are enabled - if applicable
 5) Launch Firestone Bot.exe
 
+NOTE: The bot assumes you used the provided installer. If you did not, you're likely to run into several critical errors that make the bot unusable. Please use a provided installer.
+
 ## Author
 
 - **Aaron J. Spurlock** - [div0ky](https://github.com/div0ky)
