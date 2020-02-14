@@ -22,8 +22,13 @@ opencv-python
 If you use one of the compiled installers under `Releases`, these modules will be installed for you automatically - if you don't already have them.
 
 ## Versioning
-
 We are attempting to use [Semantic Versioning](https://semver.org/)
+
+- Stable releases are packaged with an installer and tagged `-stable`
+- Pre-releases of new features or fixes are tagged either `-alpha` or `-beta`
+- An `-alpha` pre-release means the feature / fix is being worked on, is likely incomplete, and likely buggy.
+- A `-beta` pre-release means the feature is considered *complete*, but needs more testing and likely made more efficient
+- We do not use `-rc` releases. If it makes it out of beta it becomes the latest `-stable` release
 
 Check out the [CHANGELOG](https://github.com/div0ky/fsb_idle/blob/master/CHANGELOG.md) for more information.
 
