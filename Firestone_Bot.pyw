@@ -15,6 +15,7 @@ from logging.handlers import TimedRotatingFileHandler
 from time import sleep
 from time import time
 from tkinter import messagebox
+import tesserocr
 
 import pyautogui
 import pytesseract
@@ -73,13 +74,13 @@ class FirestoneBot():
         self.PAUSE_LENGTH = 0.5
         self.GUILD_MISSION_TIME_LEFT = time() - 5
         self.PRESTIGE_CHECK_TIME = time() - 5
-        self.PRESTIGE_TRIGGER = 3
+        self.PRESTIGE_TRIGGER = self.config.prestige_level
         self.SMALL_CLOSE_COORDS = None
         self.BIG_CLOSE_COORDS = None
         self.GUILD_COORDS = None
         self.GUILD_EXPEDITIONS_COORDS = None
         self.TOWN_COORDS = None
-        self.UPGRADES_LOWERED = True
+        self.UPGRADES_LOWERED = False
         self.FRESH_START = False
         self.BOSS_FAILED = False
         self.BACK_ARROW_COORDS = None
@@ -146,17 +147,17 @@ class FirestoneBot():
 
     def setupCoordinates(self):
         # TODO: This is going to need considerable expansion if all clicks are to be dynamic
-        self.UPGRADE_COORDS = (self.GAME_REGION[0] + (round(0.96 * self.GAME_REGION[2])), self.GAME_REGION[1] + (round(0.61 * self.GAME_REGION[3])))
+        self.UPGRADE_COORDS = (self.relCoords(1840, 660))
         self.GUARDIAN_CLICK_COORDS = (self.GAME_REGION[2] / 2, self.GAME_REGION[3] / 2)
-        self.SMALL_CLOSE_COORDS = (round(0.98 * self.GAME_REGION[2]), 99)
-        self.BIG_CLOSE_COORDS = round(0.95 * self.GAME_REGION[2]), round(0.07 * self.GAME_REGION[3])
-        self.GUILD_EXPEDITIONS_COORDS = (round(0.09 * self.GAME_REGION[2]), round(0.35 * self.GAME_REGION[3]))
-        self.GUILD_COORDS = (round(0.79 * self.GAME_REGION[2]), round(0.18 * self.GAME_REGION[3]))
-        self.TOWN_COORDS = (round(0.96 * self.GAME_REGION[2]), round(0.24 * self.GAME_REGION[3]))
-        self.BACK_ARROW_COORDS = (round(0.36 * self.GAME_REGION[2]), round(0.04 * self.GAME_REGION[3]))
-        self.UPGRADES_BUTTON_COORDS = (round(0.89 * self.GAME_REGION[2]), round(0.94 * self.GAME_REGION[3]))
-        self.TEMPLE_OF_ETERNALS_COORDS = (round(0.474 * self.GAME_REGION[2]), round(0.213 * self.GAME_REGION[3]))
-        self.PARTY_COORDS = (round(0.9583 * self.GAME_REGION[2]), round(0.4815 * self.GAME_REGION[3]))
+        self.SMALL_CLOSE_COORDS = (self.relCoords(1875, 100))
+        self.BIG_CLOSE_COORDS = (self.relCoords(1820, 75))
+        self.GUILD_EXPEDITIONS_COORDS = (self.relCoords(175, 385))
+        self.GUILD_COORDS = (self.relCoords(1520, 205))
+        self.TOWN_COORDS = (self.relCoords(1845, 265))
+        self.BACK_ARROW_COORDS = (self.relCoords(690, 40))
+        self.UPGRADES_BUTTON_COORDS = (self.relCoords(1605, 1020))
+        self.TEMPLE_OF_ETERNALS_COORDS = (self.relCoords(915, 250))
+        self.PARTY_COORDS = (self.relCoords(1845, 520))
 
         self.CLASS_COORDS = {"ranger": (round(0.8672 * self.GAME_REGION[2]), round(0.5417 * self.GAME_REGION[3])),
                              "mage": (round(0.8698 * self.GAME_REGION[2]), round(0.3565 * self.GAME_REGION[3])),
@@ -167,6 +168,21 @@ class FirestoneBot():
 
     def pause(self):
         sleep(self.PAUSE_LENGTH)
+
+    def relCoords(self, x=None, y=None, w=None, h=None):
+        if x:
+            newX = round(x * self.GAME_REGION[2] / 1920)
+            coords = newX
+        if y:
+            newY = round(y * self.GAME_REGION[3] / 1080)
+            coords = (newX, newY)
+        if w:
+            newW = round(w * self.GAME_REGION[2] / 1920)
+            coords = (newX, newY, newW)
+        if h:
+            newH = round(h * self.GAME_REGION[3] / 1080)
+            coords = (newX, newY, newW, newH)
+        return coords
 
     def isNum(self, num, v=1):
         if v == 1:
@@ -188,8 +204,12 @@ class FirestoneBot():
         # CONVERTS AN IMAGE INTO A STRING
         self.log.info("Reading...")
         im = Image.open(file).convert("LA")
+        base = int(float(im.size[0] * 1.5))
+        wpercent = (base / float(im.size[0]))
+        hsize = int(float(im.size[1]) * float(wpercent))
+        im = im.resize((base, hsize), Image.ANTIALIAS)
         im.save(os.path.expanduser("~") + f"/Documents/Firestone Bot/ss.png")
-        text = pytesseract.image_to_string(Image.open(file), lang="eng")
+        text = pytesseract.image_to_string(file, lang="eng", config='--psm 7')
         self.log.info(f"I think it says: {text}")
         return text
 
@@ -229,7 +249,7 @@ class FirestoneBot():
         self.log.info("Buying any available upgrades.")
         self.pause()
         while True:
-            button = pyautogui.locateAllOnScreen(imPath("can_buy.png"), region=(round(0.85 * self.GAME_REGION[2]), round(0.13 * self.GAME_REGION[3]), round(0.06 * self.GAME_REGION[2]), round(0.74 * self.GAME_REGION[3])), confidence=0.96)
+            button = pyautogui.locateAllOnScreen(imPath("can_buy.png"), region=(self.relCoords(1625, 140, 285, 830)), confidence=0.96)
             button = list(button)
             if len(button) == 0:
                 self.log.info("No (more) upgrades available.")
@@ -266,10 +286,14 @@ class FirestoneBot():
             self.pause()
             click(self.TEMPLE_OF_ETERNALS_COORDS)
             self.pause()
-            click(round(0.7031 * self.GAME_REGION[2]), round(0.5231 * self.GAME_REGION[3]))  # Open prestige menu
+            click(self.relCoords(1359, 560))  # Open prestige menu
 
-            pyautogui.screenshot(self.OCR_IMAGE, region=(round(0.5729 * self.GAME_REGION[2]), round(0.6926 * self.GAME_REGION[3]), round(0.0781 * self.GAME_REGION[2]), round(0.062 * self.GAME_REGION[3])))
+            pyautogui.screenshot(self.OCR_IMAGE, region=(self.relCoords(1070, 745, 160, 70)))
             result = self.ocr(self.OCR_IMAGE)
+
+            # while not self.isNum(result, 2):
+            #     pyautogui.screenshot(self.OCR_IMAGE, region=(self.relCoords(1070, 745, 160, 70)))
+            #     result = self.ocr(self.OCR_IMAGE)
 
             if self.isNum(result, 2):
                 self.ocr_succeed_count += 1
@@ -285,21 +309,18 @@ class FirestoneBot():
                 progress = round((self.PRESTIGE_LEVEL / self.PRESTIGE_TRIGGER) * 100)
                 self.log.info(f"Current earnings are at {self.PRESTIGE_LEVEL}x which is {progress}% of our goal.")
 
-                snooze = ((progress - 100) / (0 - 100)) *  ((60 - 1) + 1) * 1000
+                snooze = ((progress - 100) / (0 - 100)) * ((60 - 1) + 1) * 1000
                 if snooze <= 1000:
                     snooze = 1000
                 elif snooze >= 60000:
                     snooze = 60000
 
                 self.PRESTIGE_CHECK_TIME = time() + snooze
-                self.log.info(f"Will wait {(snooze / 1000)}min before checking Prestige progress again.")
+                self.log.info(f"Will wait {round((snooze / 1000), 2)}min before checking Prestige progress again.")
 
                 if self.PRESTIGE_LEVEL >= self.PRESTIGE_TRIGGER:
                     self.log.info("Firestone earnings are satisfactory. Prestiging...")
-                    click(round(0.7031 * self.GAME_REGION[2]), round(0.5231 * self.GAME_REGION[3]))
-                    self.pause()
-                    click(round(0.6016 * self.GAME_REGION[2]), round(0.4769 * self.GAME_REGION[3]))
-
+                    click(self.relCoords(1160, 525))  # Click on FREE prestige option
                     sleep(15)  # Wait for prestige to finish
 
                     click(self.GUARDIAN_CLICK_COORDS, clicks=20, interval=1.1)  # Let's get some gold to buy party with
@@ -319,23 +340,23 @@ class FirestoneBot():
         if self.config.party_size >= 1:
             self.pause()
             self.log.info("Buying first party slot.")
-            click(round(0.4167 * self.GAME_REGION[2]), round(0.7315 * self.GAME_REGION[3]))  # Buy fist party slot
+            click(self.relCoords(802, 795))  # Buy fist party slot
         if self.config.party_size >= 2:
             self.pause()
             self.log.info("Buying second party slot.")
-            click(round(0.401 * self.GAME_REGION[2]), round(0.5139 * self.GAME_REGION[3]))  # Buy second slot
+            click(self.relCoords(775, 540))  # Buy second slot
         if self.config.party_size >= 3:
             self.pause()
             self.log.info("Buying third party slot.")
-            click(round(0.2995 * self.GAME_REGION[2]), round(0.7759 * self.GAME_REGION[3]))  # Buying third party slot
+            click(self.relCoords(575, 815))  # Buying third party slot
         if self.config.party_size >= 4:
             self.pause()
             self.log.info("Buying fourth party slot.")
-            click(round(0.2995 * self.GAME_REGION[2]), round(0.4259 * self.GAME_REGION[3]))  # Buying fourth party slot
+            click(self.relCoords(550, 445))  # Buying fourth party slot
         if self.config.party_size >= 5:
             self.pause()
             self.log.info("Buying fifth party slot.")
-            click(round(0.263 * self.GAME_REGION[2]), round(0.588 * self.GAME_REGION[3]))  # Buying fifth party slot
+            click(self.relCoords(510, 630))  # Buying fifth party slot
 
         if self.config.party_size >= 1:
             self.pause()
@@ -354,7 +375,7 @@ class FirestoneBot():
             click(self.CLASS_COORDS[self.config.party_slot_5])
 
         self.pause()
-        click(round(0.599 * self.GAME_REGION[2]), round(0.088 * self.GAME_REGION[3]))  # Click to save changes
+        click(self.relCoords(1160, 95))  # Click to save changes
         self.pause()
         click(self.BIG_CLOSE_COORDS)
         self.pause()
@@ -370,7 +391,7 @@ class FirestoneBot():
             click(self.GUILD_EXPEDITIONS_COORDS)
             self.pause()
             # Take a screenshot of the mission timer
-            pyautogui.screenshot(self.OCR_IMAGE, region=(0.31 * self.GAME_REGION[2], 0.32 * self.GAME_REGION[3], 0.1 * self.GAME_REGION[2], 0.04 * self.GAME_REGION[3]))
+            pyautogui.screenshot(self.OCR_IMAGE, region=(self.relCoords(600, 345, 200, 40)))
             self.pause()
             # Attempt to read the time using OCR
             result = self.ocr(self.OCR_IMAGE)
@@ -380,12 +401,12 @@ class FirestoneBot():
                 self.ocr_succeed_count += 1
                 self.log.info("Current mission was completed.")
                 # Click on the "Claim" button.
-                click(round(0.7 * self.GAME_REGION[2]), round(0.31 * self.GAME_REGION[3]))
+                click(self.relCoords(1345, 335))
                 sleep(2)  # Wait for it to process
-                click(round(0.61 * self.GAME_REGION[2]), round(0.67 * self.GAME_REGION[3]))  # Click OK on the popup that occurs
+                click(self.relCoords(1185, 720))  # Click OK on the popup that occurs
                 self.log.info("Claimed.")
                 sleep(2)  # Wait for it to process.
-                click(round(0.7 * self.GAME_REGION[2]), round(0.32 * self.GAME_REGION[3]))  # Click to start new expedition
+                click(self.relCoords(1335, 335))  # Click to start new expedition
                 self.pause()
                 click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                 return
@@ -402,16 +423,14 @@ class FirestoneBot():
             elif result == "":
                 # If we can't tell, let's make sure it's not saying there are none.
                 self.log.info("Checking to see if we're out of guild expeditions.")
-                pyautogui.screenshot(self.OCR_IMAGE, region=(
-                round(0.32 * self.GAME_REGION[2]), round(0.48 * self.GAME_REGION[3]), round(0.35 * self.GAME_REGION[2]),
-                round(0.06 * self.GAME_REGION[3])))
+                pyautogui.screenshot(self.OCR_IMAGE, region=(self.relCoords(625, 520, 690, 65)))
                 self.pause()  # Give it time to save the image
                 result = self.ocr(self.OCR_IMAGE)  # attempt to read it
 
                 if result == "There are no pending expeditions.":
                     self.ocr_succeed_count += 1
                     self.log.info("There are no more expeditions available right now.")
-                    pyautogui.screenshot(self.OCR_IMAGE, region=(round(0.5365 * self.GAME_REGION[2]), round(0.1278 * self.GAME_REGION[3]), round(0.0708 * self.GAME_REGION[2]), round(0.0426 * self.GAME_REGION[3])))
+                    pyautogui.screenshot(self.OCR_IMAGE, region=(self.relCoords(1030, 145, 145, 35)))
                     self.pause()
                     result = self.ocr(self.OCR_IMAGE)
 
@@ -436,7 +455,7 @@ class FirestoneBot():
                     os.path.expanduser("~") + f"/Documents/Firestone Bot/OCR/Fail_{self.ocr_fail_count}_{round(time(), 5)}.png")
             self.log.warning("Unable to ascertain the current mission status.")
             self.log.info("Trying to start a new expedition anyway.")
-            click(round(0.7 * self.GAME_REGION[2]), round(0.32 * self.GAME_REGION[3]))  # Click to start new expedition
+            click(self.relCoords(1335, 335))  # Click to start new expedition
             self.pause()
             self.log.info("Returning home.")
             click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
@@ -457,18 +476,18 @@ class FirestoneBot():
         while True:
             # os.system("cls")
             try:
-                self.buyUpgrades()
+                # self.buyUpgrades()
                 if self.config.guild_missions:
                     self.guildMissions()
-                if self.config.farm_gold:
-                    self.farmGold(self.config.farm_levels)
+                # if self.config.farm_gold:
+                #     self.farmGold(self.config.farm_levels)
                 if self.config.auto_prestige:
                     self.autoPrestige()
-                if self.config.guardian == 1:
-                    self.guardianClick(100, 0.15)
-                if self.config.guardian == 2:
-                    self.guardianClick(10, 1.2)
-                self.ocr_check()
+                # if self.config.guardian == 1:
+                #     self.guardianClick(100, 0.15)
+                # if self.config.guardian == 2:
+                #     self.guardianClick(10, 1.2)
+                # self.ocr_check()
             except:
                 self.log.exception("Something went wrong.")
                 self.config.sentinel = True
