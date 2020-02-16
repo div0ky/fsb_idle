@@ -15,7 +15,6 @@ from logging.handlers import TimedRotatingFileHandler
 from time import sleep
 from time import time
 from tkinter import messagebox
-import tesserocr
 
 import pyautogui
 import pytesseract
@@ -227,12 +226,14 @@ class FirestoneBot():
     def changeUpgradeProgression(self, way):
         if way == 1:  # go down to x1
             click(self.UPGRADE_COORDS)
+            self.pause()
             click(self.UPGRADES_BUTTON_COORDS, clicks=2, interval=0.5)
             click(self.SMALL_CLOSE_COORDS)
             self.UPGRADES_LOWERED = True
             return
         elif way == 2:  # go up to milestone
             click(self.UPGRADE_COORDS)
+            self.pause()
             click(self.UPGRADES_BUTTON_COORDS, clicks=3, interval=0.5)
             click(self.SMALL_CLOSE_COORDS)
             self.UPGRADES_LOWERED = False
@@ -351,8 +352,7 @@ class FirestoneBot():
                     click(self.GUARDIAN_CLICK_COORDS, clicks=20, interval=1.1)  # Let's get some gold to buy party with
 
                     self.setupParty()
-                    if self.UPGRADES_LOWERED:
-                        self.changeUpgradeProgression(2)
+                    self.changeUpgradeProgression(2)
 
             self.log.info("Going back to home screen.")
             click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go home because we're not prestiging
