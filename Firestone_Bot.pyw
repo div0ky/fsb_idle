@@ -30,9 +30,9 @@ DEFINE VERSION INFO
 """
 
 vMajor = 2  # Increments on a BREAKING change
-vMinor = 1  # Increments on a FEATURE change
+vMinor = 2  # Increments on a FEATURE change
 vPatch = 0  # Increments on a FIX / PATCH
-vStage = "beta.0"
+vStage = "alpha.0"
 version = f"{vMajor}.{vMinor}.{vPatch}-{vStage}"  # Should be self explanatory
 
 # Define where the tesseract engine is installed
@@ -89,6 +89,7 @@ class FirestoneBot():
         self.OCR_IMAGE = os.path.expanduser("~") + "/Documents/Firestone Bot/OCR/ss.png"
         self.CLASS_COORDS = {}
         self.PARTY_COORDS = None
+        self.EXOTIC_MERCHANT_COORDS = None
 
     def _check_thread_status(self):
         """ Check status of threads. If they're not running, start them.
@@ -157,6 +158,7 @@ class FirestoneBot():
         self.UPGRADES_BUTTON_COORDS = (self.relCoords(1605, 1020))
         self.TEMPLE_OF_ETERNALS_COORDS = (self.relCoords(915, 250))
         self.PARTY_COORDS = (self.relCoords(1845, 520))
+        self.EXOTIC_MERCHANT_COORDS = (self.relCoords(1445, 735))
 
         self.CLASS_COORDS = {"ranger": (round(0.8672 * self.GAME_REGION[2]), round(0.5417 * self.GAME_REGION[3])),
                              "mage": (round(0.8698 * self.GAME_REGION[2]), round(0.3565 * self.GAME_REGION[3])),
@@ -300,19 +302,109 @@ class FirestoneBot():
                 click(self.BACK_ARROW_COORDS)
                 sleep(0.5)
                 count -= 1
+            sleep(1.5)
             click(button)
             if self.UPGRADES_LOWERED is False:
                 self.UPGRADES_LOWERED = True
                 self.log.info("Lowering upgrade progression to x1.")
                 self.changeUpgradeProgression(1)
 
+    def exoticMerchant(self):
+        upgrade_color = (27, 102, 26)
+        tolerance = 5
+
+        self.pause()
+        click(self.TOWN_COORDS)
+        self.pause()
+        click(self.EXOTIC_MERCHANT_COORDS)
+        self.pause()
+
+        # Scroll to top
+        count = 2
+        while count > 0:
+            pyautogui.moveTo(x=self.relCoords(1460), y=self.relCoords(305))
+            self.pause()
+            pyautogui.drag(0, self.relCoords(705), 1, pyautogui.easeOutQuad)
+            count -= 1
+
+        while True:
+
+            moveTo(5, 5)
+
+            if pyautogui.pixelMatchesColor(self.relCoords(900), self.relCoords(570), upgrade_color, tolerance=tolerance):  # Scroll of Speed
+                print("I should click.")
+                click(self.relCoords(900, 570))
+                moveTo(5, 5)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(1220), self.relCoords(570), upgrade_color, tolerance=tolerance):  # Scroll of Damage
+                click(self.relCoords(1300, 600))
+                moveTo(5, 5)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(1545), self.relCoords(570), upgrade_color, tolerance=tolerance):  # Scroll of Health
+                click(self.relCoords(1545, 600))
+                moveTo(5, 5)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(900), self.relCoords(900), upgrade_color, tolerance=tolerance):  # Miads' Touch
+                click(self.relCoords(900, 900))
+                moveTo(5, 5)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(1220), self.relCoords(900), upgrade_color, tolerance=tolerance):  # Pouch of Gold
+                click(self.relCoords(1220, 900))
+                moveTo(5, 5)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(1540), self.relCoords(900), upgrade_color, tolerance=tolerance):  # Bucket of Gold
+                click(self.relCoords(1540, 900))
+                moveTo(5, 5)
+
+            else:
+                break
+
+        pyautogui.moveTo(x=1460, y=1010)
+        sleep(0.5)
+        pyautogui.drag(0, -705, 1, pyautogui.easeOutQuad, pause=1)  # Scroll down to see more
+
+        while True:
+
+            moveTo(5, 5)
+
+            if pyautogui.pixelMatchesColor(self.relCoords(900), self.relCoords(540), upgrade_color, tolerance=tolerance):  # Scroll of Speed
+                click(self.relCoords(900, 540))
+                moveTo(5, 5)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(1220), self.relCoords(540), upgrade_color, tolerance=tolerance):  # Scroll of Damage
+                click(self.relCoords(1300, 600))
+                moveTo(5, 5)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(1545), self.relCoords(540), upgrade_color, tolerance=tolerance):  # Scroll of Health
+                click(self.relCoords(1545, 600))
+                moveTo(5, 5)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(900), self.relCoords(875), upgrade_color, tolerance=tolerance):  # Miads' Touch
+                click(self.relCoords(900, 900))
+                moveTo(5, 5)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(1220), self.relCoords(875), upgrade_color, tolerance=tolerance):  # Pouch of Gold
+                click(self.relCoords(1220, 900))
+                moveTo(5, 5)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(1540), self.relCoords(875), upgrade_color, tolerance=tolerance):  # Bucket of Gold
+                click(self.relCoords(1540, 900))
+                moveTo(5, 5)
+
+            else:
+                break
+
+        click(self.BIG_CLOSE_COORDS, clicks=2, interval=0.5)
+
     def autoPrestige(self):
         if self.config.auto_prestige and time() >= self.PRESTIGE_CHECK_TIME:
+            self.pause()
             click(self.TOWN_COORDS)
             self.pause()
             click(self.TEMPLE_OF_ETERNALS_COORDS)
             self.pause()
             click(self.relCoords(1359, 560))  # Open prestige menu
+            self.pause()
 
             pyautogui.screenshot(self.OCR_IMAGE, region=(self.relCoords(1070, 745, 160, 70)))
             result = self.ocr(self.OCR_IMAGE)
@@ -524,6 +616,7 @@ class FirestoneBot():
                     self.guardianClick(100, 0.15)
                 if self.config.guardian == 2:
                     self.guardianClick(10, 1.2)
+                # self.exoticMerchant()
                 self.ocr_check()
             except:
                 self.log.exception("Something went wrong.")

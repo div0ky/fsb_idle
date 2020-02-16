@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
+## [2.2.0-alpha.0] - 2020-02-16
+### Added
+- Groundwork for selling to Exotic Merchant
+
+## [2.1.0-stable] - 2020-02-16
+### Changed
+- Really just changing status of `2.1.0-beta.1` to a `stable` release
+
 ## [2.1.0-beta.1] - 2020-02-16
 ### Changed
 - Upgrades no longer use image recognition, this provides more accurate results across resolutions
