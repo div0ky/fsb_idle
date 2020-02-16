@@ -87,7 +87,7 @@ class FirestoneBot():
         self.UPGRADES_BUTTON_COORDS = None
         self.TEMPLE_OF_ETERNALS_COORDS = None
         self.PRESTIGE_LEVEL = None
-        self.OCR_IMAGE = os.path.expanduser("~") + "/Documents/Firestone Bot/ss.png"
+        self.OCR_IMAGE = os.path.expanduser("~") + "/Documents/Firestone Bot/OCR/ss.png"
         self.CLASS_COORDS = {}
         self.PARTY_COORDS = None
 
@@ -130,7 +130,7 @@ class FirestoneBot():
         c_handler.setFormatter(console_format)
 
         # Create debug handler
-        f_handler = TimedRotatingFileHandler(os.path.expanduser("~") + "/Documents/Firestone Bot/debug.log", when="midnight", backupCount=7, interval=1)
+        f_handler = TimedRotatingFileHandler(os.path.expanduser("~") + "/Documents/Firestone Bot/Logs/debug.log", when="midnight", backupCount=7, interval=1)
         f_handler.setLevel(logging.DEBUG)
         f_handler.setFormatter(file_format)
 
@@ -208,7 +208,7 @@ class FirestoneBot():
         wpercent = (base / float(im.size[0]))
         hsize = int(float(im.size[1]) * float(wpercent))
         im = im.resize((base, hsize), Image.ANTIALIAS)
-        im.save(os.path.expanduser("~") + f"/Documents/Firestone Bot/ss.png")
+        im.save(self.OCR_IMAGE)
         text = pytesseract.image_to_string(file, lang="eng", config='--psm 7')
         self.log.info(f"I think it says: {text}")
         return text
@@ -248,17 +248,42 @@ class FirestoneBot():
         moveTo(self.GUARDIAN_CLICK_COORDS)
         self.log.info("Buying any available upgrades.")
         self.pause()
+
+        upgrade_color = (43, 117, 41)
+        tolerance = 5
+
         while True:
-            button = pyautogui.locateAllOnScreen(imPath("can_buy.png"), region=(self.relCoords(1625, 140, 285, 830)), confidence=0.96)
-            button = list(button)
-            if len(button) == 0:
-                self.log.info("No (more) upgrades available.")
-                break
+
+            if pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(175), upgrade_color, tolerance=tolerance):  # Party
+                click(self.relCoords(1715, 175))
+                moveTo(self.GUARDIAN_CLICK_COORDS)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(295), upgrade_color, tolerance=tolerance):  # Guardian
+                click(self.relCoords(1715, 295))
+                moveTo(self.GUARDIAN_CLICK_COORDS)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(415), upgrade_color, tolerance=tolerance):  # Leader
+                click(self.relCoords(1715, 415))
+                moveTo(self.GUARDIAN_CLICK_COORDS)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(540), upgrade_color, tolerance=tolerance):  # Party 1
+                click(self.relCoords(1715, 540))
+                moveTo(self.GUARDIAN_CLICK_COORDS)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(655), upgrade_color, tolerance=tolerance):  # Party 2
+                click(self.relCoords(1715, 655))
+                moveTo(self.GUARDIAN_CLICK_COORDS)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(775), upgrade_color, tolerance=tolerance):  # Party 3
+                click(self.relCoords(1715, 775))
+                moveTo(self.GUARDIAN_CLICK_COORDS)
+
+            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(895), upgrade_color, tolerance=tolerance):  # Party 4
+                click(self.relCoords(1715, 895))
+                moveTo(self.GUARDIAN_CLICK_COORDS)
             else:
-                # log.info("At least %s upgrade(s) available." % len(button))
-                for i in button:
-                    pyautogui.click(x=i[0] + i[2] / 2, y=i[1] + i[3] / 2, interval=0.01)
-                pyautogui.moveTo(self.GUARDIAN_CLICK_COORDS)
+                break
+
         pyautogui.click(self.SMALL_CLOSE_COORDS)
         return
 
@@ -420,7 +445,7 @@ class FirestoneBot():
                 self.pause()
                 return
 
-            elif result == "":
+            else:
                 # If we can't tell, let's make sure it's not saying there are none.
                 self.log.info("Checking to see if we're out of guild expeditions.")
                 pyautogui.screenshot(self.OCR_IMAGE, region=(self.relCoords(625, 520, 690, 65)))
@@ -436,9 +461,21 @@ class FirestoneBot():
 
                     if self.isNum(result):
                         self.ocr_succeed_count += 1
-                        time_left = int(result.partition(":")[0]) + 1
-                        self.GUILD_MISSION_TIME_LEFT = time() + (time_left * 60)  # Add one minute to whatever minutes are left to be safe
-                        self.log.info(f"More missions available in {time_left}min. Returning home.")
+                        if len(result.partition(":")) > 1:
+
+                            hours = int(result.partition(":")[0]) * 60 * 60
+                            print(hours)
+                            temp = result.partition(":")[2]
+                            min = (int(temp.partition(":")[0]) + 1) * 60
+                            print(min)
+
+                            time_left = hours + min
+                            print(time_left)
+                        else:
+                            time_left = int(result.partition(":")[0]) * 60
+
+                        self.GUILD_MISSION_TIME_LEFT = time() + time_left  # Set timer
+                        self.log.info(f"More missions available in {time_left / 60}min. Returning home.")
                         click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                         return
                     else:
@@ -476,18 +513,18 @@ class FirestoneBot():
         while True:
             # os.system("cls")
             try:
-                # self.buyUpgrades()
+                self.buyUpgrades()
                 if self.config.guild_missions:
                     self.guildMissions()
-                # if self.config.farm_gold:
-                #     self.farmGold(self.config.farm_levels)
+                if self.config.farm_gold:
+                    self.farmGold(self.config.farm_levels)
                 if self.config.auto_prestige:
                     self.autoPrestige()
-                # if self.config.guardian == 1:
-                #     self.guardianClick(100, 0.15)
-                # if self.config.guardian == 2:
-                #     self.guardianClick(10, 1.2)
-                # self.ocr_check()
+                if self.config.guardian == 1:
+                    self.guardianClick(100, 0.15)
+                if self.config.guardian == 2:
+                    self.guardianClick(10, 1.2)
+                self.ocr_check()
             except:
                 self.log.exception("Something went wrong.")
                 self.config.sentinel = True
