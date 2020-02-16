@@ -6,6 +6,19 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
+## [2.1.0-beta.1] - 2020-02-16
+### Changed
+- Upgrades no longer use image recognition, this provides more accurate results across resolutions
+- Dynamic coordinates for screen resolution are calculated more accurately now
+- Made some tweaks to OCR... should hopefully be more consistant moving forward
+- Moved bot.ini (config file) to user's documents to avoid admin permissions to modify it
+- Logs now have their own folder in user's documents to clean things up a bit
+### Fixed
+- Upgrade progression switches work as expected now
+- Bot properly reads user settings for prestige amount from config now
+- Guild expedition timer used to count hours as minutes. It now properly calculates time remaining to refresh.
+- A check on OCR was causing failures when checking if no expeditions are left... it should fail less now
+
 ## [2.1.0-beta.0] - 2020-02-14
 ### Added
 - The bot can now auto-prestige. How about that? Needs more testing, though.
