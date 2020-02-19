@@ -15,6 +15,7 @@ class ConfigManager:
 
         # General options - can be overriden from config
         self.auto_prestige = True
+        self.prestige_level = 3.5
         self.in_guild = True
         self.guardian = "Dragon"
         self.guild_missions = True

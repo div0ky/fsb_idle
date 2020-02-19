@@ -9,6 +9,7 @@ A bot to handle auto upgrading party members and such as it progresses.
 
 import logging
 import os
+import pickle
 import threading
 import tkinter
 from logging.handlers import TimedRotatingFileHandler
@@ -18,6 +19,7 @@ from tkinter import messagebox
 
 import pyautogui
 import pytesseract
+import requests
 from PIL import Image
 from pyautogui import click
 from pyautogui import moveTo
@@ -32,7 +34,7 @@ DEFINE VERSION INFO
 vMajor = 2  # Increments on a BREAKING change
 vMinor = 2  # Increments on a FEATURE change
 vPatch = 0  # Increments on a FIX / PATCH
-vStage = "alpha.0"
+vStage = "alpha.3"
 version = f"{vMajor}.{vMinor}.{vPatch}-{vStage}"  # Should be self explanatory
 
 # Define where the tesseract engine is installed
@@ -47,49 +49,60 @@ def imPath(filename):
 
 class FirestoneBot():
     def __init__(self):
-        os.system("cls")
 
+        # INIT SOME ESSENTIAL STUFF UP FRONT
+        os.system("cls")
+        self.var = self.PersistantVariables()
         self._setup_logging()
         self.sentinel = False
 
-        # Init config and logging
+        # INITIALIZE CONFIG FILE AND MOUSE LOCKDOWN
         self.config = ConfigManager()
         self.mouseLock = MouseLock()
 
+        # INITIALIZE GUI OBJECTS
         self.root = tkinter.Tk()
         self.root.withdraw()
 
-        # Setup some check variables
-        self.ocr_fail_count = 0
-        self.ocr_succeed_count = 0
-        self.ocr_f_pct = 0
-        self.ocr_s_pct = 0
-
-        # Setup some common variables
+        # SETUP VOLATILE VARIABLES FOR COORDS
         self.GAME_REGION = None
         self.GUARDIAN_CLICK_COORDS = None
         self.UPGRADE_COORDS = None
         self.CLOSE_COORDS = None
-        self.PAUSE_LENGTH = 0.5
-        self.GUILD_MISSION_TIME_LEFT = time() - 5
-        self.PRESTIGE_CHECK_TIME = time() - 5
-        self.PRESTIGE_TRIGGER = self.config.prestige_level
         self.SMALL_CLOSE_COORDS = None
         self.BIG_CLOSE_COORDS = None
         self.GUILD_COORDS = None
         self.GUILD_EXPEDITIONS_COORDS = None
         self.TOWN_COORDS = None
-        self.UPGRADES_LOWERED = False
-        self.FRESH_START = False
-        self.BOSS_FAILED = False
         self.BACK_ARROW_COORDS = None
         self.UPGRADES_BUTTON_COORDS = None
         self.TEMPLE_OF_ETERNALS_COORDS = None
-        self.PRESTIGE_LEVEL = None
-        self.OCR_IMAGE = os.path.expanduser("~") + "/Documents/Firestone Bot/OCR/ss.png"
         self.CLASS_COORDS = {}
         self.PARTY_COORDS = None
         self.EXOTIC_MERCHANT_COORDS = None
+        self.MAP_COORDS = None
+
+        self.PRESTIGE_TRIGGER = self.config.prestige_level
+        self.PRESTIGE_LEVEL = None
+        self.PAUSE_LENGTH = 0.5
+
+    class PersistantVariables:
+        def __init__(self):
+
+            # SETUP VARIABLES FOR DEBUGGING
+            self.ocr_fail_count = 0
+            self.ocr_succeed_count = 0
+            self.ocr_f_pct = 0
+            self.ocr_s_pct = 0
+
+            # SETUP VARIABLES WE'LL NEED TO REMEMBER
+            self.GUILD_MISSION_TIME_LEFT = time() - 5
+            self.PRESTIGE_CHECK_TIME = time() - 5
+            self.UPGRADES_LOWERED = False
+            self.FRESH_START = False
+            self.BOSS_FAILED = False
+            self.OCR_IMAGE = os.path.expanduser("~") + "/Documents/Firestone Bot/OCR/ss.png"
+            self.ACTIVE_MISSIONS = 1
 
     def _check_thread_status(self):
         """ Check status of threads. If they're not running, start them.
@@ -159,6 +172,7 @@ class FirestoneBot():
         self.TEMPLE_OF_ETERNALS_COORDS = (self.relCoords(915, 250))
         self.PARTY_COORDS = (self.relCoords(1845, 520))
         self.EXOTIC_MERCHANT_COORDS = (self.relCoords(1445, 735))
+        self.MAP_COORDS = (self.relCoords(1840, 395))
 
         self.CLASS_COORDS = {"ranger": (round(0.8672 * self.GAME_REGION[2]), round(0.5417 * self.GAME_REGION[3])),
                              "mage": (round(0.8698 * self.GAME_REGION[2]), round(0.3565 * self.GAME_REGION[3])),
@@ -209,20 +223,20 @@ class FirestoneBot():
         wpercent = (base / float(im.size[0]))
         hsize = int(float(im.size[1]) * float(wpercent))
         im = im.resize((base, hsize), Image.ANTIALIAS)
-        im.save(self.OCR_IMAGE)
+        im.save(self.var.OCR_IMAGE)
         text = pytesseract.image_to_string(file, lang="eng", config='--psm 7')
         self.log.info(f"I think it says: {text}")
         return text
 
     def ocr_check(self):
-        ocr_total = self.ocr_fail_count + self.ocr_succeed_count
-        self.ocr_f_pct = round(((self.ocr_fail_count / ocr_total) * 100), 2)
-        self.ocr_s_pct = round(((self.ocr_succeed_count / ocr_total) * 100), 2)
-        ocr_status = f"{self.ocr_f_pct}% Failure. {self.ocr_s_pct}% Success."
-        if self.ocr_f_pct >= 20:
-            self.log.warning(f"OCR currently has a {self.ocr_f_pct}% failure rate.")
+        ocr_total = self.var.ocr_fail_count + self.var.ocr_succeed_count
+        self.var.ocr_f_pct = round(((self.var.ocr_fail_count / ocr_total) * 100), 2)
+        self.var.ocr_s_pct = round(((self.var.ocr_succeed_count / ocr_total) * 100), 2)
+        ocr_status = f"{self.var.ocr_f_pct}% Failure. {self.var.ocr_s_pct}% Success."
+        if self.var.ocr_f_pct >= 20:
+            self.log.warning(f"OCR currently has a {self.var.ocr_f_pct}% failure rate.")
         else:
-            self.log.info(f"OCR currently has a {self.ocr_s_pct}% success rate.")
+            self.log.info(f"OCR currently has a {self.var.ocr_s_pct}% success rate.")
         return ocr_status
 
     def changeUpgradeProgression(self, way):
@@ -231,14 +245,14 @@ class FirestoneBot():
             self.pause()
             click(self.UPGRADES_BUTTON_COORDS, clicks=2, interval=0.5)
             click(self.SMALL_CLOSE_COORDS)
-            self.UPGRADES_LOWERED = True
+            self.var.UPGRADES_LOWERED = True
             return
         elif way == 2:  # go up to milestone
             click(self.UPGRADE_COORDS)
             self.pause()
             click(self.UPGRADES_BUTTON_COORDS, clicks=3, interval=0.5)
             click(self.SMALL_CLOSE_COORDS)
-            self.UPGRADES_LOWERED = False
+            self.var.UPGRADES_LOWERED = False
             return
         return
 
@@ -304,8 +318,8 @@ class FirestoneBot():
                 count -= 1
             sleep(1.5)
             click(button)
-            if self.UPGRADES_LOWERED is False:
-                self.UPGRADES_LOWERED = True
+            if self.var.UPGRADES_LOWERED is False:
+                self.var.UPGRADES_LOWERED = True
                 self.log.info("Lowering upgrade progression to x1.")
                 self.changeUpgradeProgression(1)
 
@@ -396,8 +410,110 @@ class FirestoneBot():
 
         click(self.BIG_CLOSE_COORDS, clicks=2, interval=0.5)
 
+    def mapMissions(self):
+        click(self.MAP_COORDS)  # Open the map
+        sleep(1.5)
+
+        # missions02 = pyautogui.locateAllOnScreen(imPath("map_missions_02.png"), confidence=0.8)
+        # missions03 = pyautogui.locateAllOnScreen(imPath("map_missions_03.png"), confidence=0.8)
+
+        while True:
+            if pyautogui.pixelMatchesColor(self.relCoords(232), self.relCoords(315), (247, 163, 66), tolerance=10):
+                self.log.info("Claiming a map mission.")
+                click(self.relCoords(232, 315))
+                self.pause()
+                moveTo(self.GUARDIAN_CLICK_COORDS)
+                pyautogui.press('esc')
+                self.var.ACTIVE_MISSIONS -= 1
+                self.pause()
+            else:
+                break
+
+        if self.var.ACTIVE_MISSIONS < 3:
+            self.log.info("Checking on map missions.")
+            missions01 = pyautogui.locateAllOnScreen(imPath("map_missions_01.png"), confidence=0.745)
+            missions01 = list(missions01)
+            if len(missions01) > 0:
+                self.log.info(f"We have {len(missions01)}")
+                for x in missions01:
+                    if self.var.ACTIVE_MISSIONS < 3:
+                        click(x[0], x[1], duration=0.25)
+                        self.pause()
+                        # Check to see if the "Start Mission" popup occurred by checking for green button
+                        if pyautogui.pixelMatchesColor(self.relCoords(830), self.relCoords(960), (11, 161, 8), tolerance=5):
+                            click(self.relCoords(830, 960))
+                            self.log.info("Started a mission.")
+                            self.pause()
+                            pyautogui.press('esc')
+                            self.pause()
+                            self.var.ACTIVE_MISSIONS += 1
+                            continue
+                        else:
+                            pyautogui.press('esc')
+                            self.pause()
+                            continue
+                    else:
+                        pyautogui.press('esc', presses=1)
+                        break
+
+            missions02 = pyautogui.locateAllOnScreen(imPath("map_missions_02.png"), confidence=0.745)
+            missions02 = list(missions02)
+            if len(missions02) > 0:
+                self.log.info(f"We have {len(missions02)}")
+                for x in missions02:
+                    if self.var.ACTIVE_MISSIONS < 3:
+                        click(x[0], x[1], duration=0.25)
+                        self.pause()
+                        # Check to see if the "Start Mission" popup occurred by checking for green button
+                        if pyautogui.pixelMatchesColor(self.relCoords(830), self.relCoords(960), (11, 161, 8),
+                                                       tolerance=5):
+                            click(self.relCoords(830, 960))
+                            self.log.info("Started a mission.")
+                            self.pause()
+                            pyautogui.press('esc')
+                            self.pause()
+                            self.var.ACTIVE_MISSIONS += 1
+                            continue
+                        else:
+                            pyautogui.press('esc')
+                            self.pause()
+                            continue
+                    else:
+                        pyautogui.press('esc', presses=1)
+                        break
+
+            missions03 = pyautogui.locateAllOnScreen(imPath("map_missions_03.png"), confidence=0.745)
+            missions03 = list(missions03)
+            if len(missions03) > 0:
+                self.log.info(f"We have {len(missions03)}")
+                for x in missions03:
+                    if self.var.ACTIVE_MISSIONS < 3:
+                        click(x[0], x[1], duration=0.25)
+                        self.pause()
+                        # Check to see if the "Start Mission" popup occurred by checking for green button
+                        if pyautogui.pixelMatchesColor(self.relCoords(830), self.relCoords(960), (11, 161, 8),
+                                                       tolerance=5):
+                            click(self.relCoords(830, 960))
+                            self.log.info("Started a mission.")
+                            self.pause()
+                            pyautogui.press('esc')
+                            self.pause()
+                            self.var.ACTIVE_MISSIONS += 1
+                            continue
+                        else:
+                            pyautogui.press('esc')
+                            self.pause()
+                            continue
+                    else:
+                        pyautogui.press('esc', presses=1)
+                        break
+            else:
+                self.log.info("Doesn't look like we have any missions to click.")
+        self.log.info("Heading home.")
+        pyautogui.press('esc')
+
     def autoPrestige(self):
-        if self.config.auto_prestige and time() >= self.PRESTIGE_CHECK_TIME:
+        if self.config.auto_prestige and time() >= self.var.PRESTIGE_CHECK_TIME:
             self.pause()
             click(self.TOWN_COORDS)
             self.pause()
@@ -406,22 +522,22 @@ class FirestoneBot():
             click(self.relCoords(1359, 560))  # Open prestige menu
             self.pause()
 
-            pyautogui.screenshot(self.OCR_IMAGE, region=(self.relCoords(1070, 745, 160, 70)))
-            result = self.ocr(self.OCR_IMAGE)
+            pyautogui.screenshot(self.var.OCR_IMAGE, region=(self.relCoords(1070, 745, 160, 70)))
+            result = self.ocr(self.var.OCR_IMAGE)
 
             # while not self.isNum(result, 2):
-            #     pyautogui.screenshot(self.OCR_IMAGE, region=(self.relCoords(1070, 745, 160, 70)))
-            #     result = self.ocr(self.OCR_IMAGE)
+            #     pyautogui.screenshot(self.var.OCR_IMAGE, region=(self.relCoords(1070, 745, 160, 70)))
+            #     result = self.ocr(self.var.OCR_IMAGE)
 
             if self.isNum(result, 2):
-                self.ocr_succeed_count += 1
+                self.var.ocr_succeed_count += 1
                 self.PRESTIGE_LEVEL = round(float(result[1:]), 2)
 
             else:
-                self.ocr_fail_count += 1
+                self.var.ocr_fail_count += 1
                 self.log.warning("Wasn't able to ascertain our current prestige level.")
-                if self.ocr_f_pct > 50:
-                    pyautogui.screenshot(os.path.expanduser("~") + f"/Documents/Firestone Bot/OCR/Fail_{self.ocr_fail_count}_{round(time(), 5)}.png")
+                if self.var.ocr_f_pct > 50:
+                    pyautogui.screenshot(os.path.expanduser("~") + f"/Documents/Firestone Bot/OCR/Fail_{self.var.ocr_fail_count}_{round(time(), 5)}.png")
 
             if self.PRESTIGE_LEVEL:
                 progress = round((self.PRESTIGE_LEVEL / self.PRESTIGE_TRIGGER) * 100)
@@ -433,7 +549,7 @@ class FirestoneBot():
                 elif snooze >= 60000:
                     snooze = 60000
 
-                self.PRESTIGE_CHECK_TIME = time() + snooze
+                self.var.PRESTIGE_CHECK_TIME = time() + snooze
                 self.log.info(f"Will wait {round((snooze / 1000), 2)}min before checking Prestige progress again.")
 
                 if self.PRESTIGE_LEVEL >= self.PRESTIGE_TRIGGER:
@@ -498,7 +614,7 @@ class FirestoneBot():
         self.pause()
 
     def guildMissions(self):
-        if time() > self.GUILD_MISSION_TIME_LEFT and self.config.guild_missions:
+        if time() > self.var.GUILD_MISSION_TIME_LEFT and self.config.guild_missions:
             self.log.info("Checking on Guild Expedition status.")
             self.pause()
             click(self.TOWN_COORDS)
@@ -508,14 +624,14 @@ class FirestoneBot():
             click(self.GUILD_EXPEDITIONS_COORDS)
             self.pause()
             # Take a screenshot of the mission timer
-            pyautogui.screenshot(self.OCR_IMAGE, region=(self.relCoords(600, 345, 200, 40)))
+            pyautogui.screenshot(self.var.OCR_IMAGE, region=(self.relCoords(600, 345, 200, 40)))
             self.pause()
             # Attempt to read the time using OCR
-            result = self.ocr(self.OCR_IMAGE)
+            result = self.ocr(self.var.OCR_IMAGE)
             # If it doesn't say "Completed" but it's also not blank... it's probably a number?
 
             if result == "Completed":
-                self.ocr_succeed_count += 1
+                self.var.ocr_succeed_count += 1
                 self.log.info("Current mission was completed.")
                 # Click on the "Claim" button.
                 click(self.relCoords(1345, 335))
@@ -529,9 +645,9 @@ class FirestoneBot():
                 return
 
             elif self.isNum(result):
-                self.ocr_succeed_count += 1
+                self.var.ocr_succeed_count += 1
                 time_left = int(result.partition(":")[0]) + 1
-                self.GUILD_MISSION_TIME_LEFT = time() + (time_left * 60)  # Add one minute to whatever minutes are left to be safe
+                self.var.GUILD_MISSION_TIME_LEFT = time() + (time_left * 60)  # Add one minute to whatever minutes are left to be safe
                 self.log.info(f"Current mission should complete in {time_left}min. Going Home.")
                 click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                 self.pause()
@@ -540,19 +656,19 @@ class FirestoneBot():
             else:
                 # If we can't tell, let's make sure it's not saying there are none.
                 self.log.info("Checking to see if we're out of guild expeditions.")
-                pyautogui.screenshot(self.OCR_IMAGE, region=(self.relCoords(625, 520, 690, 65)))
+                pyautogui.screenshot(self.var.OCR_IMAGE, region=(self.relCoords(625, 520, 690, 65)))
                 self.pause()  # Give it time to save the image
-                result = self.ocr(self.OCR_IMAGE)  # attempt to read it
+                result = self.ocr(self.var.OCR_IMAGE)  # attempt to read it
 
                 if result == "There are no pending expeditions.":
-                    self.ocr_succeed_count += 1
+                    self.var.ocr_succeed_count += 1
                     self.log.info("There are no more expeditions available right now.")
-                    pyautogui.screenshot(self.OCR_IMAGE, region=(self.relCoords(1030, 145, 145, 35)))
+                    pyautogui.screenshot(self.var.OCR_IMAGE, region=(self.relCoords(1030, 145, 145, 35)))
                     self.pause()
-                    result = self.ocr(self.OCR_IMAGE)
+                    result = self.ocr(self.var.OCR_IMAGE)
 
                     if self.isNum(result):
-                        self.ocr_succeed_count += 1
+                        self.var.ocr_succeed_count += 1
                         if len(result.partition(":")) > 1:
 
                             hours = int(result.partition(":")[0]) * 60 * 60
@@ -566,22 +682,22 @@ class FirestoneBot():
                         else:
                             time_left = int(result.partition(":")[0]) * 60
 
-                        self.GUILD_MISSION_TIME_LEFT = time() + time_left  # Set timer
+                        self.var.GUILD_MISSION_TIME_LEFT = time() + time_left  # Set timer
                         self.log.info(f"More missions available in {time_left / 60}min. Returning home.")
                         click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                         return
                     else:
-                        self.ocr_fail_count += 1
-                        if self.ocr_f_pct > 50:
-                            pyautogui.screenshot(os.path.expanduser("~") + f"/Documents/Firestone Bot/OCR/Fail_{self.ocr_fail_count}_{round(time(), 5)}.png")
+                        self.var.ocr_fail_count += 1
+                        if self.var.ocr_f_pct > 50:
+                            pyautogui.screenshot(os.path.expanduser("~") + f"/Documents/Firestone Bot/OCR/Fail_{self.var.ocr_fail_count}_{round(time(), 5)}.png")
                         self.log.warning("We weren't able to determine exepidtion renewal time. Returning home.")
                         click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                         return
 
-            self.ocr_fail_count += 1
-            if self.ocr_f_pct > 50:
+            self.var.ocr_fail_count += 1
+            if self.var.ocr_f_pct > 50:
                 pyautogui.screenshot(
-                    os.path.expanduser("~") + f"/Documents/Firestone Bot/OCR/Fail_{self.ocr_fail_count}_{round(time(), 5)}.png")
+                    os.path.expanduser("~") + f"/Documents/Firestone Bot/OCR/Fail_{self.var.ocr_fail_count}_{round(time(), 5)}.png")
             self.log.warning("Unable to ascertain the current mission status.")
             self.log.info("Trying to start a new expedition anyway.")
             click(self.relCoords(1335, 335))  # Click to start new expedition
@@ -594,47 +710,77 @@ class FirestoneBot():
     def run(self):
         cycles = 0
 
+        # DEFINE SOME VOLATILE VARIABLES
         self.getGameRegion()
         self.setupCoordinates()
 
         messagebox.showinfo(title=f"Firestone Bot {version}",
-                            message=f"Click OK to start the bot.\n\nPress ESCAPE or move mouse to upper-left corner of screen to exit.")
+                            message=f"Click OK to start the bot.\n\nPress SHIFT + ESCAPE or move mouse to upper-left corner of screen to exit.")
 
         # TODO: Switch this timer back to something more than 1.5?
         sleep(1.5)
         while True:
             # os.system("cls")
-            try:
-                self.buyUpgrades()
-                if self.config.guild_missions:
-                    self.guildMissions()
-                if self.config.farm_gold:
-                    self.farmGold(self.config.farm_levels)
-                if self.config.auto_prestige:
-                    self.autoPrestige()
-                if self.config.guardian == 1:
-                    self.guardianClick(100, 0.15)
-                if self.config.guardian == 2:
-                    self.guardianClick(10, 1.2)
-                # self.exoticMerchant()
-                self.ocr_check()
-            except:
-                self.log.exception("Something went wrong.")
-                self.config.sentinel = True
-                self.mouseLock.sentinel = True
-                messagebox.showerror(title=f"Firestone Bot {version}", message="Oops! Bot must terminate.\n\nCheck the log for more info.")
-                exit(1)
+            self.buyUpgrades()
+            if self.config.guild_missions:
+                self.guildMissions()
+            if self.config.farm_gold:
+                self.farmGold(self.config.farm_levels)
+            if self.config.auto_prestige:
+                self.autoPrestige()
+
+            self.mapMissions()
+
+            if self.config.guardian == 1:
+                self.guardianClick(100, 0.15)
+            if self.config.guardian == 2:
+                self.guardianClick(10, 1.2)
+
+            self.ocr_check()
 
             cycles += 1
             self.log.info(f"Main loop has cycled {cycles} time(s).")
 
             self._check_thread_status()
+            checkVersion()
+
+            f = open(os.path.expanduser("~") + "/Documents/Firestone Bot/var.ini", 'wb')
+            pickle.dump(self.var, f, 2)
+            f.close()
+
+
+def checkVersion():
+    response = requests.get("http://div0ky.com/repo/latest.txt")
+    latest = response.text
+    latest = str(latest)
+    if latest > version:
+        messagebox.showwarning(title=f"Firestone Bot {version}", message=f"New version found. Downloading v{latest}.")
+        update = requests.get(f"http://div0ky.com/repo/Firestone Bot_v{latest}.exe")
+        open(os.path.expanduser("~") + f"/Documents/Firestone Bot/Firestone Bot_v{latest}.exe", 'wb').write(update.content)
+        os.startfile(os.path.expanduser("~") + f"/Documents/Firestone Bot/Firestone Bot_v{latest}.exe")
 
 
 def main():
-    bot = FirestoneBot()
-    bot.run()
+    try:
+        bot.run()
+    except:
+        pickle.dump(bot.var, open(os.path.expanduser("~") + "/Documents/Firestone Bot/var.ini", 'wb'))
+        bot.log.info("Variables saved to file.")
+
+        bot.config.sentinel = True
+        bot.mouseLock.sentinel = True
+
+        bot.log.exception("Something went wrong.")
+        messagebox.showerror(title=f"Firestone Bot {version}",
+                             message="Oops! Bot must terminate.\n\nCheck the log for more info.")
+        exit(1)
 
 
 if __name__ == "__main__":
+    bot = FirestoneBot()
+    try:
+        bot.var = pickle.load(open(os.path.expanduser("~") + "/Documents/Firestone Bot/var.ini", 'rb'))
+        bot.log.info("Variables loaded to file.")
+    except:
+        pass
     main()
