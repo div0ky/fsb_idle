@@ -18,6 +18,7 @@ Here are the modules you'll need to install to work with this script.
 pyautogui
 pytesseract
 opencv-python
+requests
 ```
 If you use one of the compiled installers under `Releases`, these modules will be installed for you automatically - if you don't already have them.
 
