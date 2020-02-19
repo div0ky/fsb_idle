@@ -34,7 +34,7 @@ DEFINE VERSION INFO
 vMajor = 2  # Increments on a BREAKING change
 vMinor = 2  # Increments on a FEATURE change
 vPatch = 0  # Increments on a FIX / PATCH
-vStage = "alpha.3"
+vStage = "alpha.1"
 version = f"{vMajor}.{vMinor}.{vPatch}-{vStage}"  # Should be self explanatory
 
 # Define where the tesseract engine is installed

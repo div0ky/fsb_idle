@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
+## [2.2.0-alpha.1] - 2020-02-19
+### Added
+- Groundwork for map missions. They work... sort of.
+- Groundwork for auto-updating
+- Groundwork for auto-restarting to keep guild refreshed
+- Bot now has a "memory" and can remember things through restarts; buggy
+### Fixed
+- OCR tweaks make it even more reliable now
+
 ## [2.2.0-alpha.0] - 2020-02-16
 ### Added
 - Groundwork for selling to Exotic Merchant
