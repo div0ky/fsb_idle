@@ -34,7 +34,7 @@ DEFINE VERSION INFO
 vMajor = 2  # Increments on a BREAKING change
 vMinor = 2  # Increments on a FEATURE change
 vPatch = 0  # Increments on a FIX / PATCH
-vStage = "alpha.1"
+vStage = "alpha.2"
 version = f"{vMajor}.{vMinor}.{vPatch}-{vStage}"  # Should be self explanatory
 
 # Define where the tesseract engine is installed
@@ -742,7 +742,6 @@ class FirestoneBot():
             self.log.info(f"Main loop has cycled {cycles} time(s).")
 
             self._check_thread_status()
-            checkVersion()
 
             f = open(os.path.expanduser("~") + "/Documents/Firestone Bot/var.ini", 'wb')
             pickle.dump(self.var, f, 2)
@@ -777,6 +776,7 @@ def main():
 
 
 if __name__ == "__main__":
+    checkVersion()
     bot = FirestoneBot()
     try:
         bot.var = pickle.load(open(os.path.expanduser("~") + "/Documents/Firestone Bot/var.ini", 'rb'))
