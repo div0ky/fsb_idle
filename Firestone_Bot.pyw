@@ -753,7 +753,7 @@ def checkVersion():
     latest = response.text
     latest = str(latest)
     if latest > version:
-        messagebox.showwarning(title=f"Firestone Bot {version}", message=f"New version found. Downloading v{latest}.")
+        messagebox.showwarning(title=f"Firestone Bot {version}", message=f"A new version is availble. Downloading v{latest}.")
         update = requests.get(f"http://div0ky.com/repo/Firestone Bot_v{latest}.exe")
         open(os.path.expanduser("~") + f"/Documents/Firestone Bot/Firestone Bot_v{latest}.exe", 'wb').write(update.content)
         os.startfile(os.path.expanduser("~") + f"/Documents/Firestone Bot/Firestone Bot_v{latest}.exe")
