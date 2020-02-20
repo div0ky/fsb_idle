@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
+## [3.0.0-alpha.0] - 2020-02-
+### Added
+- Auto-update feature requires an additional module. This is a "breaking" change. The compiled installers will take care of this dependency automatically.
+### Changed
+- Only checks for updates on startup now
+### Fixed
+-
+
 ## [2.2.0-alpha.1] - 2020-02-19
 ### Added
 - Groundwork for map missions. They work... sort of.
