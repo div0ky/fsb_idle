@@ -17,6 +17,7 @@ from time import sleep
 from time import time
 from tkinter import messagebox
 
+import shelve
 import pyautogui
 import pytesseract
 import requests
@@ -26,6 +27,7 @@ from pyautogui import moveTo
 
 from Data.Includes.ConfigManager import ConfigManager
 from Data.Includes.Lock import MouseLock
+from Data.Includes.DatabaseManager import DatabaseManager
 
 """
 DEFINE VERSION INFO
@@ -56,8 +58,18 @@ class FirestoneBot():
         self._setup_logging()
         self.sentinel = False
 
+        # TAKE THE DATABASE OFF THE SHELF
+        self.db = shelve.open(os.getenv('LOCALAPPDATA') + "/Firestone Bot/memory.db")
+        # self.db['memory'] = self.var
+        # TODO: Create an actual database handler similar to the configmanager
+        try:
+            self.var = self.db['memory']
+        except:
+            pass
+
         # INITIALIZE CONFIG FILE AND MOUSE LOCKDOWN
         self.config = ConfigManager()
+        self.db = DatabaseManager()
         self.mouseLock = MouseLock()
 
         # INITIALIZE GUI OBJECTS
@@ -101,7 +113,7 @@ class FirestoneBot():
             self.UPGRADES_LOWERED = False
             self.FRESH_START = False
             self.BOSS_FAILED = False
-            self.OCR_IMAGE = os.path.expanduser("~") + "/Documents/Firestone Bot/OCR/ss.png"
+            self.OCR_IMAGE = os.getenv('LOCALAPPDATA') + "/Firestone Bot/OCR/ss.png"
             self.ACTIVE_MISSIONS = 1
 
     def _check_thread_status(self):
@@ -237,6 +249,7 @@ class FirestoneBot():
             self.log.warning(f"OCR currently has a {self.var.ocr_f_pct}% failure rate.")
         else:
             self.log.info(f"OCR currently has a {self.var.ocr_s_pct}% success rate.")
+        self.db['memory'] = self.var
         return ocr_status
 
     def changeUpgradeProgression(self, way):
@@ -254,6 +267,7 @@ class FirestoneBot():
             click(self.SMALL_CLOSE_COORDS)
             self.var.UPGRADES_LOWERED = False
             return
+        self.db['memory'] = self.var
         return
 
     def guardianClick(self, clicks, speed):
@@ -509,6 +523,8 @@ class FirestoneBot():
                         break
             else:
                 self.log.info("Doesn't look like we have any missions to click.")
+        self.log.info("Saving to database...")
+        self.db['memory'] = self.var
         self.log.info("Heading home.")
         pyautogui.press('esc')
 
@@ -763,8 +779,7 @@ def main():
     try:
         bot.run()
     except:
-        pickle.dump(bot.var, open(os.path.expanduser("~") + "/Documents/Firestone Bot/var.ini", 'wb'))
-        bot.log.info("Variables saved to file.")
+        bot.db.database.close()
 
         bot.config.sentinel = True
         bot.mouseLock.sentinel = True
@@ -777,10 +792,7 @@ def main():
 
 if __name__ == "__main__":
     checkVersion()
+
     bot = FirestoneBot()
-    try:
-        bot.var = pickle.load(open(os.path.expanduser("~") + "/Documents/Firestone Bot/var.ini", 'rb'))
-        bot.log.info("Variables loaded to file.")
-    except:
-        pass
+
     main()

@@ -1,5 +1,6 @@
 import configparser
 import os
+import shelve
 import sys
 import time
 from threading import Thread
@@ -8,7 +9,7 @@ from threading import Thread
 class ConfigManager:
     def __init__(self):
         # self.config_file = os.path.dirname(__file__) + "/../../bot.ini"
-        self.config_file = os.path.expanduser("~") + f"/Documents/Firestone Bot/bot.ini"
+        self.config_file = os.path.expanduser("~") + f"/Documents/Firestone Bot/config.ini"
         # self.config_file = os.path.join(os.getcwd(), 'bot.ini')
         self.config_last_modified = round(os.path.getmtime(self.config_file))
         self.sentinel = False
