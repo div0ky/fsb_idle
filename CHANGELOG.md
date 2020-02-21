@@ -6,13 +6,13 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
-## [3.0.0-alpha.0] - 2020-02-
+## [3.0.0-alpha.0] - 2020-02-20
 ### Added
 - Auto-update feature requires an additional module. This is a "breaking" change. The compiled installers will take care of this dependency automatically.
 ### Changed
 - Only checks for updates on startup now
-### Fixed
--
+- New system for persistant variables; aka how it "remembers." This one should be more stable.
+- We now click known spawn points for missions on the map, and more accurately track how many troops are available
 
 ## [2.2.0-alpha.1] - 2020-02-19
 ### Added

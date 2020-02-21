@@ -22,6 +22,7 @@ class DatabaseManager:
         self.BOSS_FAILED = False
         self.OCR_IMAGE = os.getenv('LOCALAPPDATA') + "/Firestone Bot/OCR/ss.png"
         self.ACTIVE_MISSIONS = 1
+        self.MAP_TROOPS = 0
 
         self._define_values(self.database)
 
@@ -81,9 +82,14 @@ class DatabaseManager:
         elif "ACTIVE_MISSIONS" in self.database.keys():
             self.ACTIVE_MISSIONS = self.database['ACTIVE_MISSIONS']
 
+        if "MAP_TROOPS" not in self.database.keys():
+            self.database["MAP_TROOPS"] = self.MAP_TROOPS
+        elif "MAP_TROOPS" in self.database.keys():
+            self.MAP_TROOPS = self.database['MAP_TROOPS']
+
         self.database.sync()
 
-    def _change_value(self, key, value, diff="set"):
+    def change_value(self, key, value, diff="set"):
         if diff == "set":
             setattr(self, key, value)
             self.database[key] = value
