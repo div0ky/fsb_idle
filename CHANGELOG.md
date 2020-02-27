@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
-## [3.0.0-alpha.1] - 2020-02-27
+## [3.0.0-stable] - 2020-02-27
+I've decided to release this as the latest `stable` version. It's been running on my test machine for days now and I've had no serious glitches or bugs.
 ### Added
 - Added additional map mission points
 ### Changed
