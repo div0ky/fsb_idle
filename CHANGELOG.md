@@ -2,19 +2,20 @@
 All notable changes to this project will be documented in this file. We are attempting to use [Semantic Versioning](https://semver.org/). We are also attempting to follow the guidelines laid out at [keep a changelog](https://keepachangelog.com).
 
 ## [Unreleased]
-- Missions
 - Tavern
 - Open Chests
 
-## [3.0.3-alpha.0] - 2020-02-27
+## [3.0.0-alpha.1] - 2020-02-27
 ### Added
 - Added additional map mission points
 ### Changed
 - Now caching update installers to LocalData instead of Documents. This file removes itself after installation.
 ### Fixed
 - OCR screenshots were causing crashes as the directory has changed. 
+- Not calculating time correctly on Guild Expedition refreshes; band-aid for now
+- Doesn't do upgrades if user clears the notification; went back to old way for now
 
-## [3.0.2-alpha.0] - 2020-02-21
+## [3.0.2-alpha.0] - 2020-02-21 [YANKED]
 ### Fixed
 - Not calculating time correctly on Guild Expedition refreshes; band-aid for now
 - Doesn't do upgrades if user clears the notification; went back to old way for now
