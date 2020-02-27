@@ -1,5 +1,9 @@
 # Firestone Idle Bot
 
+## Latest Update as of 20-02-27 [11:20:31] 
+As of `v3.0.0-stable` I'm going to take a pause from adding new game features and focus on some "Quality of Life" improvements first. This will include bug fixes, performance enhancements, and other new features that don't increase functionality but make the bot nicer to use. 
+
+## Summary
 A bot to play the idle RPG "Firestone" for you while you're AFK. This is very much a WIP and I'm fully aware that this repo is currently a very large mess. I'll be updating it and keeping it maintained better as I move forward.
 
 ## Getting Started
