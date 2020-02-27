@@ -6,12 +6,25 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
+## [3.0.3-alpha.0] - 2020-02-27
+### Added
+- Added additional map mission points
+### Changed
+- Now caching update installers to LocalData instead of Documents. This file removes itself after installation.
+### Fixed
+- OCR screenshots were causing crashes as the directory has changed. 
+
+## [3.0.2-alpha.0] - 2020-02-21
+### Fixed
+- Not calculating time correctly on Guild Expedition refreshes; band-aid for now
+- Doesn't do upgrades if user clears the notification; went back to old way for now
+
 ## [3.0.0-alpha.0] - 2020-02-20
 ### Added
 - Auto-update feature requires an additional module. This is a "breaking" change. The compiled installers will take care of this dependency automatically.
 ### Changed
 - Only checks for updates on startup now
-- New system for persistant variables; aka how it "remembers." This one should be more stable.
+- New system for persistent variables; aka how it "remembers." This one should be more stable.
 - We now click known spawn points for missions on the map, and more accurately track how many troops are available
 
 ## [2.2.0-alpha.1] - 2020-02-19

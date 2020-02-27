@@ -5,7 +5,7 @@ A bot to play the idle RPG "Firestone" for you while you're AFK. This is very mu
 ## Getting Started
 
 ### Python 3
-This app is written in Python 3. As such, you'll need to install [32-bit Python](https://www.python.org/ftp/python/3.8.1/python-3.8.1.exe) on your system.
+This app is written in Python 3. As such, you'll need to install [32-bit Python](https://www.python.org/ftp/python/3.8.1/python-3.8.1.exe) on your system. During installation be sure to to `Install to PATH` and `For ALL USERS`.
 
 ### Tesseract OCR
 Key features in this bot require the use of Google's Tesseract so that it can "read" what's on the screen. The latest build can be downloaded [HERE](https://github.com/UB-Mannheim/tesseract/wiki). NOTE: Please install the `32-bit` version!

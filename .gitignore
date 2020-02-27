@@ -7,3 +7,6 @@ Data/Includes/__pycache__
 __pycache__
 *.pyc
 *.exe
+Data/Deploy/data.bak
+Data/Deploy/data.dat
+Data/Deploy/data.dir
