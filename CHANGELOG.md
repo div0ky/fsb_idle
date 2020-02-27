@@ -10,7 +10,7 @@ I've decided to release this as the latest `stable` version. It's been running o
 ### Added
 - Added additional map mission points
 ### Changed
-- Now caching update installers to LocalData instead of Documents. This file removes itself after installation.
+- Now caching update installers to `LocalData` instead of Documents. This file removes itself after installation.
 ### Fixed
 - OCR screenshots were causing crashes as the directory has changed. 
 - Not calculating time correctly on Guild Expedition refreshes; band-aid for now
