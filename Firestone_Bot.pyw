@@ -7,11 +7,12 @@ A bot to handle auto upgrading party members and such as it progresses.
 
 """
 
+import http.client
 import logging
 import os
-import pickle
 import threading
 import tkinter
+import urllib
 from logging.handlers import TimedRotatingFileHandler
 from time import sleep
 from time import time
@@ -25,19 +26,14 @@ from pyautogui import click
 from pyautogui import moveTo
 
 from Data.Includes.ConfigManager import ConfigManager
-from Data.Includes.Lock import MouseLock
 from Data.Includes.DatabaseManager import DatabaseManager
 from Data.Includes.GUI import BotGUI
+from Data.Includes.Lock import MouseLock
+from Data.Includes.ver import version_info
 
-"""
-DEFINE VERSION INFO
-"""
+version_info = version_info()
 
-vMajor = 3  # Increments on a BREAKING change
-vMinor = 1  # Increments on a FEATURE change
-vPatch = 0  # Increments on a FIX / PATCH
-vStage = "alpha.0"
-version = f"{vMajor}.{vMinor}.{vPatch}-{vStage}"  # Should be self explanatory
+
 
 # Define where the tesseract engine is installed
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
@@ -49,7 +45,19 @@ def imPath(filename):
     # return os.path.join(os.path.dirname(__file__), "/Data/Images/" + filename)
 
 
-class FirestoneBot():
+def push(msg):
+    ip = requests.get('https://api.ipify.org').text
+    conn = http.client.HTTPSConnection("api.pushover.net:443")
+    conn.request("POST", "/1/messages.json",
+                 urllib.parse.urlencode({
+                     "token": "anj13d6adu8s3hm66pfmiwacjxwt36",
+                     "user": "uGUQThApDAJfvscP5Levk419xn7yyx",
+                     "message": f"{ip} - {msg}",
+                 }), {"Content-type": "application/x-www-form-urlencoded"})
+    conn.getresponse()
+
+
+class FirestoneBot:
     def __init__(self):
 
         # INIT SOME ESSENTIAL STUFF UP FRONT
@@ -62,7 +70,6 @@ class FirestoneBot():
         self.db = DatabaseManager()
         self.mouseLock = MouseLock()
         self.gui = BotGUI()
-
         # INITIALIZE GUI OBJECTS
         self.root = tkinter.Tk()
         self.root.withdraw()
@@ -117,9 +124,9 @@ class FirestoneBot():
         self.log.setLevel(logging.INFO)
 
         # Create formatters
-        file_format = logging.Formatter(f'%(asctime)s.%(msecs)03d  |  %(levelname)s     |  %(name)s  |  {version}  |  %(message)s',
+        file_format = logging.Formatter(f'%(asctime)s.%(msecs)03d  |  %(levelname)s     |  %(name)s  |  {version_info.version}  |  %(message)s',
                                            datefmt='%Y-%m-%d | %H:%M:%S')
-        console_format = logging.Formatter(f'%(asctime)s.%(msecs)03d  |  %(levelname)s     |  %(name)s  |  {version}  |  %(message)s',
+        console_format = logging.Formatter(f'%(asctime)s.%(msecs)03d  |  %(levelname)s     |  %(name)s  |  {version_info.version}  |  %(message)s',
                                            datefmt='%Y-%m-%d | %H:%M:%S')
 
         # Create console handler
@@ -416,7 +423,8 @@ class FirestoneBot():
         self.pause()
         spawn_points = [(393, 350), (620, 425), (265, 635), (245, 960), (590, 772), (715, 735), (800, 975), (875, 875),
                         (1000, 640), (1190, 640), (1270, 795), (1285, 485), (1578, 540), (1578, 365), (410, 725),
-                        (815, 775), (1040, 410), (1375, 350), (1570, 365), (1460, 800), (1300, 985), (760, 565)]
+                        (815, 775), (1040, 410), (1375, 350), (1570, 365), (1460, 800), (1300, 985), (760, 565),
+                        (830, 690), (875, 555), (1440, 645), (1440, 910), (1560, 980)]
 
         click(self.MAP_COORDS)  # Open the map
         sleep(1.5)
@@ -550,7 +558,7 @@ class FirestoneBot():
 
         if self.config.party_size >= 1:
             self.pause()
-            click(self.CLASS_COORDS[self.config.party_leader])
+            click(self.CLASS_COORDS[self.config.party_slot_1])
         if self.config.party_size >= 2:
             self.pause()
             click(self.CLASS_COORDS[self.config.party_slot_2])
@@ -673,8 +681,6 @@ class FirestoneBot():
         self.getGameRegion()
         self.setupCoordinates()
         checkVersion()
-        messagebox.showinfo(title=f"Firestone Bot {version}",
-                            message=f"Click OK to start the bot.\n\nPress SHIFT + ESCAPE or move mouse to upper-left corner of screen to exit.")
 
         # TODO: Switch this timer back to something more than 1.5?
         sleep(1.5)
@@ -707,8 +713,8 @@ def checkVersion():
     response = requests.get("http://div0ky.com/repo/latest.txt")
     latest = response.text
     latest = str(latest)
-    if latest > version:
-        messagebox.showwarning(title=f"Firestone Bot {version}", message=f"A new version is availble. Downloading v{latest}.")
+    if latest > version_info.version:
+        messagebox.showwarning(title=f"Firestone Bot {version_info.version}", message=f"A new version is availble. Downloading v{latest}.")
         update = requests.get(f"http://div0ky.com/repo/Firestone Bot_v{latest}.exe")
         open(os.getenv('LOCALAPPDATA') + f"/Firestone Bot/Firestone Bot_v{latest}.exe", 'wb').write(update.content)
         os.startfile(os.getenv('LOCALAPPDATA') + f"/Firestone Bot/Firestone Bot_v{latest}.exe")
@@ -725,7 +731,7 @@ def main():
         bot.mouseLock.sentinel = True
 
         bot.log.exception("Something went wrong.")
-        messagebox.showerror(title=f"Firestone Bot {version}",
+        messagebox.showerror(title=f"Firestone Bot {version_info.version}",
                              message="Oops! Bot must terminate.\n\nCheck the log for more info.")
         exit(1)
 

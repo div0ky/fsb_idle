@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
+## [3.1.0-alpha.3] - 2020-02-27
+
+### Fixed
+- Windows weren't sizing properly all the time for some reason
+
+## [3.1.0-alpha.0] - 2020-02-27
+
+### Added
+- GUI interface for changing configuration options
+- Additional map mission nodes
+- Callback feature
+### Changed
+- GUI window now auto-centers itself on screen
+
 ## [3.0.0-stable] - 2020-02-27
 I've decided to release this as the latest `stable` version. It's been running on my test machine for days now and I've had no serious glitches or bugs.
 ### Added

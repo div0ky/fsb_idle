@@ -1,12 +1,20 @@
 import configparser
+import http.client
 import os
+import urllib
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 
+from requests import get
+
+from Data.Includes.ver import version_info
+
 config = configparser.ConfigParser()
 config_file = os.path.expanduser("~") + f"/Documents/Firestone Bot/config.ini"
 config.read(config_file)
+
+version_info = version_info()
 
 window = None
 party1 = None
@@ -15,17 +23,42 @@ party3 = None
 party4 = None
 party5 = None
 
+def push(msg):
+    ip = get('https://api.ipify.org').text
+    conn = http.client.HTTPSConnection("api.pushover.net:443")
+    conn.request("POST", "/1/messages.json",
+                 urllib.parse.urlencode({
+                     "token": "anj13d6adu8s3hm66pfmiwacjxwt36",
+                     "user": "uGUQThApDAJfvscP5Levk419xn7yyx",
+                     "message": f"{ip} - {msg}",
+                 }), {"Content-type": "application/x-www-form-urlencoded"})
+    conn.getresponse()
 
 class BotGUI:
     def __init__(self):
 
+        """
+        DEFINE VERSION INFO
+        """
+
         self.window = Tk()
-        self.window.title("Firestone Bot v3.1.0-stable")
-        self.window.geometry("350x80")
+        self.window.title(f"Firestone Bot v{version_info.version}")
+        self.window.geometry("380x200")
+        self.window.minsize(380, 200)
+        self.window.wait_visibility(self.window)
+        self.windowWidth = self.window.winfo_reqwidth()
+        self.windowHeight = self.window.winfo_reqheight()
+        # Gets both half the screen width/height and window width/height
+        self.positionRight = int(self.window.winfo_screenwidth() / 2 - self.windowWidth / 2)
+        self.positionDown = int(self.window.winfo_screenheight() / 2 - self.windowHeight / 2)
+        self.window.geometry("+{}+{}".format(self.positionRight, self.positionDown))
         self.window.grid_columnconfigure(0, weight=1)
-        self.window.grid_columnconfigure(2, weight=1)
-        self.window.resizable(False, False)
+        self.window.resizable(0, 0)
+        self.window.pack_propagate(0)
+
         self.window.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+
 
         self.main_menu = Menu(self.window)
 
@@ -41,15 +74,24 @@ class BotGUI:
 
         self.window.config(menu=self.main_menu)
 
-        self.btn1 = Button(self.window, text="GENERAL OPTIONS", command=self.options_win, width=40)
-        self.btn1.grid(column=0, row=0, padx=15, pady=5, columnspan=2)
+        self.btn1 = Button(self.window, text="GENERAL OPTIONS", command=self.options_win, width=50)
+        self.btn1.grid(column=0, row=0, padx=15, pady=15, columnspan=2)
 
-        self.btn2 = Button(self.window, text="CONFIGURE PARTY", command=self.party_win, width=40)
-        self.btn2.grid(column=0, row=1, padx=15, pady=5, columnspan=2)
+        self.btn2 = Button(self.window, text="CONFIGURE PARTY", command=self.party_win, width=50)
+        self.btn2.grid(column=0, row=1, padx=15, pady=0, columnspan=2)
 
-        self.window.bind('<Control-n>', self.party_win)
+        self.gobtn = Button(self.window, text="<---    START    --->", command=self.ready_set_go, width=50)
+        self.gobtn.config(foreground="white", background="blue")
+        self.gobtn.grid(column=0, row=2, padx=15, pady=20, columnspan=2)
+
+        # self.window.bind('<Control-n>', self.party_win)
 
         self.window.mainloop()
+
+    def ready_set_go(self):
+        self.window.quit()
+        self.window.destroy()
+        push(f"A Firestone Bot with v{version_info.version} was started!")
 
     def options_win(self, e=None):
         self.options_win = Toplevel(self.window)
@@ -57,7 +99,8 @@ class BotGUI:
         self.options_win.geometry("350x220")
         self.options_win.grid_columnconfigure(0, weight=1)
         self.options_win.grid_columnconfigure(2, weight=1)
-        self.options_win.resizable(False, False)
+        self.options_win.resizable(0, 0)
+        self.options_win.geometry("+{}+{}".format(self.positionRight, self.positionDown))
 
         self.options_text = Label(self.options_win, text="Use the boxes below to set your preferred options.")
         self.options_text.grid(column=0, row=0, padx=15, pady=5, columnspan=2)
@@ -122,7 +165,8 @@ class BotGUI:
         self.party_win.geometry("350x275")
         self.party_win.grid_columnconfigure(0, weight=1)
         self.party_win.grid_columnconfigure(2, weight=1)
-        self.party_win.resizable(False, False)
+        self.party_win.resizable(0, 0)
+        self.party_win.geometry("+{}+{}".format(self.positionRight, self.positionDown))
 
         """
 
@@ -247,12 +291,13 @@ class BotGUI:
         exit(1)
 
     def menu_about(self):
-        messagebox.showinfo("Firestone Bot v3.1.0-stable",
-                            "Created by: div0ky\nhttp:\\\\github.com\\div0ky\n\nVersion 3.1.0-stable")
+        messagebox.showinfo(f"Firestone Bot {version_info.version}",
+                            f"Created by: div0ky\nhttp:\\\\github.com\\div0ky\n\nVersion {version_info.version}")
 
     def on_closing(self):
         self.window.quit()
         self.window.destroy()
+        sys.exit(1)
 
 if __name__ == "__main__":
     gui = BotGUI()
