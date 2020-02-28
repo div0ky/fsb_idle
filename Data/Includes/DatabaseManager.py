@@ -6,7 +6,7 @@ import shelve
 class DatabaseManager:
     def __init__(self):
 
-        self.database = shelve.open(os.getenv('LOCALAPPDATA') + "/Firestone Bot/data", writeback=True)
+        self.database = shelve.open(os.getenv('LOCALAPPDATA') + "\\Firestone Bot\\data", flag='c', writeback=True)
 
         # SETUP VARIABLES FOR DEBUGGING
         self.ocr_fail_count = 0

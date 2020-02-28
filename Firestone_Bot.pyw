@@ -27,15 +27,16 @@ from pyautogui import moveTo
 from Data.Includes.ConfigManager import ConfigManager
 from Data.Includes.Lock import MouseLock
 from Data.Includes.DatabaseManager import DatabaseManager
+from Data.Includes.GUI import BotGUI
 
 """
 DEFINE VERSION INFO
 """
 
 vMajor = 3  # Increments on a BREAKING change
-vMinor = 0  # Increments on a FEATURE change
+vMinor = 1  # Increments on a FEATURE change
 vPatch = 0  # Increments on a FIX / PATCH
-vStage = "alpha.1"
+vStage = "alpha.0"
 version = f"{vMajor}.{vMinor}.{vPatch}-{vStage}"  # Should be self explanatory
 
 # Define where the tesseract engine is installed
@@ -60,6 +61,7 @@ class FirestoneBot():
         self.config = ConfigManager()
         self.db = DatabaseManager()
         self.mouseLock = MouseLock()
+        self.gui = BotGUI()
 
         # INITIALIZE GUI OBJECTS
         self.root = tkinter.Tk()

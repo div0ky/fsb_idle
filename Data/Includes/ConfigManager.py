@@ -26,7 +26,7 @@ class ConfigManager:
 
         # Party settings. Can be overriden via config
         self.party_size = 5
-        self.party_leader = "Ranger"
+        self.party_slot_1 = "Ranger"
         self.party_slot_2 = "Mage"
         self.party_slot_3 = "Warrior"
         self.party_slot_4 = "Tank"
@@ -39,7 +39,8 @@ class ConfigManager:
             self._verify_ini(config_file=config)
         else:
             print("Unable to load config file. Ensure bot.ini is in the CWD")
-            sys.exit(1)
+            with open(self.config_file, 'w') as configfile:
+                self.config.write(configfile)
 
         self._set_ini_options(config)
 
@@ -83,8 +84,10 @@ class ConfigManager:
 
         if "party_size" in config['PARTY']:
             self.party_size = config['PARTY'].getint("party_size")
-        if "party_leader" in config['PARTY']:
-            self.party_leader = config['PARTY']['party_leader'].lower()
+        if "party_slot_1" in config['PARTY']:
+            self.party_slot_1 = config['PARTY']['party_slot_1'].lower()
+        else:
+            config['PARTY']['party_slot_1'] = self.party_slot_1
         if "party_slot_2" in config['PARTY']:
             self.party_slot_2 = config['PARTY']['party_slot_2'].lower()
         if "party_slot_3" in config['PARTY']:
@@ -100,7 +103,7 @@ class ConfigManager:
         """
 
         general_values = ["auto_prestige", "in_guild", "guardian", "guild_missions", "farm_gold", "farm_levels", "prestige_level"]
-        party_values = ["party_size", "party_leader", "party_slot_2", "party_slot_3", "party_slot_4", "party_slot_5"]
+        party_values = ["party_size", "party_slot_1", "party_slot_2", "party_slot_3", "party_slot_4", "party_slot_5"]
         party_members = ["ranger", "tank", "mage", "warrior", "priest", "rogue"]
         incorrect_values = []
         missing_values = []
@@ -117,10 +120,10 @@ class ConfigManager:
             if val not in config_file["PARTY"]:
                 missing_values.append("PARTY: " + val)
 
-        for val in party_values[1:]:
-            val = config_file['PARTY'][val]
-            if val.lower() not in party_members:
-                incorrect_values.append("PARTY: " + val)
+        # for val in party_values[1:]:
+        #     val = config_file['PARTY'][val]
+        #     if val.lower() not in party_members:
+        #         incorrect_values.append("PARTY: " + val)
 
         if missing_values:
             print("Config file is missing required values. \n Missing values:")
