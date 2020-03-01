@@ -9,7 +9,7 @@ from threading import Thread
 class ConfigManager:
     def __init__(self):
         # self.config_file = os.path.dirname(__file__) + "/../../bot.ini"
-        self.config_file = os.path.expanduser("~") + f"/Documents/Firestone Bot/config.ini"
+        self.config_file = os.getenv('LOCALAPPDATA') + "/Firestone Bot/config.ini"
         # self.config_file = os.path.join(os.getcwd(), 'bot.ini')
         self.config_last_modified = round(os.path.getmtime(self.config_file))
         self.sentinel = False
@@ -23,6 +23,7 @@ class ConfigManager:
         self.farm_gold = True
         self.farm_levels = 5
         self.logging = True
+        self.channel = "Stable"
 
         # Party settings. Can be overriden via config
         self.party_size = 5
@@ -81,6 +82,8 @@ class ConfigManager:
             self.farm_gold = config['OPTIONS'].getboolean("farm_gold")
         if "farm_levels" in config['OPTIONS']:
             self.farm_levels = config['OPTIONS'].getint("farm_levels")
+        if "channel" in config['OPTIONS']:
+            self.channel = config['OPTIONS']['channel']
 
         if "party_size" in config['PARTY']:
             self.party_size = config['PARTY'].getint("party_size")

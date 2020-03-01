@@ -1,12 +1,7 @@
 ﻿.idea
 Data/Images/ss.jpg
-setup.iss
-Data/Scripts/*
 Data/Includes/__pycache__
 Data/Includes/__pycache__
 __pycache__
 *.pyc
 *.exe
-Data/Deploy/data.bak
-Data/Deploy/data.dat
-Data/Deploy/data.dir

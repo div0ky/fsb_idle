@@ -151,7 +151,6 @@ class FirestoneBot:
         self.log.info(f"Screen resolution detected as: {sWidth}x{sHeight}")
 
     def setupCoordinates(self):
-        # TODO: This is going to need considerable expansion if all clicks are to be dynamic
         self.UPGRADE_COORDS = (self.relCoords(1840, 660))
         self.GUARDIAN_CLICK_COORDS = (self.GAME_REGION[2] / 2, self.GAME_REGION[3] / 2)
         self.SMALL_CLOSE_COORDS = (self.relCoords(1875, 100))
@@ -424,7 +423,8 @@ class FirestoneBot:
         spawn_points = [(393, 350), (620, 425), (265, 635), (245, 960), (590, 772), (715, 735), (800, 975), (875, 875),
                         (1000, 640), (1190, 640), (1270, 795), (1285, 485), (1578, 540), (1578, 365), (410, 725),
                         (815, 775), (1040, 410), (1375, 350), (1570, 365), (1460, 800), (1300, 985), (760, 565),
-                        (830, 690), (875, 555), (1440, 645), (1440, 910), (1560, 980)]
+                        (830, 690), (875, 555), (1440, 645), (1440, 910), (1560, 980), (830, 395), (465, 445),
+                        (1550, 740), (1290, 688)]
 
         click(self.MAP_COORDS)  # Open the map
         sleep(1.5)
@@ -680,7 +680,6 @@ class FirestoneBot:
         # DEFINE SOME VOLATILE VARIABLES
         self.getGameRegion()
         self.setupCoordinates()
-        checkVersion()
 
         # TODO: Switch this timer back to something more than 1.5?
         sleep(1.5)
@@ -709,22 +708,10 @@ class FirestoneBot:
             self._check_thread_status()
 
 
-def checkVersion():
-    response = requests.get("http://div0ky.com/repo/latest.txt")
-    latest = response.text
-    latest = str(latest)
-    if latest > version_info.version:
-        messagebox.showwarning(title=f"Firestone Bot {version_info.version}", message=f"A new version is availble. Downloading v{latest}.")
-        update = requests.get(f"http://div0ky.com/repo/Firestone Bot_v{latest}.exe")
-        open(os.getenv('LOCALAPPDATA') + f"/Firestone Bot/Firestone Bot_v{latest}.exe", 'wb').write(update.content)
-        os.startfile(os.getenv('LOCALAPPDATA') + f"/Firestone Bot/Firestone Bot_v{latest}.exe")
-        exit(1)
-
-
 def main():
     try:
         bot.run()
-    except:
+    except Exception as e:
         bot.db.database.close()
 
         bot.config.sentinel = True
@@ -733,7 +720,8 @@ def main():
         bot.log.exception("Something went wrong.")
         messagebox.showerror(title=f"Firestone Bot {version_info.version}",
                              message="Oops! Bot must terminate.\n\nCheck the log for more info.")
-        exit(1)
+        push(f"Bot terminated with Exception {e}.")
+        SystemExit()
 
 
 if __name__ == "__main__":

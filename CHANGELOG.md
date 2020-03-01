@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
+## [4.0.0-dev.6] - 2020-03-01
+
+## [4.0.0-dev.5] - 2020-02-29
+
+### Added
+- Error alerts if invalid party selections are made
+- Bot window floats above all other windows now
+- Additional map mission nodes
+
+### Changed
+- Better window handling
+- Deployment structure and method
+- Completely rebuilt the auto-update function
+- Update is now optional and asks the user
+- Users are no longer required to install Python to run the bot
+- New app icons
+
+### Fixed
+- Guild Missions toggle now works in `General Options`
+- Launcher / Wrapper properly refocuses and terminates 
+
 ## [3.1.0-alpha.3] - 2020-02-27
 
 ### Fixed
