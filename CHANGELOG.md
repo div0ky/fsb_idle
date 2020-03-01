@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
+## [4.0.0-dev.9] - 2020-03-1
+
+### Fixed
+- Mouse was locking prematurely when trying to edit configuration
+
 ## [4.0.0-dev.8] - 2020-03-01
 
 ### Changed

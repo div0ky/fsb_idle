@@ -1,10 +1,11 @@
 import configparser
 import http.client
-import os
+import os, sys
 import urllib
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
+from packaging import version
 
 import requests
 from requests import get
@@ -44,7 +45,7 @@ class BotGUI:
 
         self.window = Tk()
         self.window.title(f"Firestone Bot v{version_info.version}")
-        self.window.geometry("380x200")
+        self.window.geometry("380x225")
         self.window.minsize(380, 200)
         self.window.wait_visibility(self.window)
         self.windowWidth = self.window.winfo_reqwidth()
@@ -101,27 +102,51 @@ class BotGUI:
         self.window.withdraw()
         self.options_win = Toplevel(self.window)
         self.options_win.protocol("WM_DELETE_WINDOW", self.options_on_close)
-        self.options_win.title("Configure Options")
-        self.options_win.geometry("350x220")
+        self.options_win.title(f"Firestone Bot v{version_info.version}")
+        self.options_win.geometry("350x250")
         self.options_win.grid_columnconfigure(0, weight=1)
         self.options_win.grid_columnconfigure(2, weight=1)
         self.options_win.resizable(0, 0)
+        self.options_win.pack_propagate(0)
+        self.options_win.attributes("-topmost", True)
         self.options_win.geometry("+{}+{}".format(self.positionRight, self.positionDown))
 
         self.options_text = Label(self.options_win, text="Use the boxes below to set your preferred options.")
         self.options_text.grid(column=0, row=0, padx=15, pady=5, columnspan=2)
 
+        # Toggle if you want the bot to automatically prestige for you
+
         self.prestige_state = BooleanVar()
         if config['OPTIONS']['auto_prestige'] == "True":
             self.prestige_state.set(True)
         self.prestige_toggle = Checkbutton(self.options_win, text="Auto-Prestige?", var=self.prestige_state)
-        self.prestige_toggle.grid(column=0, row=3, padx=15, pady=5, sticky="w")
+        self.prestige_toggle.grid(column=0, row=5, padx=15, pady=5, sticky="w")
 
-        self.guild_state = BooleanVar()
-        if config['OPTIONS']['in_guild'] == "True":
-            self.guild_state.set(True)
-        self.guild_toggle = Checkbutton(self.options_win, text="In Guild?", var=self.guild_state)
-        self.guild_toggle.grid(column=1, row=3, padx=15, pady=10, sticky="w")
+        # Selection for update channel
+
+        self.updates_label = Label(self.options_win, text="Updates Channel:")
+        self.updates_label.grid(column=0, row=3, padx=15, pady=2, sticky="w")
+
+        self.channel_choice = ttk.Combobox(self.options_win, state="readonly")
+        self.channel_choice['values'] = ("Stable", "Development")
+        if config['OPTIONS']['channel'] == "Stable":
+            self.channel_choice.current(0)
+        elif config['OPTIONS']['channel'] == "Development":
+            self.channel_choice.current(1)
+        else:
+            self.channel_choice['values'] = self.channel_choice['values'] + (config['OPTIONS']['channel'],)
+            self.channel_choice.current(2)
+        self.channel_choice.grid(column=0, row=4, padx=15, pady=5, sticky="w")
+
+        # Toggle for if the user is in a guild or not
+
+        #self.guild_state = BooleanVar()
+        #if config['OPTIONS']['in_guild'] == "True":
+        #    self.guild_state.set(True)
+        #self.guild_toggle = Checkbutton(self.options_win, text="In Guild?", var=self.guild_state)
+        #self.guild_toggle.grid(column=1, row=3, padx=15, pady=10, sticky="w")
+
+        # Select which guardian the user is using
 
         self.guardian_label = Label(self.options_win, text="Which Guardian:")
         self.guardian_label.grid(column=0, row=1, padx=15, pady=2, sticky="w")
@@ -132,14 +157,13 @@ class BotGUI:
             self.guardian_choice.current(0)
         elif config['OPTIONS']['guardian'] == "2":
             self.guardian_choice.current(1)
-
         self.guardian_choice.grid(column=0, row=2, padx=15, pady=5, sticky="w")
 
         self.guild_missions_state = BooleanVar()
         if config['OPTIONS']['guild_missions'] == "True":
             self.guild_missions_state.set(True)
         self.guild_missions_toggle = Checkbutton(self.options_win, text="Guild Missions?", var=self.guild_missions_state)
-        self.guild_missions_toggle.grid(column=1, row=4, padx=15, pady=5, sticky="w")
+        self.guild_missions_toggle.grid(column=1, row=5, padx=15, pady=5, sticky="w")
 
         self.prestige_level_label = Label(self.options_win, text="Prestige Multiplier:")
         self.prestige_level_label.grid(column=1, row=1, padx=15, pady=2, sticky="w")
@@ -149,7 +173,7 @@ class BotGUI:
         self.prestige_level.insert(0, config['OPTIONS']['prestige_level'])
 
         self.g_btn = Button(self.options_win, text="SAVE", width=40, command=self.options_save)
-        self.g_btn.grid(column=0, row=5, padx=15, pady=15, columnspan=2)
+        self.g_btn.grid(column=0, row=6, padx=15, pady=15, columnspan=2)
 
     def options_save(self, e=None):
         config['OPTIONS']['prestige_level'] = self.prestige_level.get()
@@ -172,11 +196,13 @@ class BotGUI:
         self.window.withdraw()
         self.party_win = Toplevel(self.window)
         self.party_win.protocol("WM_DELETE_WINDOW", self.party_on_close)
-        self.party_win.title("Configure Party")
+        self.party_win.title(f"Firestone Bot v{version_info.version}")
         self.party_win.geometry("350x275")
         self.party_win.grid_columnconfigure(0, weight=1)
         self.party_win.grid_columnconfigure(2, weight=1)
         self.party_win.resizable(0, 0)
+        self.party_win.pack_propagate(0)
+        self.party_win.attributes("-topmost", True)
         self.party_win.geometry("+{}+{}".format(self.positionRight, self.positionDown))
 
         """
@@ -310,7 +336,7 @@ class BotGUI:
         self.party_win.destroy()
 
     def menu_exit(self):
-        exit(1)
+        sys.exit()
 
     def menu_about(self):
         messagebox.showinfo(f"Firestone Bot {version_info.version}",
@@ -327,7 +353,7 @@ class BotGUI:
     def on_closing(self):
         self.window.quit()
         self.window.destroy()
-        sys.exit(1)
+        sys.exit()
 
     def checkVersion(self):
         print(config['OPTIONS']['channel'])
@@ -342,11 +368,11 @@ class BotGUI:
 
         print(latest)
         print(version_info.version)
-        if latest > version_info.version:
+        if version.parse(latest) > version.parse(version_info.version):
             self.window.destroy()
             root = Tk()
             root.geometry("325x70")
-            root.title("Firestone Bot Updater")
+            root.title(f"Firestone Bot v{latest} Updater")
             total_label = Label(root, text="Download Pending...")
             total_label.grid(column=0, row=0, padx=15, pady=5)
             root.grid_columnconfigure(0, weight=1)
@@ -363,7 +389,7 @@ class BotGUI:
             progress.grid(column=0, row=1, padx=15, pady=10)
             root.withdraw()
 
-            ask_update = messagebox.askyesno(title=f"Firestone Bot {version_info.version}",
+            ask_update = messagebox.askyesno(title=f"Firestone Bot v{version_info.version}",
                                              message=f"A new version is availble. You're running v{version_info.version}. The latest version is v{latest}.\n\nDo you want to download & update?")
 
             if ask_update:
@@ -390,13 +416,14 @@ class BotGUI:
                     total_label.config(text="DOWNLOAD COMPLETE")
                     # messagebox.showinfo(title="DOWNLOAD COMPLETE", message="Download Complete. Launching Installer...")
                     root.destroy()
+                push(f"Updated to v{latest}")
                 os.startfile(os.getenv(
                     'LOCALAPPDATA') + f"/Firestone Bot/Firestone_Bot_v{latest}.exe")
-                SystemExit()
+                sys.exit(1)
 
             else:
                 root.destroy()
-                SystemExit()
+                # sys.exit(1)
 
 if __name__ == "__main__":
     gui = BotGUI()

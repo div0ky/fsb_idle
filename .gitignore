@@ -5,3 +5,5 @@ Data/Includes/__pycache__
 __pycache__
 *.pyc
 *.exe
+.vscode
+Data/Includes/.env

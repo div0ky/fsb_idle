@@ -10,13 +10,13 @@ A bot to handle auto upgrading party members and such as it progresses.
 import http.client
 import logging
 import os
+import sys
 import threading
 import tkinter
 import urllib
 from logging.handlers import TimedRotatingFileHandler
 from time import sleep
 from time import time
-from tkinter import messagebox
 
 import pyautogui
 import pytesseract
@@ -718,11 +718,11 @@ def main():
         bot.mouseLock.sentinel = True
 
         bot.log.exception("Something went wrong.")
-        pyautogui.alert(title=f"Firestone Bot {version_info.version}", text="Oops! Bot must terminate.\n\nCheck the log for more info.", timeout=2500)
+        # pyautogui.alert(title=f"Firestone Bot {version_info.version}", text="Oops! Bot must terminate.\n\nCheck the log for more info.", timeout=2500)
         # messagebox.showerror(title=f"Firestone Bot {version_info.version}",
         #                      message="Oops! Bot must terminate.\n\nCheck the log for more info.")
         push(f"Bot terminated with Exception {e}.")
-        SystemExit()
+        sys.exit()
 
 
 if __name__ == "__main__":
