@@ -25,7 +25,7 @@ from PIL import Image
 from pyautogui import click
 from pyautogui import moveTo
 
-from Data.Includes import ConfigManager
+from Data.Includes.ConfigManager import ConfigManager
 from Data.Includes.DatabaseManager import DatabaseManager
 from Data.Includes.GUI import BotGUI
 from Data.Includes.Lock import MouseLock
@@ -257,7 +257,7 @@ class FirestoneBot:
             click(self.SMALL_CLOSE_COORDS)
             self.db.UPGRADES_LOWERED = False
             return
-        self.db['memory'] = self.var
+        # self.db['memory'] = self.var
         return
 
     def guardianClick(self, clicks, speed):

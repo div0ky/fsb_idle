@@ -177,7 +177,7 @@ class BotGUI:
 
     def options_save(self, e=None):
         config['OPTIONS']['prestige_level'] = self.prestige_level.get()
-        config['OPTIONS']['in_guild'] = str(self.guild_state.get())
+        # config['OPTIONS']['in_guild'] = str(self.guild_state.get())
         config['OPTIONS']['auto_prestige'] = str(self.prestige_state.get())
         config['OPTIONS']['guild_missions'] = str(self.guild_missions_state.get())
 
