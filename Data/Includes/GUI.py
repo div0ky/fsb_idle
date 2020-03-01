@@ -1,13 +1,13 @@
 import configparser
 import http.client
 import os
+import sys
 import urllib
-from tkinter import *
-from tkinter import messagebox
-from tkinter import ttk
-from packaging import version
+from tkinter import Tk, Menu, Label, Button, Toplevel, BooleanVar, messagebox, HORIZONTAL
+from tkinter.ttk import Combobox, Checkbutton, Entry, Progressbar
 
 import requests
+from packaging import version
 from requests import get
 
 from Data.Includes.ver import version_info
@@ -127,7 +127,7 @@ class BotGUI:
         self.updates_label = Label(self.options_win, text="Updates Channel:")
         self.updates_label.grid(column=0, row=3, padx=15, pady=2, sticky="w")
 
-        self.channel_choice = ttk.Combobox(self.options_win, state="readonly")
+        self.channel_choice = Combobox(self.options_win, state="readonly")
         self.channel_choice['values'] = ("Stable", "Development")
         if config['OPTIONS']['channel'] == "Stable":
             self.channel_choice.current(0)
@@ -151,7 +151,7 @@ class BotGUI:
         self.guardian_label = Label(self.options_win, text="Which Guardian:")
         self.guardian_label.grid(column=0, row=1, padx=15, pady=2, sticky="w")
 
-        self.guardian_choice = ttk.Combobox(self.options_win, state="readonly")
+        self.guardian_choice = Combobox(self.options_win, state="readonly")
         self.guardian_choice['values'] = ("Fairy", "Dragon")
         if config['OPTIONS']['guardian'] == "1":
             self.guardian_choice.current(0)
@@ -220,14 +220,14 @@ class BotGUI:
         self.party2_label = Label(self.party_win, text="Party Slot 02:")
         self.party2_label.grid(column=1, row=1, padx=15, pady=5, sticky="w")
 
-        self.party1 = ttk.Combobox(self.party_win, state="readonly")
+        self.party1 = Combobox(self.party_win, state="readonly")
         self.party1['values'] = (
             config['PARTY']['party_slot_1'], config['PARTY']['party_slot_2'], config['PARTY']['party_slot_3'],
             config['PARTY']['party_slot_4'], config['PARTY']['party_slot_5'])
         self.party1.current(0)
         self.party1.grid(column=0, row=2, padx=15, pady=5, sticky="w")
 
-        self.party2 = ttk.Combobox(self.party_win, state="readonly")
+        self.party2 = Combobox(self.party_win, state="readonly")
         self.party2['values'] = (
             config['PARTY']['party_slot_1'], config['PARTY']['party_slot_2'], config['PARTY']['party_slot_3'],
             config['PARTY']['party_slot_4'], config['PARTY']['party_slot_5'])
@@ -240,14 +240,14 @@ class BotGUI:
         self.party4_label = Label(self.party_win, text="Party Slot 04:")
         self.party4_label.grid(column=1, row=3, padx=15, pady=5, sticky="w")
 
-        self.party3 = ttk.Combobox(self.party_win, state="readonly")
+        self.party3 = Combobox(self.party_win, state="readonly")
         self.party3['values'] = (
             config['PARTY']['party_slot_1'], config['PARTY']['party_slot_2'], config['PARTY']['party_slot_3'],
             config['PARTY']['party_slot_4'], config['PARTY']['party_slot_5'])
         self.party3.current(2)
         self.party3.grid(column=0, row=4, padx=15, pady=5, sticky="w")
 
-        self.party4 = ttk.Combobox(self.party_win, state="readonly")
+        self.party4 = Combobox(self.party_win, state="readonly")
         self.party4['values'] = (
             config['PARTY']['party_slot_1'], config['PARTY']['party_slot_2'], config['PARTY']['party_slot_3'],
             config['PARTY']['party_slot_4'], config['PARTY']['party_slot_5'])
@@ -260,14 +260,14 @@ class BotGUI:
         self.party_size_label = Label(self.party_win, text="Party Size:")
         self.party_size_label.grid(column=1, row=5, padx=15, pady=5, sticky="w")
 
-        self.party5 = ttk.Combobox(self.party_win, state="readonly")
+        self.party5 = Combobox(self.party_win, state="readonly")
         self.party5['values'] = (
             config['PARTY']['party_slot_1'], config['PARTY']['party_slot_2'], config['PARTY']['party_slot_3'],
             config['PARTY']['party_slot_4'], config['PARTY']['party_slot_5'])
         self.party5.current(4)
         self.party5.grid(column=0, row=6, padx=15, pady=5, sticky="w")
 
-        self.party_size = ttk.Combobox(self.party_win, state="readonly")
+        self.party_size = Combobox(self.party_win, state="readonly")
         self.party_size['values'] = ("1", "2", "3", "4", "5")
         self.party_size.current(4)
         self.party_size.grid(column=1, row=6, padx=15, pady=5, sticky="w")
@@ -385,7 +385,7 @@ class BotGUI:
             root.resizable(0, 0)
             root.pack_propagate(0)
             root.attributes("-topmost", True)
-            progress = ttk.Progressbar(root, orient=HORIZONTAL, length=300, mode='determinate')
+            progress = Progressbar(root, orient=HORIZONTAL, length=300, mode='determinate')
             progress.grid(column=0, row=1, padx=15, pady=10)
             root.withdraw()
 
