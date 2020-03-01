@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file. We are atte
 
 ## [4.0.0-dev.6] - 2020-03-01
 
+### Changed
+- The mouse is now disabled while the bot runs
+
+### Fixed
+- The launcher / wrapper now exits gracefully if the bot crashes
+
 ## [4.0.0-dev.5] - 2020-02-29
 
 ### Added
