@@ -718,8 +718,9 @@ def main():
         bot.mouseLock.sentinel = True
 
         bot.log.exception("Something went wrong.")
-        messagebox.showerror(title=f"Firestone Bot {version_info.version}",
-                             message="Oops! Bot must terminate.\n\nCheck the log for more info.")
+        pyautogui.alert(title=f"Firestone Bot {version_info.version}", text="Oops! Bot must terminate.\n\nCheck the log for more info.", timeout=2500)
+        # messagebox.showerror(title=f"Firestone Bot {version_info.version}",
+        #                      message="Oops! Bot must terminate.\n\nCheck the log for more info.")
         push(f"Bot terminated with Exception {e}.")
         SystemExit()
 

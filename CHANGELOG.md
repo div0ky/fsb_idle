@@ -5,10 +5,11 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
-## [4.0.0-dev.6] - 2020-03-01
+## [4.0.0-dev.8] - 2020-03-01
 
 ### Changed
 - The mouse is now disabled while the bot runs
+- Alert box now times out when bot terminates
 
 ### Fixed
 - The launcher / wrapper now exits gracefully if the bot crashes
