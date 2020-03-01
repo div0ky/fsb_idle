@@ -25,15 +25,13 @@ from PIL import Image
 from pyautogui import click
 from pyautogui import moveTo
 
-from Data.Includes.ConfigManager import ConfigManager
+from Data.Includes import ConfigManager
 from Data.Includes.DatabaseManager import DatabaseManager
 from Data.Includes.GUI import BotGUI
 from Data.Includes.Lock import MouseLock
 from Data.Includes.ver import version_info
 
 version_info = version_info()
-
-
 
 # Define where the tesseract engine is installed
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'

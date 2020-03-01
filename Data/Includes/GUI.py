@@ -1,6 +1,6 @@
 import configparser
 import http.client
-import os, sys
+import os
 import urllib
 from tkinter import *
 from tkinter import messagebox
