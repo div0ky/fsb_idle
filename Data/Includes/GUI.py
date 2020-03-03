@@ -25,6 +25,7 @@ party3 = None
 party4 = None
 party5 = None
 
+
 def push(msg):
     ip = get('https://api.ipify.org').text
     conn = http.client.HTTPSConnection("api.pushover.net:443")
@@ -35,6 +36,7 @@ def push(msg):
                      "message": f"{ip} - {msg}",
                  }), {"Content-type": "application/x-www-form-urlencoded"})
     conn.getresponse()
+
 
 class BotGUI:
     def __init__(self):
@@ -140,11 +142,11 @@ class BotGUI:
 
         # Toggle for if the user is in a guild or not
 
-        #self.guild_state = BooleanVar()
-        #if config['OPTIONS']['in_guild'] == "True":
+        # self.guild_state = BooleanVar()
+        # if config['OPTIONS']['in_guild'] == "True":
         #    self.guild_state.set(True)
-        #self.guild_toggle = Checkbutton(self.options_win, text="In Guild?", var=self.guild_state)
-        #self.guild_toggle.grid(column=1, row=3, padx=15, pady=10, sticky="w")
+        # self.guild_toggle = Checkbutton(self.options_win, text="In Guild?", var=self.guild_state)
+        # self.guild_toggle.grid(column=1, row=3, padx=15, pady=10, sticky="w")
 
         # Select which guardian the user is using
 
@@ -162,7 +164,8 @@ class BotGUI:
         self.guild_missions_state = BooleanVar()
         if config['OPTIONS']['guild_missions'] == "True":
             self.guild_missions_state.set(True)
-        self.guild_missions_toggle = Checkbutton(self.options_win, text="Guild Missions?", var=self.guild_missions_state)
+        self.guild_missions_toggle = Checkbutton(self.options_win, text="Guild Missions?",
+                                                 var=self.guild_missions_state)
         self.guild_missions_toggle.grid(column=1, row=5, padx=15, pady=5, sticky="w")
 
         self.prestige_level_label = Label(self.options_win, text="Prestige Multiplier:")
@@ -424,6 +427,7 @@ class BotGUI:
             else:
                 root.destroy()
                 # sys.exit(1)
+
 
 if __name__ == "__main__":
     gui = BotGUI()

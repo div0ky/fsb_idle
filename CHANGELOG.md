@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
+## [4.0.5-dev.15] - 2020-03-03
+
+### Fixed
+- Auto prestige toggle wasn't properly setting prestige state
+
 ## [4.0.4-dev.13] - 2020-03-01
 
 ### Fixed

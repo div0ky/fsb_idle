@@ -1,7 +1,5 @@
 import configparser
 import os
-import shelve
-import sys
 import time
 from threading import Thread
 
@@ -41,7 +39,8 @@ class ConfigManager:
         else:
             print("Unable to load config file. Ensure bot.ini is in the CWD")
             with open(self.config_file, 'w') as configfile:
-                self.config.write(configfile)
+                config = configparser.ConfigParser()
+                config.write(configfile)
 
         self._set_ini_options(config)
 
@@ -69,7 +68,7 @@ class ConfigManager:
         """
         # Load options from config
         if "auto_prestige" in config['OPTIONS']:
-            self.in_guild = config['OPTIONS'].getboolean("auto_prestige")
+            self.auto_prestige = config['OPTIONS'].getboolean("auto_prestige")
         if "prestige_level" in config['OPTIONS']:
             self.prestige_level = round(float(config['OPTIONS']['prestige_level']), 2)
         if "in_guild" in config['OPTIONS']:
@@ -100,6 +99,7 @@ class ConfigManager:
         if "party_slot_5" in config['PARTY']:
             self.party_slot_5 = config['PARTY']['party_slot_5'].lower()
 
+    # noinspection PyMethodMayBeStatic
     def _verify_ini(self, config_file=None):
         """
         Make sure all required fields are in the config file. If they aren't, abort.
@@ -107,7 +107,7 @@ class ConfigManager:
 
         general_values = ["auto_prestige", "in_guild", "guardian", "guild_missions", "farm_gold", "farm_levels", "prestige_level"]
         party_values = ["party_size", "party_slot_1", "party_slot_2", "party_slot_3", "party_slot_4", "party_slot_5"]
-        party_members = ["ranger", "tank", "mage", "warrior", "priest", "rogue"]
+        # party_members = ["ranger", "tank", "mage", "warrior", "priest", "rogue"]
         incorrect_values = []
         missing_values = []
 

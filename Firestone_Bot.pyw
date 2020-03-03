@@ -122,10 +122,12 @@ class FirestoneBot:
         self.log.setLevel(logging.INFO)
 
         # Create formatters
-        file_format = logging.Formatter(f'%(asctime)s.%(msecs)03d  |  %(levelname)s     |  %(name)s  |  {version_info.version}  |  %(message)s',
-                                           datefmt='%Y-%m-%d | %H:%M:%S')
-        console_format = logging.Formatter(f'%(asctime)s.%(msecs)03d  |  %(levelname)s     |  %(name)s  |  {version_info.version}  |  %(message)s',
-                                           datefmt='%Y-%m-%d | %H:%M:%S')
+        file_format = logging.Formatter(
+            f'%(asctime)s.%(msecs)03d  |  %(levelname)s     |  %(name)s  |  {version_info.version}  |  %(message)s',
+            datefmt='%Y-%m-%d | %H:%M:%S')
+        console_format = logging.Formatter(
+            f'%(asctime)s.%(msecs)03d  |  %(levelname)s     |  %(name)s  |  {version_info.version}  |  %(message)s',
+            datefmt='%Y-%m-%d | %H:%M:%S')
 
         # Create console handler
         c_handler = logging.StreamHandler()
@@ -133,7 +135,8 @@ class FirestoneBot:
         c_handler.setFormatter(console_format)
 
         # Create debug handler
-        f_handler = TimedRotatingFileHandler(os.path.expanduser("~") + "/Documents/Firestone Bot/Logs/debug.log", when="midnight", backupCount=7, interval=1)
+        f_handler = TimedRotatingFileHandler(os.path.expanduser("~") + "/Documents/Firestone Bot/Logs/debug.log",
+                                             when="midnight", backupCount=7, interval=1)
         f_handler.setLevel(logging.DEBUG)
         f_handler.setFormatter(file_format)
 
@@ -217,7 +220,6 @@ class FirestoneBot:
             else:
                 return False
 
-
     def ocr(self, file):
         # CONVERTS AN IMAGE INTO A STRING
         self.log.info("Reading...")
@@ -277,31 +279,38 @@ class FirestoneBot:
 
         while True:
 
-            if pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(175), upgrade_color, tolerance=tolerance):  # Party
+            if pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(175), upgrade_color,
+                                           tolerance=tolerance):  # Party
                 click(self.relCoords(1715, 175))
                 moveTo(self.GUARDIAN_CLICK_COORDS)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(295), upgrade_color, tolerance=tolerance):  # Guardian
+            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(295), upgrade_color,
+                                             tolerance=tolerance):  # Guardian
                 click(self.relCoords(1715, 295))
                 moveTo(self.GUARDIAN_CLICK_COORDS)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(415), upgrade_color, tolerance=tolerance):  # Leader
+            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(415), upgrade_color,
+                                             tolerance=tolerance):  # Leader
                 click(self.relCoords(1715, 415))
                 moveTo(self.GUARDIAN_CLICK_COORDS)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(540), upgrade_color, tolerance=tolerance):  # Party 1
+            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(540), upgrade_color,
+                                             tolerance=tolerance):  # Party 1
                 click(self.relCoords(1715, 540))
                 moveTo(self.GUARDIAN_CLICK_COORDS)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(655), upgrade_color, tolerance=tolerance):  # Party 2
+            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(655), upgrade_color,
+                                             tolerance=tolerance):  # Party 2
                 click(self.relCoords(1715, 655))
                 moveTo(self.GUARDIAN_CLICK_COORDS)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(775), upgrade_color, tolerance=tolerance):  # Party 3
+            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(775), upgrade_color,
+                                             tolerance=tolerance):  # Party 3
                 click(self.relCoords(1715, 775))
                 moveTo(self.GUARDIAN_CLICK_COORDS)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(895), upgrade_color, tolerance=tolerance):  # Party 4
+            elif pyautogui.pixelMatchesColor(self.relCoords(1715), self.relCoords(895), upgrade_color,
+                                             tolerance=tolerance):  # Party 4
                 click(self.relCoords(1715, 895))
                 moveTo(self.GUARDIAN_CLICK_COORDS)
             else:
@@ -351,28 +360,34 @@ class FirestoneBot:
 
             moveTo(5, 5)
 
-            if pyautogui.pixelMatchesColor(self.relCoords(900), self.relCoords(570), upgrade_color, tolerance=tolerance):  # Scroll of Speed
+            if pyautogui.pixelMatchesColor(self.relCoords(900), self.relCoords(570), upgrade_color,
+                                           tolerance=tolerance):  # Scroll of Speed
                 print("I should click.")
                 click(self.relCoords(900, 570))
                 moveTo(5, 5)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(1220), self.relCoords(570), upgrade_color, tolerance=tolerance):  # Scroll of Damage
+            elif pyautogui.pixelMatchesColor(self.relCoords(1220), self.relCoords(570), upgrade_color,
+                                             tolerance=tolerance):  # Scroll of Damage
                 click(self.relCoords(1300, 600))
                 moveTo(5, 5)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(1545), self.relCoords(570), upgrade_color, tolerance=tolerance):  # Scroll of Health
+            elif pyautogui.pixelMatchesColor(self.relCoords(1545), self.relCoords(570), upgrade_color,
+                                             tolerance=tolerance):  # Scroll of Health
                 click(self.relCoords(1545, 600))
                 moveTo(5, 5)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(900), self.relCoords(900), upgrade_color, tolerance=tolerance):  # Miads' Touch
+            elif pyautogui.pixelMatchesColor(self.relCoords(900), self.relCoords(900), upgrade_color,
+                                             tolerance=tolerance):  # Miads' Touch
                 click(self.relCoords(900, 900))
                 moveTo(5, 5)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(1220), self.relCoords(900), upgrade_color, tolerance=tolerance):  # Pouch of Gold
+            elif pyautogui.pixelMatchesColor(self.relCoords(1220), self.relCoords(900), upgrade_color,
+                                             tolerance=tolerance):  # Pouch of Gold
                 click(self.relCoords(1220, 900))
                 moveTo(5, 5)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(1540), self.relCoords(900), upgrade_color, tolerance=tolerance):  # Bucket of Gold
+            elif pyautogui.pixelMatchesColor(self.relCoords(1540), self.relCoords(900), upgrade_color,
+                                             tolerance=tolerance):  # Bucket of Gold
                 click(self.relCoords(1540, 900))
                 moveTo(5, 5)
 
@@ -387,27 +402,33 @@ class FirestoneBot:
 
             moveTo(5, 5)
 
-            if pyautogui.pixelMatchesColor(self.relCoords(900), self.relCoords(540), upgrade_color, tolerance=tolerance):  # Scroll of Speed
+            if pyautogui.pixelMatchesColor(self.relCoords(900), self.relCoords(540), upgrade_color,
+                                           tolerance=tolerance):  # Scroll of Speed
                 click(self.relCoords(900, 540))
                 moveTo(5, 5)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(1220), self.relCoords(540), upgrade_color, tolerance=tolerance):  # Scroll of Damage
+            elif pyautogui.pixelMatchesColor(self.relCoords(1220), self.relCoords(540), upgrade_color,
+                                             tolerance=tolerance):  # Scroll of Damage
                 click(self.relCoords(1300, 600))
                 moveTo(5, 5)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(1545), self.relCoords(540), upgrade_color, tolerance=tolerance):  # Scroll of Health
+            elif pyautogui.pixelMatchesColor(self.relCoords(1545), self.relCoords(540), upgrade_color,
+                                             tolerance=tolerance):  # Scroll of Health
                 click(self.relCoords(1545, 600))
                 moveTo(5, 5)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(900), self.relCoords(875), upgrade_color, tolerance=tolerance):  # Miads' Touch
+            elif pyautogui.pixelMatchesColor(self.relCoords(900), self.relCoords(875), upgrade_color,
+                                             tolerance=tolerance):  # Miads' Touch
                 click(self.relCoords(900, 900))
                 moveTo(5, 5)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(1220), self.relCoords(875), upgrade_color, tolerance=tolerance):  # Pouch of Gold
+            elif pyautogui.pixelMatchesColor(self.relCoords(1220), self.relCoords(875), upgrade_color,
+                                             tolerance=tolerance):  # Pouch of Gold
                 click(self.relCoords(1220, 900))
                 moveTo(5, 5)
 
-            elif pyautogui.pixelMatchesColor(self.relCoords(1540), self.relCoords(875), upgrade_color, tolerance=tolerance):  # Bucket of Gold
+            elif pyautogui.pixelMatchesColor(self.relCoords(1540), self.relCoords(875), upgrade_color,
+                                             tolerance=tolerance):  # Bucket of Gold
                 click(self.relCoords(1540, 900))
                 moveTo(5, 5)
 
@@ -460,7 +481,8 @@ class FirestoneBot:
                         self.pause()
                         self.db.change_value("MAP_TROOPS", 1, diff="sub")
                         continue
-                    elif pyautogui.pixelMatchesColor(self.relCoords(743), self.relCoords(934), (231, 77, 66), tolerance=5):
+                    elif pyautogui.pixelMatchesColor(self.relCoords(743), self.relCoords(934), (231, 77, 66),
+                                                     tolerance=5):
                         pyautogui.press('esc')
                     else:
                         # pyautogui.press('esc')
@@ -610,7 +632,8 @@ class FirestoneBot:
             elif self.isNum(result):
                 self.db.change_value("ocr_succeed_count", 1, diff="add")
                 time_left = int(result.partition(":")[0]) + 1
-                self.db.change_value("GUILD_MISSION_TIME_LEFT", time() + (time_left * 60)) # Add one minute to whatever minutes are left to be safe
+                self.db.change_value("GUILD_MISSION_TIME_LEFT", time() + (
+                            time_left * 60))  # Add one minute to whatever minutes are left to be safe
                 self.log.info(f"Current mission should complete in {time_left}min. Going Home.")
                 click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                 self.pause()

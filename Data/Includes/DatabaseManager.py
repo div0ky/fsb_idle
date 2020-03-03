@@ -1,6 +1,6 @@
 import os
-from time import time
 import shelve
+from time import time
 
 
 class DatabaseManager:
