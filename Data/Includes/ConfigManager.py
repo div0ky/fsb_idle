@@ -1,3 +1,4 @@
+#! python3
 import configparser
 import os
 import time

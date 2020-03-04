@@ -68,6 +68,8 @@ class FirestoneBot:
         self.db = DatabaseManager()
         self.mouseLock = MouseLock()
         self.gui = BotGUI()
+        self.gui.update_status("Starting up!")
+
         # INITIALIZE GUI OBJECTS
         self.root = tkinter.Tk()
         self.root.withdraw()
@@ -244,6 +246,10 @@ class FirestoneBot:
             self.log.info(f"OCR currently has a {self.db.ocr_s_pct}% success rate.")
         return ocr_status
 
+    def status(self, status):
+        self.log.info(status)
+        self.gui.update_status(status)
+
     def changeUpgradeProgression(self, way):
         if way == 1:  # go down to x1
             click(self.UPGRADE_COORDS)
@@ -263,7 +269,7 @@ class FirestoneBot:
         return
 
     def guardianClick(self, clicks, speed):
-        self.log.info("Resuming Guardian duties. Clicking %s times." % clicks)
+        self.status("Resuming Guardian duties. Clicking %s times." % clicks)
         click(self.GUARDIAN_CLICK_COORDS, clicks=clicks, interval=speed)
 
     def buyUpgrades(self):
@@ -271,7 +277,7 @@ class FirestoneBot:
         # if pyautogui.pixelMatchesColor(self.relCoords(1894), self.relCoords(619), (244, 0, 0), tolerance=5):  # Upgrades avail bubble
         click(self.UPGRADE_COORDS)  # Open the upgrade menu
         moveTo(self.GUARDIAN_CLICK_COORDS)
-        self.log.info("Buying any available upgrades.")
+        self.status("Buying any available upgrades.")
         self.pause()
 
         upgrade_color = (43, 117, 41)
@@ -324,9 +330,11 @@ class FirestoneBot:
         if button is None:
             return
         else:
-            self.log.info("We seem to have hit a wall.")
+            self.status("We seem to have hit a wall.")
+
             count = levels
-            self.log.info("Going back %s levels to farm." % levels)
+            self.status("Going back %s levels to farm." % levels)
+
             while count >= 0:
                 click(self.BACK_ARROW_COORDS)
                 sleep(0.5)
@@ -335,7 +343,7 @@ class FirestoneBot:
             click(button)
             if self.db.UPGRADES_LOWERED is False:
                 self.db.UPGRADES_LOWERED = True
-                self.log.info("Lowering upgrade progression to x1.")
+                self.status("Lowering upgrade progression to x1.")
                 self.changeUpgradeProgression(1)
 
     def exoticMerchant(self):
@@ -445,6 +453,7 @@ class FirestoneBot:
                         (830, 690), (875, 555), (1440, 645), (1440, 910), (1560, 980), (830, 395), (465, 445),
                         (1550, 740), (1290, 688)]
 
+        self.gui.update_status("Checking on Map Missions.")
         click(self.MAP_COORDS)  # Open the map
         sleep(1.5)
 
@@ -453,11 +462,11 @@ class FirestoneBot:
 
         if self.isNum(result, 3):
             self.db.change_value("MAP_TROOPS", int(result[0]))
-            self.log.info(f"We appear to have {self.db.MAP_TROOPS} troops available.")
+            self.status(f"We appear to have {self.db.MAP_TROOPS} troops available.")
 
         while True:
             if pyautogui.pixelMatchesColor(self.relCoords(232), self.relCoords(315), (247, 163, 66), tolerance=10):
-                self.log.info("Claiming a map mission.")
+                self.status("Claiming a map mission.")
                 click(self.relCoords(232, 315))
                 self.pause()
                 moveTo(self.GUARDIAN_CLICK_COORDS)
@@ -475,7 +484,7 @@ class FirestoneBot:
                     self.pause()
                     if pyautogui.pixelMatchesColor(self.relCoords(830), self.relCoords(960), (11, 161, 8), tolerance=5):
                         click(self.relCoords(830, 960))
-                        self.log.info("Started a mission.")
+                        self.status("Started a mission.")
                         self.pause()
                         pyautogui.press('esc')
                         self.pause()
@@ -491,9 +500,8 @@ class FirestoneBot:
                 else:
                     break
         else:
-            self.log.info("We don't seem to have any available troops.")
+            self.status("We don't seem to have any available troops.\nGoing home.")
 
-        self.log.info("Going to home screen.")
         pyautogui.press('esc')
 
     def autoPrestige(self):
@@ -526,7 +534,8 @@ class FirestoneBot:
 
             if self.PRESTIGE_LEVEL:
                 progress = round((self.PRESTIGE_LEVEL / self.PRESTIGE_TRIGGER) * 100)
-                self.log.info(f"Current earnings are at {self.PRESTIGE_LEVEL}x which is {progress}% of our goal.")
+                self.status(f"Current earnings are at {self.PRESTIGE_LEVEL}x which is {progress}% of our goal.")
+                self.pause()
 
                 snooze = ((progress - 100) / (0 - 100)) * ((60 - 1) + 1) * 1000
                 if snooze <= 1000:
@@ -535,10 +544,11 @@ class FirestoneBot:
                     snooze = 60000
 
                 self.db.change_value("PRESTIGE_CHECK_TIME", time() + snooze)
-                self.log.info(f"Will wait {round((snooze / 1000), 2)}min before checking Prestige progress again.")
+                self.status(f"Will wait {round((snooze / 1000), 2)}min before checking Prestige progress again.")
+                self.pause()
 
                 if self.PRESTIGE_LEVEL >= self.PRESTIGE_TRIGGER:
-                    self.log.info("Firestone earnings are satisfactory. Prestiging...")
+                    self.status("Firestone earnings are satisfactory. Prestiging...")
                     click(self.relCoords(1160, 525))  # Click on FREE prestige option
                     sleep(15)  # Wait for prestige to finish
 
@@ -551,29 +561,29 @@ class FirestoneBot:
             click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go home because we're not prestiging
 
     def setupParty(self):
-        self.log.info("Setting up the party.")
+        self.status("Setting up the party.")
         self.pause()
         click(self.PARTY_COORDS)
 
         if self.config.party_size >= 1:
             self.pause()
-            self.log.info("Buying first party slot.")
+            self.status("Buying first party slot.")
             click(self.relCoords(802, 795))  # Buy fist party slot
         if self.config.party_size >= 2:
             self.pause()
-            self.log.info("Buying second party slot.")
+            self.status("Buying second party slot.")
             click(self.relCoords(775, 540))  # Buy second slot
         if self.config.party_size >= 3:
             self.pause()
-            self.log.info("Buying third party slot.")
+            self.status("Buying third party slot.")
             click(self.relCoords(575, 815))  # Buying third party slot
         if self.config.party_size >= 4:
             self.pause()
-            self.log.info("Buying fourth party slot.")
+            self.status("Buying fourth party slot.")
             click(self.relCoords(550, 445))  # Buying fourth party slot
         if self.config.party_size >= 5:
             self.pause()
-            self.log.info("Buying fifth party slot.")
+            self.status("Buying fifth party slot.")
             click(self.relCoords(510, 630))  # Buying fifth party slot
 
         if self.config.party_size >= 1:
@@ -600,7 +610,7 @@ class FirestoneBot:
 
     def guildMissions(self):
         if time() > self.db.GUILD_MISSION_TIME_LEFT and self.config.guild_missions:
-            self.log.info("Checking on Guild Expedition status.")
+            self.status("Checking on Guild Expedition status.")
             self.pause()
             click(self.TOWN_COORDS)
             self.pause()
@@ -617,12 +627,12 @@ class FirestoneBot:
 
             if result == "Completed":
                 self.db.change_value("ocr_succeed_count", 1, diff="add")
-                self.log.info("Current mission was completed.")
+                self.status("Current mission was completed.")
                 # Click on the "Claim" button.
                 click(self.relCoords(1345, 335))
                 sleep(2)  # Wait for it to process
                 click(self.relCoords(1185, 720))  # Click OK on the popup that occurs
-                self.log.info("Claimed.")
+                self.status("Claimed.")
                 sleep(2)  # Wait for it to process.
                 click(self.relCoords(1335, 335))  # Click to start new expedition
                 self.pause()
@@ -634,21 +644,21 @@ class FirestoneBot:
                 time_left = int(result.partition(":")[0]) + 1
                 self.db.change_value("GUILD_MISSION_TIME_LEFT", time() + (
                             time_left * 60))  # Add one minute to whatever minutes are left to be safe
-                self.log.info(f"Current mission should complete in {time_left}min. Going Home.")
+                self.status(f"Current mission should complete in {time_left}min. Going Home.")
                 click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                 self.pause()
                 return
 
             else:
                 # If we can't tell, let's make sure it's not saying there are none.
-                self.log.info("Checking to see if we're out of guild expeditions.")
+                self.status("Checking to see if we're out of guild expeditions.")
                 pyautogui.screenshot(self.db.OCR_IMAGE, region=(self.relCoords(625, 520, 690, 65)))
                 self.pause()  # Give it time to save the image
                 result = self.ocr(self.db.OCR_IMAGE)  # attempt to read it
 
                 if result == "There are no pending expeditions.":
                     self.db.change_value("ocr_succeed_count", 1, diff="add")
-                    self.log.info("There are no more expeditions available right now.")
+                    self.status("There are no more expeditions available right now.")
                     pyautogui.screenshot(self.db.OCR_IMAGE, region=(self.relCoords(1030, 145, 145, 35)))
                     self.pause()
                     result = self.ocr(self.db.OCR_IMAGE)
@@ -669,7 +679,7 @@ class FirestoneBot:
                             time_left = int(result.partition(":")[0]) * 60
 
                         self.db.change_value("GUILD_MISSION_TIME_LEFT", time() + time_left)  # Set timer
-                        self.log.info(f"More missions available in {time_left / 60}min. Returning home.")
+                        self.status(f"More missions available in {time_left / 60}min. Returning home.")
                         click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                         return
                     else:
@@ -677,7 +687,7 @@ class FirestoneBot:
                         # TODO: Determine if this is still necessary. DISABLED for now.
                         # if self.db.ocr_f_pct > 50:
                         #     pyautogui.screenshot(os.path.expanduser("~") + f"/Documents/Firestone Bot/OCR/Fail_{self.db.ocr_fail_count}_{round(time(), 5)}.png")
-                        self.log.warning("We weren't able to determine exepidtion renewal time. Returning home.")
+                        self.log.warning("I wasn't able to determine expedition renewal time. Returning home.")
                         click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                         return
 
@@ -687,10 +697,9 @@ class FirestoneBot:
             #     pyautogui.screenshot(
             #         os.path.expanduser("~") + f"/Documents/Firestone Bot/OCR/Fail_{self.db.ocr_fail_count}_{round(time(), 5)}.png")
             self.log.warning("Unable to ascertain the current mission status.")
-            self.log.info("Trying to start a new expedition anyway.")
+            self.status("Trying to start a new expedition anyway.\nReturning home.")
             click(self.relCoords(1335, 335))  # Click to start new expedition
             self.pause()
-            self.log.info("Returning home.")
             click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
             self.pause()
             return
@@ -700,7 +709,9 @@ class FirestoneBot:
 
         # DEFINE SOME VOLATILE VARIABLES
         self.getGameRegion()
+        self.gui.update_status("Checking the game region.")
         self.setupCoordinates()
+        self.gui.update_status("Setting up coordinates.")
 
         # TODO: Switch this timer back to something more than 1.5?
         sleep(1.5)

@@ -5,7 +5,10 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
-## [4.0.5-dev.15] - 2020-03-03
+## [4.1.0-stable] - 2020-03-03
+
+### Added
+- Status box to inform user what the bot is thinking / doing
 
 ### Fixed
 - Auto prestige toggle wasn't properly setting prestige state

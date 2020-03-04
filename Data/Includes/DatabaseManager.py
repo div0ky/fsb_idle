@@ -1,3 +1,4 @@
+#! python3
 import os
 import shelve
 from time import time

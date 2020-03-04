@@ -1,3 +1,4 @@
+#! python3
 import configparser
 import http.client
 import os
@@ -5,6 +6,7 @@ import sys
 import urllib
 from tkinter import Tk, Menu, Label, Button, Toplevel, BooleanVar, messagebox, HORIZONTAL
 from tkinter.ttk import Combobox, Checkbutton, Entry, Progressbar
+from threading import Thread
 
 import requests
 from packaging import version
@@ -93,14 +95,19 @@ class BotGUI:
         # self.window.bind('<Control-n>', self.party_win)
 
         self.window.after(300, self.checkVersion)
+        self.window.after(300, self.status_win)
+        # Thread(target=self.status_win, name="StatusWindow", daemon=True).start()
         self.window.mainloop()
 
     def ready_set_go(self):
         self.window.quit()
-        self.window.destroy()
+        self.window.withdraw()
+        # self.window.destroy()
         push(f"A Firestone Bot with v{version_info.version} was started!")
 
     def options_win(self, e=None):
+        self.update_status("Now I'm saying things!")
+
         self.window.withdraw()
         self.options_win = Toplevel(self.window)
         self.options_win.protocol("WM_DELETE_WINDOW", self.options_on_close)
@@ -338,6 +345,27 @@ class BotGUI:
         self.window.deiconify()
         self.party_win.destroy()
 
+    def status_win(self, e=None):
+        # self.window.withdraw()
+        self.status_win = Toplevel(self.window)
+        self.status_win.configure(background="black")
+        self.status_win.overrideredirect(1)
+        self.status_win.protocol("WM_DELETE_WINDOW", self.status_on_close)
+        self.status_win.title(f"Firestone Bot v{version_info.version}")
+        self.status_win.geometry("350x35")
+        self.status_win.grid_columnconfigure(0, weight=1)
+        self.status_win.resizable(0, 0)
+        self.status_win.pack_propagate(0)
+        self.status_win.attributes("-topmost", True)
+        self.status_win.geometry("+{}+{}".format(0, 0))
+
+        self.status_text = Label(self.status_win, foreground="white", background="black", text="IDLE BOT: Verify my settings before we get started.")
+        self.status_text.grid(column=0, row=0, padx=5, pady=5, columnspan=2, sticky="w")
+
+    def update_status(self, status):
+        self.status_text.config(text=f"IDLE BOT: {status}")
+        self.status_win.update()
+
     def menu_exit(self):
         sys.exit()
 
@@ -348,6 +376,9 @@ class BotGUI:
     def options_on_close(self):
         self.window.deiconify()
         self.options_win.destroy()
+
+    def status_on_close(self):
+        self.status_win.destroy()
 
     def party_on_close(self):
         self.window.deiconify()
