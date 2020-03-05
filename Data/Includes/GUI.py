@@ -20,6 +20,11 @@ config.read(config_file)
 
 version_info = version_info()
 
+if version_info.vStage == "stable":
+    current_version = version.parse(version_info.version)
+else:
+    current_version = version.parse(version_info.full_version)
+
 window = None
 party1 = None
 party2 = None
@@ -48,7 +53,7 @@ class BotGUI:
         """
 
         self.window = Tk()
-        self.window.title(f"Firestone Bot v{version_info.version}")
+        self.window.title(f"Firestone Bot v{current_version}")
         self.window.geometry("380x225")
         self.window.minsize(380, 200)
         self.window.wait_visibility(self.window)
@@ -103,15 +108,13 @@ class BotGUI:
         self.window.quit()
         self.window.withdraw()
         # self.window.destroy()
-        push(f"A Firestone Bot with v{version_info.version} was started!")
+        push(f"A Firestone Bot with v{current_version} was started!")
 
     def options_win(self, e=None):
-        self.update_status("Now I'm saying things!")
-
         self.window.withdraw()
         self.options_win = Toplevel(self.window)
         self.options_win.protocol("WM_DELETE_WINDOW", self.options_on_close)
-        self.options_win.title(f"Firestone Bot v{version_info.version}")
+        self.options_win.title(f"Firestone Bot v{current_version}")
         self.options_win.geometry("350x250")
         self.options_win.grid_columnconfigure(0, weight=1)
         self.options_win.grid_columnconfigure(2, weight=1)
@@ -206,7 +209,7 @@ class BotGUI:
         self.window.withdraw()
         self.party_win = Toplevel(self.window)
         self.party_win.protocol("WM_DELETE_WINDOW", self.party_on_close)
-        self.party_win.title(f"Firestone Bot v{version_info.version}")
+        self.party_win.title(f"Firestone Bot v{current_version}")
         self.party_win.geometry("350x275")
         self.party_win.grid_columnconfigure(0, weight=1)
         self.party_win.grid_columnconfigure(2, weight=1)
@@ -351,7 +354,7 @@ class BotGUI:
         self.status_win.configure(background="black")
         self.status_win.overrideredirect(1)
         self.status_win.protocol("WM_DELETE_WINDOW", self.status_on_close)
-        self.status_win.title(f"Firestone Bot v{version_info.version}")
+        self.status_win.title(f"Firestone Bot v{current_version}")
         self.status_win.geometry("350x35")
         self.status_win.grid_columnconfigure(0, weight=1)
         self.status_win.resizable(0, 0)
@@ -370,8 +373,8 @@ class BotGUI:
         sys.exit()
 
     def menu_about(self):
-        messagebox.showinfo(f"Firestone Bot {version_info.version}",
-                            f"Created by: div0ky\nhttp:\\\\github.com\\div0ky\n\nVersion {version_info.version}")
+        messagebox.showinfo(f"Firestone Bot {current_version}",
+                            f"Created by: div0ky\nhttp:\\\\github.com\\div0ky\n\nVersion {current_version}")
 
     def options_on_close(self):
         self.window.deiconify()
@@ -392,17 +395,19 @@ class BotGUI:
     def checkVersion(self):
         print(config['OPTIONS']['channel'])
         if config['OPTIONS']['channel'] == "Development":
-            response = requests.get("http://div0ky.com/repo/dev.txt")
+            response = requests.get("http://div0ky.com/repo/development/latest.txt")
         elif config['OPTIONS']['channel'] == "Staging":
-            response = requests.get("http://div0ky.com/repo/staging.txt")
+            response = requests.get("http://div0ky.com/repo/staging/latest.txt")
         else:
-            response = requests.get("http://div0ky.com/repo/latest.txt")
+            response = requests.get("http://div0ky.com/repo/stable/latest.txt")
         latest = response.text
         latest = str(latest)
+        latest = version.parse(latest)
 
-        print(latest)
-        print(version_info.version)
-        if version.parse(latest) > version.parse(version_info.version):
+
+        print(f"Current Version is {current_version}\nLatest Version is {latest}")
+
+        if latest > current_version:
             self.window.destroy()
             root = Tk()
             root.geometry("325x70")
@@ -423,8 +428,8 @@ class BotGUI:
             progress.grid(column=0, row=1, padx=15, pady=10)
             root.withdraw()
 
-            ask_update = messagebox.askyesno(title=f"Firestone Bot v{version_info.version}",
-                                             message=f"A new version is availble. You're running v{version_info.version}. The latest version is v{latest}.\n\nDo you want to download & update?")
+            ask_update = messagebox.askyesno(title=f"Firestone Bot v{current_version}",
+                                             message=f"A new version is availble. You're running v{current_version}. The latest version is v{latest}.\n\nDo you want to download & update?")
 
             if ask_update:
                 root.deiconify()

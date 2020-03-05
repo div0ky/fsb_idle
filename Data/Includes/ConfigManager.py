@@ -9,15 +9,14 @@ class ConfigManager:
     def __init__(self):
         # self.config_file = os.path.dirname(__file__) + "/../../bot.ini"
         self.config_file = os.getenv('LOCALAPPDATA') + "/Firestone Bot/config.ini"
-        # self.config_file = os.path.join(os.getcwd(), 'bot.ini')
-        self.config_last_modified = round(os.path.getmtime(self.config_file))
+        self.config_last_modified = None
         self.sentinel = False
 
         # General options - can be overriden from config
         self.auto_prestige = True
         self.prestige_level = 3.5
         self.in_guild = True
-        self.guardian = "Dragon"
+        self.guardian = 2  # 1 for Fairy, 2 for Dragon
         self.guild_missions = True
         self.farm_gold = True
         self.farm_levels = 5
@@ -31,19 +30,20 @@ class ConfigManager:
         self.party_slot_3 = "Warrior"
         self.party_slot_4 = "Tank"
         self.party_slot_5 = "Priest"
+        self.party_slot_6 = "Rogue"
 
         # Load the config. If we can't find it, abort
         if os.path.isfile(self.config_file):
-            config = configparser.ConfigParser()
-            config.read(self.config_file)
-            self._verify_ini(config_file=config)
+            self.config_last_modified = round(os.path.getmtime(self.config_file))
+            self.config = configparser.ConfigParser()
+            self.config.read(self.config_file)
+            self._verify_ini(config_file=self.config)
         else:
-            print("Unable to load config file. Ensure bot.ini is in the CWD")
-            with open(self.config_file, 'w') as configfile:
-                config = configparser.ConfigParser()
-                config.write(configfile)
+            print("Unable to load config file. Creating one.")
+            self._build_ini(self.config_file)
 
-        self._set_ini_options(config)
+
+        self._set_ini_options(self.config)
 
         Thread(target=self.reload_ini, name="ConfigMonitor", daemon=True).start()
 
@@ -100,6 +100,31 @@ class ConfigManager:
         if "party_slot_5" in config['PARTY']:
             self.party_slot_5 = config['PARTY']['party_slot_5'].lower()
 
+    def _build_ini(self, config):
+        self.config = configparser.ConfigParser()
+
+        self.config['OPTIONS'] = {'auto_prestige': self.auto_prestige,
+                                  'prestige_level': self.prestige_level,
+                                  'in_guild': self.in_guild,
+                                  'guardian': self.guardian,
+                                  'guild_missions': self.guild_missions,
+                                  'farm_gold': self.farm_gold,
+                                  'farm_levels': self.farm_levels,
+                                  'channel': self.channel}
+
+        self.config['PARTY'] = {'party_size': self.party_size,
+                                'party_slot_1': self.party_slot_1,
+                                'party_slot_2': self.party_slot_2,
+                                'party_slot_3': self.party_slot_3,
+                                'party_slot_4': self.party_slot_4,
+                                'party_slot_5': self.party_slot_5,
+                                'party_slot_6': self.party_slot_6}
+
+        with open(self.config_file, 'w') as configfile:
+            self.config.write(configfile)
+        self.config_last_modified = round(os.path.getmtime(self.config_file))
+
+
     # noinspection PyMethodMayBeStatic
     def _verify_ini(self, config_file=None):
         """
@@ -145,3 +170,6 @@ class ConfigManager:
             if config_file['OPTIONS'].getboolean("in_guild") is False:
                 raise Exception("Config file is set to do guild expeditions, but also says we're not in a guild.")
 
+
+if __name__ == "__main__":
+    config_manager = ConfigManager()

@@ -30,6 +30,7 @@ from Data.Includes.DatabaseManager import DatabaseManager
 from Data.Includes.GUI import BotGUI
 from Data.Includes.Lock import MouseLock
 from Data.Includes.ver import version_info
+from Data.Includes.IdleBotDB import IdleBotDB
 
 version_info = version_info()
 
@@ -66,6 +67,7 @@ class FirestoneBot:
         # INITIALIZE CONFIG FILE AND MOUSE LOCKDOWN
         self.config = ConfigManager()
         self.db = DatabaseManager()
+        self.database = IdleBotDB()
         self.mouseLock = MouseLock()
         self.gui = BotGUI()
         self.gui.update_status("Starting up!")
@@ -125,10 +127,10 @@ class FirestoneBot:
 
         # Create formatters
         file_format = logging.Formatter(
-            f'%(asctime)s.%(msecs)03d  |  %(levelname)s     |  %(name)s  |  {version_info.version}  |  %(message)s',
+            f'%(asctime)s.%(msecs)03d  |  %(levelname)s     |  %(name)s  |  {version_info.full_version}  |  %(message)s',
             datefmt='%Y-%m-%d | %H:%M:%S')
         console_format = logging.Formatter(
-            f'%(asctime)s.%(msecs)03d  |  %(levelname)s     |  %(name)s  |  {version_info.version}  |  %(message)s',
+            f'%(asctime)s.%(msecs)03d  |  %(levelname)s     |  %(name)s  |  {version_info.full_version}  |  %(message)s',
             datefmt='%Y-%m-%d | %H:%M:%S')
 
         # Create console handler
@@ -230,7 +232,7 @@ class FirestoneBot:
         wpercent = (base / float(im.size[0]))
         hsize = int(float(im.size[1]) * float(wpercent))
         im = im.resize((base, hsize), Image.ANTIALIAS)
-        im.save(self.db.OCR_IMAGE)
+        im.save(self.database.OCR_IMAGE)
         text = pytesseract.image_to_string(file, lang="eng", config='--psm 7')
         self.log.info(f"I think it says: {text}")
         return text
@@ -457,8 +459,8 @@ class FirestoneBot:
         click(self.MAP_COORDS)  # Open the map
         sleep(1.5)
 
-        pyautogui.screenshot(self.db.OCR_IMAGE, region=(self.relCoords(825, 30, 100, 38)))
-        result = self.ocr(self.db.OCR_IMAGE)
+        pyautogui.screenshot(self.database.OCR_IMAGE, region=(self.relCoords(825, 30, 100, 38)))
+        result = self.ocr(self.database.OCR_IMAGE)
 
         if self.isNum(result, 3):
             self.db.change_value("MAP_TROOPS", int(result[0]))
@@ -514,12 +516,12 @@ class FirestoneBot:
             click(self.relCoords(1359, 560))  # Open prestige menu
             self.pause()
 
-            pyautogui.screenshot(self.db.OCR_IMAGE, region=(self.relCoords(1070, 745, 160, 70)))
-            result = self.ocr(self.db.OCR_IMAGE)
+            pyautogui.screenshot(self.database.OCR_IMAGE, region=(self.relCoords(1070, 745, 160, 70)))
+            result = self.ocr(self.database.OCR_IMAGE)
 
             # while not self.isNum(result, 2):
-            #     pyautogui.screenshot(self.db.OCR_IMAGE, region=(self.relCoords(1070, 745, 160, 70)))
-            #     result = self.ocr(self.db.OCR_IMAGE)
+            #     pyautogui.screenshot(self.database.OCR_IMAGE, region=(self.relCoords(1070, 745, 160, 70)))
+            #     result = self.ocr(self.database.OCR_IMAGE)
 
             if self.isNum(result, 2):
                 self.db.change_value("ocr_succeed_count", 1, diff="add")
@@ -609,7 +611,7 @@ class FirestoneBot:
         self.pause()
 
     def guildMissions(self):
-        if time() > self.db.GUILD_MISSION_TIME_LEFT and self.config.guild_missions:
+        if time() > self.database.GUILD_MISSION_TIME_LEFT and self.config.guild_missions:
             self.status("Checking on Guild Expedition status.")
             self.pause()
             click(self.TOWN_COORDS)
@@ -619,14 +621,14 @@ class FirestoneBot:
             click(self.GUILD_EXPEDITIONS_COORDS)
             self.pause()
             # Take a screenshot of the mission timer
-            pyautogui.screenshot(self.db.OCR_IMAGE, region=(self.relCoords(600, 345, 200, 40)))
+            pyautogui.screenshot(self.database.OCR_IMAGE, region=(self.relCoords(600, 345, 200, 40)))
             self.pause()
             # Attempt to read the time using OCR
-            result = self.ocr(self.db.OCR_IMAGE)
+            result = self.ocr(self.database.OCR_IMAGE)
             # If it doesn't say "Completed" but it's also not blank... it's probably a number?
 
             if result == "Completed":
-                self.db.change_value("ocr_succeed_count", 1, diff="add")
+                self.database.save_option('ocr_succeed_count', int(self.database.read_option('ocr_succeed_count')) + 1)
                 self.status("Current mission was completed.")
                 # Click on the "Claim" button.
                 click(self.relCoords(1345, 335))
@@ -640,10 +642,9 @@ class FirestoneBot:
                 return
 
             elif self.isNum(result):
-                self.db.change_value("ocr_succeed_count", 1, diff="add")
-                time_left = int(result.partition(":")[0]) + 1
-                self.db.change_value("GUILD_MISSION_TIME_LEFT", time() + (
-                            time_left * 60))  # Add one minute to whatever minutes are left to be safe
+                self.database.save_option('ocr_succeed_count', int(self.database.read_option('ocr_succeed_count')) + 1)
+                time_left = int(result.partition(":")[0]) + 1  # Add one minute to whatever minutes are left to be safe
+                self.database.save_option('GUILD_MISSION_TIME_LEFT', time() + (time_left * 60))
                 self.status(f"Current mission should complete in {time_left}min. Going Home.")
                 click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                 self.pause()
@@ -652,16 +653,16 @@ class FirestoneBot:
             else:
                 # If we can't tell, let's make sure it's not saying there are none.
                 self.status("Checking to see if we're out of guild expeditions.")
-                pyautogui.screenshot(self.db.OCR_IMAGE, region=(self.relCoords(625, 520, 690, 65)))
+                pyautogui.screenshot(self.database.OCR_IMAGE, region=(self.relCoords(625, 520, 690, 65)))
                 self.pause()  # Give it time to save the image
-                result = self.ocr(self.db.OCR_IMAGE)  # attempt to read it
+                result = self.ocr(self.database.OCR_IMAGE)  # attempt to read it
 
                 if result == "There are no pending expeditions.":
-                    self.db.change_value("ocr_succeed_count", 1, diff="add")
+                    self.database.save_option('ocr_succeed_count', int(self.database.read_option('ocr_succeed_count')) + 1)
                     self.status("There are no more expeditions available right now.")
-                    pyautogui.screenshot(self.db.OCR_IMAGE, region=(self.relCoords(1030, 145, 145, 35)))
+                    pyautogui.screenshot(self.database.OCR_IMAGE, region=(self.relCoords(1030, 145, 145, 35)))
                     self.pause()
-                    result = self.ocr(self.db.OCR_IMAGE)
+                    result = self.ocr(self.database.OCR_IMAGE)
 
                     if self.isNum(result):
                         self.db.change_value("ocr_succeed_count", 1, diff="add")
@@ -753,7 +754,7 @@ def main():
         # pyautogui.alert(title=f"Firestone Bot {version_info.version}", text="Oops! Bot must terminate.\n\nCheck the log for more info.", timeout=2500)
         # messagebox.showerror(title=f"Firestone Bot {version_info.version}",
         #                      message="Oops! Bot must terminate.\n\nCheck the log for more info.")
-        push(f"Bot terminated with Exception {e}.")
+        # push(f"Bot terminated with Exception {e}.")
         sys.exit()
 
 

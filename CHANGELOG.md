@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
+## [4.1.2-dev.1] - 2020-03-05
+
+### Added
+- Bot now uses SQLite3
+
+### Removed
+- No longer using text file and Shelve for memory
+
+## [4.1.1] - 2020-03-03
+
+## Added
+- Better handling of internal configuration settings
+
 ## [4.1.0-stable] - 2020-03-03
 
 ### Added
