@@ -41,10 +41,12 @@ class IdleBotDB:
     def save_option(self, setting, option):
         self.c.execute("INSERT OR REPLACE INTO config VALUES (?,?)", [setting, option])
         self.connection.commit()
+        setattr(self, setting, option)
 
-    def read_option(self, option):
-        for row in self.c.execute("SELECT option FROM config WHERE setting=?", [option]):
+    def read_option(self, setting):
+        for row in self.c.execute("SELECT option FROM config WHERE setting=?", [setting]):
             variable = row[0]
+            # setattr(self, setting, variable)
             break
         else:
             variable = False
@@ -62,13 +64,13 @@ class IdleBotDB:
             self.save_option('ocr_succeed_count', self.ocr_succeed_count)
 
         if self.read_option('ocr_f_pct'):
-            self.ocr_f_pct = int(self.read_option('ocr_f_pct'))
+            self.ocr_f_pct = float(self.read_option('ocr_f_pct'))
         else:
             self.save_option('ocr_f_pct', self.ocr_f_pct)
 
 
         if self.read_option('ocr_s_pct'):
-            self.ocr_s_pct = int(self.read_option('ocr_s_pct'))
+            self.ocr_s_pct = float(self.read_option('ocr_s_pct'))
         else:
             self.save_option('ocr_s_pct', self.ocr_s_pct)
 

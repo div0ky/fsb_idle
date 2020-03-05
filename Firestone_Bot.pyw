@@ -26,7 +26,6 @@ from pyautogui import click
 from pyautogui import moveTo
 
 from Data.Includes.ConfigManager import ConfigManager
-from Data.Includes.DatabaseManager import DatabaseManager
 from Data.Includes.GUI import BotGUI
 from Data.Includes.Lock import MouseLock
 from Data.Includes.ver import version_info
@@ -66,7 +65,6 @@ class FirestoneBot:
 
         # INITIALIZE CONFIG FILE AND MOUSE LOCKDOWN
         self.config = ConfigManager()
-        self.db = DatabaseManager()
         self.database = IdleBotDB()
         self.mouseLock = MouseLock()
         self.gui = BotGUI()
@@ -238,14 +236,17 @@ class FirestoneBot:
         return text
 
     def ocr_check(self):
-        ocr_total = self.db.ocr_fail_count + self.db.ocr_succeed_count
-        self.db.change_value("ocr_f_pct", round(((self.db.ocr_fail_count / ocr_total) * 100), 2))
-        self.db.change_value("ocr_s_pct", round(((self.db.ocr_succeed_count / ocr_total) * 100), 2))
-        ocr_status = f"{self.db.ocr_f_pct}% Failure. {self.db.ocr_s_pct}% Success."
-        if self.db.ocr_f_pct >= 20:
-            self.log.warning(f"OCR currently has a {self.db.ocr_f_pct}% failure rate.")
+        # pull ocr fail / succeed totals
+        ocr_total = self.database.ocr_fail_count + self.database.ocr_succeed_count
+        # Generate save / fail percentages and save to database
+        self.database.save_option('ocr_f_pct', round(((self.database.ocr_fail_count / ocr_total) * 100), 2))
+        self.database.save_option('ocr_s_pct', round(((self.database.ocr_succeed_count / ocr_total) * 100), 2))
+
+        ocr_status = f"{self.database.ocr_f_pct}% Failure. {self.database.ocr_s_pct}% Success."
+        if self.database.ocr_f_pct >= 20:
+            self.log.warning(f"OCR currently has a {self.database.ocr_f_pct}% failure rate.")
         else:
-            self.log.info(f"OCR currently has a {self.db.ocr_s_pct}% success rate.")
+            self.log.info(f"OCR currently has a {self.database.ocr_s_pct}% success rate.")
         return ocr_status
 
     def status(self, status):
@@ -258,14 +259,14 @@ class FirestoneBot:
             self.pause()
             click(self.UPGRADES_BUTTON_COORDS, clicks=2, interval=0.5)
             click(self.SMALL_CLOSE_COORDS)
-            self.db.UPGRADES_LOWERED = True
+            self.database.UPGRADES_LOWERED = True
             return
         elif way == 2:  # go up to milestone
             click(self.UPGRADE_COORDS)
             self.pause()
             click(self.UPGRADES_BUTTON_COORDS, clicks=3, interval=0.5)
             click(self.SMALL_CLOSE_COORDS)
-            self.db.UPGRADES_LOWERED = False
+            self.database.UPGRADES_LOWERED = False
             return
         # self.db['memory'] = self.var
         return
@@ -343,8 +344,8 @@ class FirestoneBot:
                 count -= 1
             sleep(1.5)
             click(button)
-            if self.db.UPGRADES_LOWERED is False:
-                self.db.UPGRADES_LOWERED = True
+            if self.database.UPGRADES_LOWERED is False:
+                self.database.UPGRADES_LOWERED = True
                 self.status("Lowering upgrade progression to x1.")
                 self.changeUpgradeProgression(1)
 
@@ -463,8 +464,8 @@ class FirestoneBot:
         result = self.ocr(self.database.OCR_IMAGE)
 
         if self.isNum(result, 3):
-            self.db.change_value("MAP_TROOPS", int(result[0]))
-            self.status(f"We appear to have {self.db.MAP_TROOPS} troops available.")
+            self.database.save_option('MAP_TROOPS', int(result[0]))
+            self.status(f"We appear to have {self.database.MAP_TROOPS} troops available.")
 
         while True:
             if pyautogui.pixelMatchesColor(self.relCoords(232), self.relCoords(315), (247, 163, 66), tolerance=10):
@@ -477,10 +478,10 @@ class FirestoneBot:
             else:
                 break
 
-        if self.db.MAP_TROOPS > 0:
+        if self.database.MAP_TROOPS > 0:
             self.log.info("Entered map missions loop")
             for x in spawn_points:
-                if self.db.MAP_TROOPS > 0:
+                if self.database.MAP_TROOPS > 0:
                     self.log.info(f"Clicking @ {x[0], x[1]}")
                     click(x)  # Click known spawn points
                     self.pause()
@@ -490,7 +491,7 @@ class FirestoneBot:
                         self.pause()
                         pyautogui.press('esc')
                         self.pause()
-                        self.db.change_value("MAP_TROOPS", 1, diff="sub")
+                        self.database.save_option('MAP_TROOPS', self.database.MAP_TROOPS -1)
                         continue
                     elif pyautogui.pixelMatchesColor(self.relCoords(743), self.relCoords(934), (231, 77, 66),
                                                      tolerance=5):
@@ -507,7 +508,7 @@ class FirestoneBot:
         pyautogui.press('esc')
 
     def autoPrestige(self):
-        if self.config.auto_prestige and time() >= self.db.PRESTIGE_CHECK_TIME:
+        if self.config.auto_prestige and time() >= self.database.PRESTIGE_CHECK_TIME:
             self.pause()
             click(self.TOWN_COORDS)
             self.pause()
@@ -524,11 +525,12 @@ class FirestoneBot:
             #     result = self.ocr(self.database.OCR_IMAGE)
 
             if self.isNum(result, 2):
-                self.db.change_value("ocr_succeed_count", 1, diff="add")
+                self.database.save_option('ocr_succeed_count', int(self.database.read_option('ocr_succeed_count')) + 1)
+
                 self.PRESTIGE_LEVEL = round(float(result[1:]), 2)
 
             else:
-                self.db.change_value("ocr_fail_count", 1, diff="add")
+                self.database.save_option('ocr_fail_count', int(self.database.read_option('ocr_fail_count')) + 1)
                 self.log.warning("Wasn't able to ascertain our current prestige level.")
                 # TODO: Determine if this is still necessary. DISABLED for now.
                 # if self.db.ocr_f_pct > 50:
@@ -544,8 +546,7 @@ class FirestoneBot:
                     snooze = 1000
                 elif snooze >= 60000:
                     snooze = 60000
-
-                self.db.change_value("PRESTIGE_CHECK_TIME", time() + snooze)
+                self.database.save_option('PRESTIGE_CHECK_TIME', time() + snooze)
                 self.status(f"Will wait {round((snooze / 1000), 2)}min before checking Prestige progress again.")
                 self.pause()
 
@@ -665,7 +666,7 @@ class FirestoneBot:
                     result = self.ocr(self.database.OCR_IMAGE)
 
                     if self.isNum(result):
-                        self.db.change_value("ocr_succeed_count", 1, diff="add")
+                        self.database.save_option('ocr_succeed_count', int(self.database.read_option('ocr_succeed_count')) + 1)
                         if len(result.partition(":")) > 1:
                             # TODO: This math is off, it needs to consider 3 part timecodes and not just 2 re: partition
                             hours = int(result.partition(":")[0]) * 60
@@ -679,12 +680,12 @@ class FirestoneBot:
                         else:
                             time_left = int(result.partition(":")[0]) * 60
 
-                        self.db.change_value("GUILD_MISSION_TIME_LEFT", time() + time_left)  # Set timer
+                        self.database.save_option('GUILD_MISSION_TIME_LEFT', time() + time_left)  # Set timer
                         self.status(f"More missions available in {time_left / 60}min. Returning home.")
                         click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                         return
                     else:
-                        self.db.change_value("ocr_fail_count", 1, diff="add")
+                        self.database.save_option('ocr_fail_count', int(self.database.read_option('ocr_fail_count')) + 1)
                         # TODO: Determine if this is still necessary. DISABLED for now.
                         # if self.db.ocr_f_pct > 50:
                         #     pyautogui.screenshot(os.path.expanduser("~") + f"/Documents/Firestone Bot/OCR/Fail_{self.db.ocr_fail_count}_{round(time(), 5)}.png")
@@ -692,7 +693,7 @@ class FirestoneBot:
                         click(self.BIG_CLOSE_COORDS, clicks=3, interval=0.5)  # Go back to main screen
                         return
 
-            self.db.change_value("ocr_fail_count", 1, diff="add")
+            self.database.save_option('ocr_fail_count', int(self.database.read_option('ocr_fail_count')) + 1)
             # TODO: Determine if this is still necessary. DISABLED for now.
             # if self.db.ocr_f_pct > 50:
             #     pyautogui.screenshot(
@@ -745,7 +746,7 @@ def main():
     try:
         bot.run()
     except Exception as e:
-        bot.db.database.close()
+        bot.database.connection.close()
 
         bot.config.sentinel = True
         bot.mouseLock.sentinel = True

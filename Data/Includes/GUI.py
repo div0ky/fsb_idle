@@ -108,7 +108,7 @@ class BotGUI:
         self.window.quit()
         self.window.withdraw()
         # self.window.destroy()
-        push(f"A Firestone Bot with v{current_version} was started!")
+        # push(f"A Firestone Bot with v{current_version} was started!")
 
     def options_win(self, e=None):
         self.window.withdraw()
@@ -354,7 +354,7 @@ class BotGUI:
         self.status_win.configure(background="black")
         self.status_win.overrideredirect(1)
         self.status_win.protocol("WM_DELETE_WINDOW", self.status_on_close)
-        self.status_win.title(f"Firestone Bot v{current_version}")
+        self.status_win.title(f"Idle Bot Status")
         self.status_win.geometry("350x35")
         self.status_win.grid_columnconfigure(0, weight=1)
         self.status_win.resizable(0, 0)

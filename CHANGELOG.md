@@ -13,6 +13,9 @@ All notable changes to this project will be documented in this file. We are atte
 ### Removed
 - No longer using text file and Shelve for memory
 
+### Fixed
+- Window naming convention was breaking the bot wrapper
+
 ## [4.1.1] - 2020-03-03
 
 ## Added
