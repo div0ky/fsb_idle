@@ -3,12 +3,16 @@ import configparser
 import os
 import time
 from threading import Thread
+from sys import platform
 
 
 class ConfigManager:
     def __init__(self):
         # self.config_file = os.path.dirname(__file__) + "/../../bot.ini"
-        self.config_file = os.getenv('LOCALAPPDATA') + "/Firestone Bot/config.ini"
+        if platform == "win32":
+            self.config_file = os.getenv('LOCALAPPDATA') + "/Firestone Bot/config.ini"
+        elif platform == 'darwin':
+            self.config_file = os.path.expanduser('~/Documents/Firestone Bot/config.ini')
         self.config_last_modified = None
         self.sentinel = False
 
@@ -41,6 +45,9 @@ class ConfigManager:
         else:
             print("Unable to load config file. Creating one.")
             self._build_ini(self.config_file)
+            self.config = configparser.ConfigParser()
+            self.config.read(self.config_file)
+            self._verify_ini(config_file=self.config)
 
 
         self._set_ini_options(self.config)

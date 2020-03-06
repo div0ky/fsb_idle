@@ -7,6 +7,7 @@ import urllib
 from tkinter import Tk, Menu, Label, Button, Toplevel, BooleanVar, messagebox, HORIZONTAL
 from tkinter.ttk import Combobox, Checkbutton, Entry, Progressbar
 from threading import Thread
+from sys import platform
 
 import requests
 from packaging import version
@@ -15,7 +16,15 @@ from requests import get
 from Data.Includes.ver import version_info
 
 config = configparser.ConfigParser()
-config_file = os.getenv('LOCALAPPDATA') + "/Firestone Bot/config.ini"
+if platform == "linux" or platform == "linux2":
+    print("We're using Linux")
+elif platform == "darwin":
+    print("We're on MacOS")
+    config_file = os.path.expanduser('~/Documents/Firestone Bot/config.ini')
+elif platform == "win32":
+    print("We're on Windows")
+    config_file = os.getenv('LOCALAPPDATA') + "/Firestone Bot/config.ini"
+
 config.read(config_file)
 
 version_info = version_info()

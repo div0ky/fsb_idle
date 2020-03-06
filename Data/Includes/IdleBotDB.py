@@ -1,10 +1,22 @@
 import sqlite3
 import os
+from sys import platform
 from time import time
 
 class IdleBotDB:
     def __init__(self):
-        self.connection = sqlite3.connect(os.getenv('LOCALAPPDATA') + "\\Firestone Bot\\memory.db")
+
+        if platform == "linux" or platform == "linux2":
+            print("We're using Linux")
+        elif platform == "darwin":
+            print("We're on MacOS")
+            self.connection = sqlite3.connect(os.path.expanduser('~/Documents/Firestone Bot/memory.db'))
+            self.OCR_IMAGE = os.path.expanduser('~/Documents/Firestone Bot/ss.png')
+        elif platform == "win32":
+            print("We're on Windows")
+            self.connection = sqlite3.connect(os.getenv('LOCALAPPDATA') + "\\Firestone Bot\\memory.db")
+            self.OCR_IMAGE = os.getenv('LOCALAPPDATA') + "\\Firestone Bot\\OCR\\ss.png"
+
         # self.connection = sqlite3.connect("http://div0ky.com/repo/memory.db")
         self.c = self.connection.cursor()
 
@@ -21,7 +33,6 @@ class IdleBotDB:
         self.UPGRADES_STATUS = "Milestone"
         self.FRESH_START = False
         self.BOSS_FAILED = False
-        self.OCR_IMAGE = os.getenv('LOCALAPPDATA') + "\\Firestone Bot\\OCR\\ss.png"
         self.ACTIVE_MISSIONS = 0
         self.MAP_TROOPS = 0
 
