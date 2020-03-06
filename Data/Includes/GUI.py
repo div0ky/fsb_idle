@@ -1,29 +1,38 @@
 #! python3
 import configparser
 import http.client
-import json
 import os
 import sys
 import urllib
-from tkinter import Tk, Menu, Label, Button, Toplevel, BooleanVar, messagebox, HORIZONTAL, simpledialog
-from tkinter.ttk import Combobox, Checkbutton, Entry, Progressbar, Style
+from tkinter import Tk, Menu, Label, Button, Toplevel, BooleanVar, messagebox, HORIZONTAL
+from tkinter.ttk import Combobox, Checkbutton, Entry, Progressbar
+from threading import Thread
+from sys import platform
 
 import requests
-import semver
+from packaging import version
 from requests import get
 
 from Data.Includes.ver import version_info
 
 config = configparser.ConfigParser()
-config_file = os.getenv('LOCALAPPDATA') + "/Firestone Bot/config.ini"
+if platform == "linux" or platform == "linux2":
+    print("We're using Linux")
+elif platform == "darwin":
+    print("We're on MacOS")
+    config_file = os.path.expanduser('~/Documents/Firestone Bot/config.ini')
+elif platform == "win32":
+    print("We're on Windows")
+    config_file = os.getenv('LOCALAPPDATA') + "/Firestone Bot/config.ini"
+
 config.read(config_file)
 
 version_info = version_info()
 
 if version_info.vStage == "stable":
-    current_version = version_info.version
+    current_version = version.parse(version_info.version)
 else:
-    current_version = version_info.full_version
+    current_version = version.parse(version_info.full_version)
 
 window = None
 party1 = None
@@ -48,12 +57,6 @@ def push(msg):
 class BotGUI:
     def __init__(self):
 
-        self.key_info = None
-        try:
-            self.license_key = str(config['OPTIONS']['license_key'])
-        except:
-            self.license_key = ''
-
         """
         DEFINE VERSION INFO
         """
@@ -61,9 +64,6 @@ class BotGUI:
         self.window = Tk()
         self.window.title(f"Firestone Bot v{current_version}")
         self.window.geometry("380x225")
-        self.style = Style()
-        if sys.platform == "win32":
-            self.style.theme_use('winnative')
         self.window.minsize(380, 200)
         self.window.wait_visibility(self.window)
         self.windowWidth = self.window.winfo_reqwidth()
@@ -74,7 +74,7 @@ class BotGUI:
         self.window.geometry("+{}+{}".format(self.positionRight, self.positionDown))
         self.window.grid_columnconfigure(0, weight=1)
         self.window.resizable(0, 0)
-        # self.window.pack_propagate(0)
+        self.window.pack_propagate(0)
         self.window.attributes("-topmost", True)
 
         self.window.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -108,11 +108,9 @@ class BotGUI:
 
         # self.window.bind('<Control-n>', self.party_win)
 
-        self.window.after(300, self.status_win)
-        self.verifyLicense(self.license_key)
         self.window.after(300, self.checkVersion)
+        self.window.after(300, self.status_win)
         # Thread(target=self.status_win, name="StatusWindow", daemon=True).start()
-
         self.window.mainloop()
 
     def ready_set_go(self):
@@ -130,7 +128,7 @@ class BotGUI:
         self.options_win.grid_columnconfigure(0, weight=1)
         self.options_win.grid_columnconfigure(2, weight=1)
         self.options_win.resizable(0, 0)
-        # self.options_win.pack_propagate(0)
+        self.options_win.pack_propagate(0)
         self.options_win.attributes("-topmost", True)
         self.options_win.geometry("+{}+{}".format(self.positionRight, self.positionDown))
 
@@ -225,7 +223,7 @@ class BotGUI:
         self.party_win.grid_columnconfigure(0, weight=1)
         self.party_win.grid_columnconfigure(2, weight=1)
         self.party_win.resizable(0, 0)
-        # self.party_win.pack_propagate(0)
+        self.party_win.pack_propagate(0)
         self.party_win.attributes("-topmost", True)
         self.party_win.geometry("+{}+{}".format(self.positionRight, self.positionDown))
 
@@ -368,9 +366,8 @@ class BotGUI:
         self.status_win.title(f"Idle Bot Status")
         self.status_win.geometry("350x35")
         self.status_win.grid_columnconfigure(0, weight=1)
-        self.status_win.grid_columnconfigure(0, weight=2)
         self.status_win.resizable(0, 0)
-        # self.status_win.pack_propagate(0)
+        self.status_win.pack_propagate(0)
         self.status_win.attributes("-topmost", True)
         self.status_win.geometry("+{}+{}".format(0, 0))
 
@@ -385,12 +382,8 @@ class BotGUI:
         sys.exit()
 
     def menu_about(self):
-        if self.key_info:
-            user = self.key_info['purchase']['email']
-        else:
-            user = "UNLICENSED"
-        messagebox.showinfo(f"ABOUT",
-                            f"FIRESTONE IDLE BOT v{current_version}\n\nLicensed to {user}\n\nThank you for supporting Firestone Idle Bot!")
+        messagebox.showinfo(f"Firestone Bot {current_version}",
+                            f"Created by: div0ky\nhttp:\\\\github.com\\div0ky\n\nVersion {current_version}")
 
     def options_on_close(self):
         self.window.deiconify()
@@ -408,46 +401,6 @@ class BotGUI:
         self.window.destroy()
         sys.exit()
 
-    def verifyLicense(self, key):
-        data = {
-            'product_permalink': 'hqKje',
-            'license_key': key,
-            'increment_uses_count': 'false'
-        }
-
-        response = requests.post('https://api.gumroad.com/v2/licenses/verify', data=data)
-        self.key_info = json.loads(response.text)
-
-        if self.key_info['success'] == True and self.key_info['purchase']['refunded'] == False:
-            return True
-        else:
-            self.window.withdraw()
-            messagebox.showerror(f'Firestone Bot v{current_version}', 'LICENSE KEY IS INVALID OR NOT FOUND.')
-            self.notLicensed()
-            return False
-
-    def notLicensed(self):
-        lkey = None
-        valid = False
-        while lkey is None and valid == False:
-            lkey = simpledialog.askstring(title=f'Firestone Bot v{current_version}', prompt='       PLEASE ENTER YOUR LICENSE KEY:       ')
-
-            if lkey is not None:
-                check = self.verifyLicense(lkey)
-                if check:
-                    # messagebox.showinfo('SUCCESS', 'Key is valid!')
-                    self.license_key = self.key_info['purchase']['license_key']
-                    config['OPTIONS']['license_key'] = self.license_key
-                    with open(config_file, 'w') as configfile:
-                        config.write(configfile)
-                    valid = True
-                    self.window.deiconify()
-                else:
-                    messagebox.showwarning('INVALID', 'Key is invalid.')
-            else:
-                messagebox.showwarning('INVALID', 'LICENSE KEY IS INVALID.')
-                exit()
-
     def checkVersion(self):
         print(config['OPTIONS']['channel'])
         if config['OPTIONS']['channel'] == "Development":
@@ -457,12 +410,14 @@ class BotGUI:
         else:
             response = requests.get("http://div0ky.com/repo/stable/latest.txt")
         latest = response.text
+        latest = str(latest)
+        latest = version.parse(latest)
 
 
         print(f"Current Version is {current_version}\nLatest Version is {latest}")
 
-        if semver.compare(latest, current_version) > 0:
-            self.window.withdraw()
+        if latest > current_version:
+            self.window.destroy()
             root = Tk()
             root.geometry("325x70")
             root.title(f"Firestone Bot v{latest} Updater")
@@ -476,7 +431,7 @@ class BotGUI:
             positionDown = int(root.winfo_screenheight() / 2 - rootHeight / 2)
             root.geometry("+{}+{}".format(positionRight, positionDown))
             root.resizable(0, 0)
-            # root.pack_propagate(0)
+            root.pack_propagate(0)
             root.attributes("-topmost", True)
             progress = Progressbar(root, orient=HORIZONTAL, length=300, mode='determinate')
             progress.grid(column=0, row=1, padx=15, pady=10)
@@ -510,12 +465,12 @@ class BotGUI:
                     # messagebox.showinfo(title="DOWNLOAD COMPLETE", message="Download Complete. Launching Installer...")
                     root.destroy()
                 push(f"Updated to v{latest}")
-                os.startfile(os.getenv('LOCALAPPDATA') + f"/Firestone Bot/Firestone_Bot_v{latest}.exe")
-                sys.exit()
+                os.startfile(os.getenv(
+                    'LOCALAPPDATA') + f"/Firestone Bot/Firestone_Bot_v{latest}.exe")
+                sys.exit(1)
 
             else:
                 root.destroy()
-                self.window.deiconify()
                 # sys.exit(1)
 
 
