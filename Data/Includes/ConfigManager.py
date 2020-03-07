@@ -22,6 +22,7 @@ class ConfigManager:
         self.farm_levels = 5
         self.logging = True
         self.channel = "Stable"
+        self.license_key = ''
 
         # Party settings. Can be overriden via config
         self.party_size = 5
@@ -84,6 +85,8 @@ class ConfigManager:
             self.farm_levels = config['OPTIONS'].getint("farm_levels")
         if "channel" in config['OPTIONS']:
             self.channel = config['OPTIONS']['channel']
+        if "license_key" in config['OPTIONS']:
+            self.license_key = config['OPTIONS']['license_key']
 
         if "party_size" in config['PARTY']:
             self.party_size = config['PARTY'].getint("party_size")
@@ -110,7 +113,8 @@ class ConfigManager:
                                   'guild_missions': self.guild_missions,
                                   'farm_gold': self.farm_gold,
                                   'farm_levels': self.farm_levels,
-                                  'channel': self.channel}
+                                  'channel': self.channel,
+                                  'license_key': self.license_key}
 
         self.config['PARTY'] = {'party_size': self.party_size,
                                 'party_slot_1': self.party_slot_1,
@@ -140,6 +144,12 @@ class ConfigManager:
         if not config_file:
             print("No config file supplied. Aborting.")
             raise Exception("No config file supplied. Aborting.")
+
+        if 'license_key' not in self.config["OPTIONS"]:
+            self.config['OPTIONS']['license_key'] = self.license_key
+            with open(self.config_file, 'w') as configfile:
+                self.config.write(configfile)
+            self.config_last_modified = round(os.path.getmtime(self.config_file))
 
         for val in general_values:
             if val not in config_file["OPTIONS"]:
