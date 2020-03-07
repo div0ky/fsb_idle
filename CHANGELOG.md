@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
+## [5.0.0-dev.2] - 2020-03-06
+
+## Added
+- Support for licensing
+
+## Changed
+- BOT NOW REQUIRES A VALID LICENSE KEY TO OPERATE; hence the bump to 5.0.0
+- ConfigManager now checks for a license key and updates older config files to support this
+
+## Fixed
+- Auto updater wasn't working as expected
+- Main window didn't reappear after choosing NOT to update
+- Version numbers are now parsing correctly
+
 ## [4.1.2-dev.1] - 2020-03-05
 
 ### Added

@@ -68,7 +68,7 @@ class FirestoneBot:
         self.database = IdleBotDB()
         self.mouseLock = MouseLock()
         self.gui = BotGUI()
-        self.gui.update_status("Starting up!")
+        # self.gui.update_status("Starting up!")
 
         # INITIALIZE GUI OBJECTS
         self.root = tkinter.Tk()
