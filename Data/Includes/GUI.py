@@ -389,8 +389,11 @@ class BotGUI:
             user = self.key_info['purchase']['email']
         else:
             user = "UNLICENSED"
-        messagebox.showinfo(f"ABOUT",
-                            f"FIRESTONE IDLE BOT v{current_version}\n\nLicensed to {user}\n\nThank you for supporting Firestone Idle Bot!")
+        if self.key_info['purchase']['subscription_cancelled_at'] is None and self.key_info['purchase']['subscription_failed_at'] is None:
+            sub = "ACTIVE"
+        else:
+            sub = "NOT ACTIVE"
+        messagebox.showinfo(f"ABOUT", f"FIRESTONE IDLE BOT v{current_version}\n\nLICENSED TO: {user}\nSUBSCRIPTION: {sub}\n\nThank you for supporting Firestone Idle Bot!")
 
     def options_on_close(self):
         self.window.deiconify()
@@ -443,80 +446,81 @@ class BotGUI:
                     valid = True
                     self.window.deiconify()
                 else:
-                    messagebox.showwarning('INVALID', 'Key is invalid.')
+                    messagebox.showwarning(f'Firestone Bot v{current_version}', 'Key is invalid.')
             else:
-                messagebox.showwarning('INVALID', 'LICENSE KEY IS INVALID.')
-                exit()
+                messagebox.showwarning(f'Firestone Bot v{current_version}', 'LICENSE KEY IS INVALID.')
+                SystemExit()
 
     def checkVersion(self):
-        print(config['OPTIONS']['channel'])
-        if config['OPTIONS']['channel'] == "Development":
-            response = requests.get("http://div0ky.com/repo/development/latest.txt")
-        elif config['OPTIONS']['channel'] == "Staging":
-            response = requests.get("http://div0ky.com/repo/staging/latest.txt")
-        else:
-            response = requests.get("http://div0ky.com/repo/stable/latest.txt")
-        latest = response.text
-
-
-        print(f"Current Version is {current_version}\nLatest Version is {latest}")
-
-        if semver.compare(latest, current_version) > 0:
-            self.window.withdraw()
-            root = Tk()
-            root.geometry("325x70")
-            root.title(f"Firestone Bot v{latest} Updater")
-            total_label = Label(root, text="Download Pending...")
-            total_label.grid(column=0, row=0, padx=15, pady=5)
-            root.grid_columnconfigure(0, weight=1)
-            rootWidth = root.winfo_reqwidth()
-            rootHeight = root.winfo_reqheight()
-            # Gets both half the screen width/height and window width/height
-            positionRight = int(root.winfo_screenwidth() / 2 - rootWidth / 2)
-            positionDown = int(root.winfo_screenheight() / 2 - rootHeight / 2)
-            root.geometry("+{}+{}".format(positionRight, positionDown))
-            root.resizable(0, 0)
-            # root.pack_propagate(0)
-            root.attributes("-topmost", True)
-            progress = Progressbar(root, orient=HORIZONTAL, length=300, mode='determinate')
-            progress.grid(column=0, row=1, padx=15, pady=10)
-            root.withdraw()
-
-            ask_update = messagebox.askyesno(title=f"Firestone Bot v{current_version}",
-                                             message=f"A new version is availble. You're running v{current_version}. The latest version is v{latest}.\n\nDo you want to download & update?")
-
-            if ask_update:
-                root.deiconify()
-                update = f"http://div0ky.com/repo/Firestone_Bot_v{latest}.exe"
-                with open(os.getenv('LOCALAPPDATA') + f"/Firestone Bot/Firestone_Bot_v{latest}.exe", 'wb') as f:
-                    response = requests.get(update, stream=True)
-                    total_size = response.headers.get('content-length')
-                    if total_size is None:
-                        f.write(response.content)
-                    else:
-                        dl = 0
-                        total_size = int(total_size)
-                        adj_size = round(int(total_size) / 1000, 2)
-                        for data in response.iter_content(chunk_size=4096):
-                            dl += len(data)
-                            adj_dl = round(dl / 1000, 2)
-                            f.write(data)
-                            done = int(100 * dl / total_size)
-                            progress['value'] = done
-                            total_label.config(text=f"{adj_dl}KB / {adj_size}KB")
-                            root.update()
-                            # print("\r[%s%s]" % ('=' * done, ' ' * (50 - done)))
-                    total_label.config(text="DOWNLOAD COMPLETE")
-                    # messagebox.showinfo(title="DOWNLOAD COMPLETE", message="Download Complete. Launching Installer...")
-                    root.destroy()
-                push(f"Updated to v{latest}")
-                os.startfile(os.getenv('LOCALAPPDATA') + f"/Firestone Bot/Firestone_Bot_v{latest}.exe")
-                sys.exit()
-
+        if self.key_info['purchase']['subscription_cancelled_at'] is None and self.key_info['purchase']['subscription_failed_at'] is None:
+            print(config['OPTIONS']['channel'])
+            if config['OPTIONS']['channel'] == "Development":
+                response = requests.get("http://div0ky.com/repo/development/latest.txt")
+            elif config['OPTIONS']['channel'] == "Staging":
+                response = requests.get("http://div0ky.com/repo/staging/latest.txt")
             else:
-                root.destroy()
-                self.window.deiconify()
-                # sys.exit(1)
+                response = requests.get("http://div0ky.com/repo/stable/latest.txt")
+            latest = response.text
+
+
+            print(f"Current Version is {current_version}\nLatest Version is {latest}")
+
+            if semver.compare(latest, current_version) > 0:
+                self.window.withdraw()
+                root = Tk()
+                root.geometry("325x70")
+                root.title(f"Firestone Bot v{latest} Updater")
+                total_label = Label(root, text="Download Pending...")
+                total_label.grid(column=0, row=0, padx=15, pady=5)
+                root.grid_columnconfigure(0, weight=1)
+                rootWidth = root.winfo_reqwidth()
+                rootHeight = root.winfo_reqheight()
+                # Gets both half the screen width/height and window width/height
+                positionRight = int(root.winfo_screenwidth() / 2 - rootWidth / 2)
+                positionDown = int(root.winfo_screenheight() / 2 - rootHeight / 2)
+                root.geometry("+{}+{}".format(positionRight, positionDown))
+                root.resizable(0, 0)
+                # root.pack_propagate(0)
+                root.attributes("-topmost", True)
+                progress = Progressbar(root, orient=HORIZONTAL, length=300, mode='determinate')
+                progress.grid(column=0, row=1, padx=15, pady=10)
+                root.withdraw()
+
+                ask_update = messagebox.askyesno(title=f"Firestone Bot v{current_version}",
+                                                 message=f"A new version is availble. You're running v{current_version}. The latest version is v{latest}.\n\nDo you want to download & update?")
+
+                if ask_update:
+                    root.deiconify()
+                    update = f"http://div0ky.com/repo/Firestone_Bot_v{latest}.exe"
+                    with open(os.getenv('LOCALAPPDATA') + f"/Firestone Bot/Firestone_Bot_v{latest}.exe", 'wb') as f:
+                        response = requests.get(update, stream=True)
+                        total_size = response.headers.get('content-length')
+                        if total_size is None:
+                            f.write(response.content)
+                        else:
+                            dl = 0
+                            total_size = int(total_size)
+                            adj_size = round(int(total_size) / 1000, 2)
+                            for data in response.iter_content(chunk_size=4096):
+                                dl += len(data)
+                                adj_dl = round(dl / 1000, 2)
+                                f.write(data)
+                                done = int(100 * dl / total_size)
+                                progress['value'] = done
+                                total_label.config(text=f"{adj_dl}KB / {adj_size}KB")
+                                root.update()
+                                # print("\r[%s%s]" % ('=' * done, ' ' * (50 - done)))
+                        total_label.config(text="DOWNLOAD COMPLETE")
+                        # messagebox.showinfo(title="DOWNLOAD COMPLETE", message="Download Complete. Launching Installer...")
+                        root.destroy()
+                    push(f"Updated to v{latest}")
+                    os.startfile(os.getenv('LOCALAPPDATA') + f"/Firestone Bot/Firestone_Bot_v{latest}.exe")
+                    sys.exit()
+
+                else:
+                    root.destroy()
+                    self.window.deiconify()
+                    # sys.exit(1)
 
 
 if __name__ == "__main__":
