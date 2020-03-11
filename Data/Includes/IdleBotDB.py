@@ -22,8 +22,10 @@ class IdleBotDB:
         self.c = self.connection.cursor()
 
         # SETUP UNIQUE IDENTIFIER
-        self.public_id = None
-        self.license_key = None
+        self.public_id = ''
+        self.license_key = ''
+        self.email = None
+        self.authenticated = False
 
         # SETUP VARIABLES FOR DEBUGGING
         self.ocr_fail_count = 0
