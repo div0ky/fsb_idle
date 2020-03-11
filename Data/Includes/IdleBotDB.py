@@ -1,6 +1,7 @@
 import sqlite3
 import os
 from sys import platform
+import uuid
 from time import time
 
 class IdleBotDB:
@@ -19,6 +20,10 @@ class IdleBotDB:
 
         # self.connection = sqlite3.connect("http://div0ky.com/repo/memory.db")
         self.c = self.connection.cursor()
+
+        # SETUP UNIQUE IDENTIFIER
+        self.public_id = None
+        self.license_key = None
 
         # SETUP VARIABLES FOR DEBUGGING
         self.ocr_fail_count = 0
@@ -79,12 +84,18 @@ class IdleBotDB:
         else:
             self.save_option('ocr_f_pct', self.ocr_f_pct)
 
+        if self.read_option('public_id'):
+            self.public_id = str(self.read_option('public_id'))
+        else:
+            self.save_option('public_id', str(uuid.uuid4()))
+
+        if self.read_option('license_key'):
+            self.license_key = str(self.read_option('license_key'))
 
         if self.read_option('ocr_s_pct'):
             self.ocr_s_pct = float(self.read_option('ocr_s_pct'))
         else:
             self.save_option('ocr_s_pct', self.ocr_s_pct)
-
 
         if self.read_option('GUILD_MISSION_TIME_LEFT'):
             self.GUILD_MISSION_TIME_LEFT = float(self.read_option('GUILD_MISSION_TIME_LEFT'))
