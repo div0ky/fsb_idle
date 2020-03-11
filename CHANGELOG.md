@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
+## [5.0.0-dev.8] - 2020-03-11
+
+## Fixed
+- Broke auto-updater somewhere along the line. It's fixed now.
+
+## [5.0.0-dev.7] - 2020-03-11
+
+## Added
+- Tesseract is now bundled with the installer
+
+## [5.0.0-dev.6] - 2020-03-11
+
+## Added
+- Support for div API v0.1
+
 ## [5.0.0-dev.2] - 2020-03-06
 
 ## Added

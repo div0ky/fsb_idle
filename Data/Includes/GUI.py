@@ -1,17 +1,19 @@
 #! python3
 import configparser
 import http.client
-import json
 import os
 import sys
+import time
 import urllib
+from threading import Thread
 from tkinter import Tk, Menu, Label, Button, Toplevel, BooleanVar, messagebox, HORIZONTAL, simpledialog
 from tkinter.ttk import Combobox, Checkbutton, Entry, Progressbar, Style
-from Data.Includes.IdleBotDB import IdleBotDB
+
 import requests
 import semver
 from requests import get
 
+from Data.Includes.IdleBotDB import IdleBotDB
 from Data.Includes.ver import version_info
 
 config = configparser.ConfigParser()
@@ -111,9 +113,9 @@ class BotGUI:
 
         self.window.after(300, self.status_win)
         # self.verifyLicense(self.license_key)
-        self.come_alive()
-        self.window.after(300, self.checkVersion)
+        self.authenticate()
         # Thread(target=self.status_win, name="StatusWindow", daemon=True).start()
+        Thread(target=self.keep_alive, name="KeepAlive", daemon=True).start()
 
         self.window.mainloop()
 
@@ -387,15 +389,12 @@ class BotGUI:
         sys.exit()
 
     def menu_about(self):
-        if self.key_info:
-            user = self.key_info['purchase']['email']
+        if db.email:
+            user = db.email
         else:
             user = "UNLICENSED"
-        if self.key_info['purchase']['subscription_cancelled_at'] is None and self.key_info['purchase']['subscription_failed_at'] is None:
-            sub = "ACTIVE"
-        else:
-            sub = "NOT ACTIVE"
-        messagebox.showinfo(f"ABOUT", f"FIRESTONE IDLE BOT v{current_version}\n\nLICENSED TO: {user}\nSUBSCRIPTION: {sub}\n\nThank you for supporting Firestone Idle Bot!")
+
+        messagebox.showinfo(f"ABOUT", f"FIRESTONE IDLE BOT v{current_version}\n\nLICENSED TO: {user}\n\nThank you for supporting Firestone Idle Bot!")
 
     def options_on_close(self):
         self.window.deiconify()
@@ -414,26 +413,30 @@ class BotGUI:
         sys.exit()
 
 
-    def come_alive(self):
-        self.api = f'http://127.0.0.1:5000/activate?key={self.license_key}&id={self.public_id}'
-        response = requests.get(self.api)
-        if response['success']:
-            self.valid = True
-        print(self.api)
-        print(response.text)
-
-    def verifyLicense(self, key):
-        data = {
-            'product_permalink': 'hqKje',
-            'license_key': key,
-            'increment_uses_count': 'false'
-        }
-
-        response = requests.post(f'https://api.gumroad.com/v2/licenses/verify', data=data)
-        self.key_info = json.loads(response.text)
-
-        if self.key_info['success'] == True and self.key_info['purchase']['refunded'] == False:
-            return True
+    def authenticate(self, key=None):
+        # db.public_id = '9b466c98-1041-4531-91bc-00aa33c25377'
+        if db.license_key or key is not None:
+            if key is None:
+                response = requests.get(f'https://api.div0ky.com/authenticate?key={db.license_key}&id={db.public_id}&version={version_info.full_version}')
+            else:
+                response = requests.get(f'https://api.div0ky.com/authenticate?key={key}&id={db.public_id}&version={version_info.full_version}')
+            print(response.text)
+            data = response.json()
+            if data['success']:
+                db.token = data['token']
+                db.email = data['email']
+                db.authenticated = True
+                print(response.url)
+                self.checkVersion()
+                return True
+            elif data['message'] == 'Somebody is already using that license key!':
+                self.window.withdraw()
+                messagebox.showerror(f'Firestone Bot v{current_version}', data['message'])
+                exit()
+            else:
+                self.window.withdraw()
+                messagebox.showerror(f'Firestone Bot v{current_version}', data['message'])
+                return False
         else:
             self.window.withdraw()
             messagebox.showerror(f'Firestone Bot v{current_version}', 'LICENSE KEY IS INVALID OR NOT FOUND.')
@@ -445,25 +448,35 @@ class BotGUI:
         valid = False
         while lkey is None and valid == False:
             lkey = simpledialog.askstring(title=f'Firestone Bot v{current_version}', prompt='       PLEASE ENTER YOUR LICENSE KEY:       ')
-
+            print(lkey)
             if lkey is not None:
-                check = self.verifyLicense(lkey)
+                db.save_option('license_key', lkey)
+                check = self.authenticate(key=lkey)
                 if check:
-                    # messagebox.showinfo('SUCCESS', 'Key is valid!')
-                    self.license_key = self.key_info['purchase']['license_key']
-                    config['OPTIONS']['license_key'] = self.license_key
-                    with open(config_file, 'w') as configfile:
-                        config.write(configfile)
+                    db.save_option('license_key', lkey)
                     valid = True
                     self.window.deiconify()
                 else:
                     messagebox.showwarning(f'Firestone Bot v{current_version}', 'Key is invalid.')
             else:
                 messagebox.showwarning(f'Firestone Bot v{current_version}', 'LICENSE KEY IS INVALID.')
-                SystemExit()
+                exit()
+
+    def keep_alive(self):
+        # Timer(29, self.keep_alive).start()
+        while True:
+            time.sleep(280)
+            response = requests.get(f'https://api.div0ky.com/alive?token={db.token}')
+            print(response.text)
+            data = response.json()
+            if data['success']:
+                db.token = data['token']
+            else:
+                raise Exception("Couldn't keep alive!")
+            print(response.url)
 
     def checkVersion(self):
-        if self.key_info['purchase']['subscription_cancelled_at'] is None and self.key_info['purchase']['subscription_failed_at'] is None:
+        if db.authenticated:
             print(config['OPTIONS']['channel'])
             if config['OPTIONS']['channel'] == "Development":
                 response = requests.get("http://div0ky.com/repo/development/latest.txt")
