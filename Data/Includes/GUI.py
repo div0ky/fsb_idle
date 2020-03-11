@@ -7,7 +7,7 @@ import sys
 import urllib
 from tkinter import Tk, Menu, Label, Button, Toplevel, BooleanVar, messagebox, HORIZONTAL, simpledialog
 from tkinter.ttk import Combobox, Checkbutton, Entry, Progressbar, Style
-
+from Data.Includes.IdleBotDB import IdleBotDB
 import requests
 import semver
 from requests import get
@@ -17,6 +17,8 @@ from Data.Includes.ver import version_info
 config = configparser.ConfigParser()
 config_file = os.getenv('LOCALAPPDATA') + "/Firestone Bot/config.ini"
 config.read(config_file)
+
+db = IdleBotDB()
 
 version_info = version_info()
 
@@ -49,10 +51,9 @@ class BotGUI:
     def __init__(self):
 
         self.key_info = None
-        try:
-            self.license_key = str(config['OPTIONS']['license_key'])
-        except:
-            self.license_key = ''
+        self.license_key = db.license_key
+        self.public_id = db.public_id
+        self.valid = False
 
         """
         DEFINE VERSION INFO
@@ -109,7 +110,8 @@ class BotGUI:
         # self.window.bind('<Control-n>', self.party_win)
 
         self.window.after(300, self.status_win)
-        self.verifyLicense(self.license_key)
+        # self.verifyLicense(self.license_key)
+        self.come_alive()
         self.window.after(300, self.checkVersion)
         # Thread(target=self.status_win, name="StatusWindow", daemon=True).start()
 
@@ -411,6 +413,15 @@ class BotGUI:
         self.window.destroy()
         sys.exit()
 
+
+    def come_alive(self):
+        self.api = f'http://127.0.0.1:5000/activate?key={self.license_key}&id={self.public_id}'
+        response = requests.get(self.api)
+        if response['success']:
+            self.valid = True
+        print(self.api)
+        print(response.text)
+
     def verifyLicense(self, key):
         data = {
             'product_permalink': 'hqKje',
@@ -418,7 +429,7 @@ class BotGUI:
             'increment_uses_count': 'false'
         }
 
-        response = requests.post('https://api.gumroad.com/v2/licenses/verify', data=data)
+        response = requests.post(f'https://api.gumroad.com/v2/licenses/verify', data=data)
         self.key_info = json.loads(response.text)
 
         if self.key_info['success'] == True and self.key_info['purchase']['refunded'] == False:
