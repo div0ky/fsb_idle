@@ -90,6 +90,7 @@ class BotGUI:
 
         self.help_menu = Menu(self.main_menu, tearoff=0)
         self.help_menu.add_command(label="About", command=self.menu_about)
+        self.help_menu.add_command(label="Change License Key", command=self.menu_change_license)
 
         self.main_menu.add_cascade(label="File", menu=self.file_menu)
         self.main_menu.add_cascade(label="Help", menu=self.help_menu)
@@ -111,10 +112,9 @@ class BotGUI:
 
         # self.window.bind('<Control-n>', self.party_win)
 
+        self.window.after(30, self.authenticate)
+        self.window.after(150, self.checkVersion)
         self.window.after(300, self.status_win)
-        # self.verifyLicense(self.license_key)
-        self.authenticate()
-        # Thread(target=self.status_win, name="StatusWindow", daemon=True).start()
         Thread(target=self.keep_alive, name="KeepAlive", daemon=True).start()
 
         self.window.mainloop()
@@ -365,6 +365,7 @@ class BotGUI:
 
     def status_win(self, e=None):
         # self.window.withdraw()
+        print('Deploy status window')
         self.status_win = Toplevel(self.window)
         self.status_win.configure(background="black")
         self.status_win.overrideredirect(1)
@@ -387,6 +388,9 @@ class BotGUI:
 
     def menu_exit(self):
         sys.exit()
+
+    def menu_change_license(self):
+        self.change_license()
 
     def menu_about(self):
         if db.email:
@@ -414,7 +418,29 @@ class BotGUI:
 
 
     def authenticate(self, key=None):
-        # db.public_id = '9b466c98-1041-4531-91bc-00aa33c25377'
+        self.window.withdraw()
+        print('Withdraw main window.')
+        self.auth_win = Tk()
+        print('Deploy auth window')
+        self.auth_win.geometry("325x70")
+        self.auth_win.title(f"Firestone Bot v{current_version}")
+        total_label = Label(self.auth_win, text="Authenticating...".upper())
+        total_label.grid(column=0, row=0, padx=15, pady=5)
+        self.auth_win.grid_columnconfigure(0, weight=1)
+        rootWidth = self.auth_win.winfo_reqwidth()
+        rootHeight = self.auth_win.winfo_reqheight()
+        # Gets both half the screen width/height and window width/height
+        positionRight = int(self.auth_win.winfo_screenwidth() / 2 - rootWidth / 2)
+        positionDown = int(self.auth_win.winfo_screenheight() / 2 - rootHeight / 2)
+        self.auth_win.geometry("+{}+{}".format(positionRight, positionDown))
+        self.auth_win.resizable(0, 0)
+        # root.pack_propagate(0)
+        self.auth_win.attributes("-topmost", True)
+        self.progress = Progressbar(self.auth_win, orient=HORIZONTAL, length=300, mode='determinate')
+        self.progress.grid(column=0, row=1, padx=15, pady=10)
+        self.auth_win.update()
+        # time.sleep(5)
+
         if db.license_key or key is not None:
             if key is None:
                 response = requests.get(f'https://api.div0ky.com/authenticate?key={db.license_key}&id={db.public_id}&version={version_info.full_version}')
@@ -427,7 +453,11 @@ class BotGUI:
                 db.email = data['email']
                 db.authenticated = True
                 print(response.url)
-                self.checkVersion()
+                self.progress['value'] = 50
+                total_label.config(text="SUCCESS")
+                self.auth_win.update()
+                time.sleep(2)
+                self.auth_win.destroy()
                 return True
             elif data['message'] == 'Somebody is already using that license key!':
                 self.window.withdraw()
@@ -461,6 +491,23 @@ class BotGUI:
             else:
                 messagebox.showwarning(f'Firestone Bot v{current_version}', 'LICENSE KEY IS INVALID.')
                 exit()
+
+    def change_license(self):
+        lkey = None
+        valid = False
+        while lkey is None and valid == False:
+            lkey = simpledialog.askstring(title=f'Firestone Bot v{current_version}', prompt='       PLEASE ENTER YOUR LICENSE KEY:       ')
+            print(lkey)
+            if lkey is not None:
+                db.save_option('license_key', lkey)
+                check = self.authenticate(key=lkey)
+                if check:
+                    valid = True
+                    self.window.deiconify()
+                else:
+                    messagebox.showwarning(f'Firestone Bot v{current_version}', 'Key is invalid.')
+            else:
+                return
 
     def keep_alive(self):
         # Timer(29, self.keep_alive).start()

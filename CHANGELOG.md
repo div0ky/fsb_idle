@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file. We are atte
 - Tavern
 - Open Chests
 
+## [5.0.0-dev.9] - 2020-03-13
+
+## Added
+- Menu item under Help > Change License Key to change your key on that device
+
 ## [5.0.0-dev.8] - 2020-03-11
 
 ## Fixed
