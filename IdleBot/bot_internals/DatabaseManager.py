@@ -4,6 +4,8 @@ from sys import platform
 import uuid
 from time import time
 import functools
+from .BotLog import log
+
 
 def singleton(cls):
     # Only ONE instance allowed
@@ -12,21 +14,23 @@ def singleton(cls):
         if not wrapper_singleton.instance:
             wrapper_singleton.instance = cls(*args, **kwargs)
         return wrapper_singleton.instance
+
     wrapper_singleton.instance = None
     return wrapper_singleton
+
 
 @singleton
 class DatabaseManager:
     def __init__(self):
 
         if platform == "linux" or platform == "linux2":
-            print("We're using Linux")
+            log.debug("We're using Linux")
         elif platform == "darwin":
-            print("We're on MacOS")
+            log.debug("We're on MacOS")
             self.connection = sqlite3.connect(os.path.expanduser('~/Documents/Firestone Bot/memory.db'))
             self.ocr_image = os.path.expanduser('~/Documents/Firestone Bot/ss.png')
         elif platform == "win32":
-            print("We're on Windows")
+            log.debug("We appear to be on a Windows OS")
             self.connection = sqlite3.connect(os.getenv('LOCALAPPDATA') + "\\Firestone Bot\\memory.db")
             self.ocr_image = os.getenv('LOCALAPPDATA') + "\\Firestone Bot\\OCR\\ss.png"
 
@@ -90,12 +94,12 @@ class DatabaseManager:
     def _verify_tables(self):
         self.c.execute("SELECT count(name) FROM sqlite_master WHERE type='table' AND name='config'")
         if self.c.fetchone()[0] == 1:
-            print("Table exists.")
+            log.debug("Config table exists in database")
         else:
             self.c.execute("CREATE TABLE config(setting UNIQUE, option TEXT)")
-            print("Created tables.")
+            log.debug("Config tables weren't found. Created necessary tables.")
             self.connection.commit()
-            print("Commited changes to database.")
+            log.debug("Commited changes to database.")
 
     def save_option(self, setting, option):
         self.c.execute("INSERT OR REPLACE INTO config VALUES (?,?)", [setting, option])
@@ -198,7 +202,8 @@ class DatabaseManager:
         if self.read_option('heroes'):
             self.heroes = [x for x in self.read_option('heroes').split(',')]
         else:
-            self.heroes = ['Talia','Boris','Asmondai','Burt','Muriel','Astrid','Ina','Fini','Solaine','Benedictus','Blaze','Luana','Valerius']
+            self.heroes = ['Talia', 'Boris', 'Asmondai', 'Burt', 'Muriel', 'Astrid', 'Ina', 'Fini', 'Solaine',
+                           'Benedictus', 'Blaze', 'Luana', 'Valerius']
 
         # auto_prestige
         if self.read_option('auto_prestige'):
@@ -283,6 +288,7 @@ class DatabaseManager:
             self.party_slot_5 = self.read_option('party_slot_5')
         else:
             self.save_option('party_slot_5', self.party_slot_5)
+
 
 database = DatabaseManager()
 
