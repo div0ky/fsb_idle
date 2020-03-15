@@ -1,5 +1,4 @@
 semver
 pytesseract
 requests
-PIL
 Flask

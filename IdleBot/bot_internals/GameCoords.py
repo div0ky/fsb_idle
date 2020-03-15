@@ -1,9 +1,10 @@
-from win32api import GetSystemMetrics
-from bot_internals.BotLog import log
-from bot_internals.DatabaseManager import database
+from .BotLog import log
+from .DatabaseManager import database
+
 
 class GameCoords:
     def __init__(self):
+        log.info('Figuring out screen coordinates')
         # SETUP VOLATILE VARIABLES FOR COORDS
         self.game_region = None
         self.guardian_click_coords = None
@@ -17,38 +18,40 @@ class GameCoords:
         self.back_arrow_coords = None
         self.upgrades_button_coords = None
         self.temple_of_eternals_coords = None
-        self.class_coords = {}
+        self.hero_coords = {}
         self.party_coords = None
         self.exotic_merchant_coords = None
         self.map_coords = None
         self.pause_length = 0.5
 
-        self.getGameRegion()
-        self.setupCoordinates()
+        self.get_game_region()
+        self.setup_coordinates()
 
-    def getGameRegion(self):
-        # Calculate the game region based on screen resolution.
-        sWidth, sHeight = GetSystemMetrics(0), GetSystemMetrics(1)
-        self.game_region = (0, 0, sWidth, sHeight)
-        log.info("Program Start\n\n")
-        log.info(f"Screen resolution detected as: {sWidth}x{sHeight}")
+    """
+    After much debate, the game is hardset for 1920x1080 resolution for now.
+    I have no current plans to support other resolutions.
+    """
+    def get_game_region(self):  # Calculate the game region based on screen resolution.
+        screen_width, screen_height = (1920, 1080)
+        self.game_region = (0, 0, screen_width, screen_height)
+        # log.info(f"Screen resolution detected as: {screen_width}x{screen_height}")
 
     def relative_coords(self, x=None, y=None, w=None, h=None):
         if x:
-            newX = round(x * self.game_region[2] / 1920)
-            coords = newX
+            new_x = round(x * self.game_region[2] / 1920)
+            coords = new_x
         if y:
-            newY = round(y * self.game_region[3] / 1080)
-            coords = (newX, newY)
+            new_y = round(y * self.game_region[3] / 1080)
+            coords = (new_x, new_y)
         if w:
-            newW = round(w * self.game_region[2] / 1920)
-            coords = (newX, newY, newW)
+            new_width = round(w * self.game_region[2] / 1920)
+            coords = (new_x, new_y, new_width)
         if h:
-            newH = round(h * self.game_region[3] / 1080)
-            coords = (newX, newY, newW, newH)
+            new_height = round(h * self.game_region[3] / 1080)
+            coords = (new_x, new_y, new_width, new_height)
         return coords
 
-    def setupCoordinates(self):
+    def setup_coordinates(self):
         self.upgrade_coords = (self.relative_coords(1840, 660))
         self.guardian_click_coords = (self.game_region[2] / 2, self.game_region[3] / 2)
         self.small_close_coords = (self.relative_coords(1875, 100))
@@ -63,11 +66,12 @@ class GameCoords:
         self.exotic_merchant_coords = (self.relative_coords(1445, 735))
         self.map_coords = (self.relative_coords(1840, 395))
 
-        self.class_coords = {"ranger": (round(0.8672 * self.game_region[2]), round(0.5417 * self.game_region[3])),
-                             "mage": (round(0.8698 * self.game_region[2]), round(0.3565 * self.game_region[3])),
-                             "tank": (round(0.7708 * self.game_region[2]), round(0.3565 * self.game_region[3])),
-                             "warrior": (round(0.7708 * self.game_region[2]), round(0.5444 * self.game_region[3])),
-                             "priest": (round(0.7708 * self.game_region[2]), round(0.7269 * self.game_region[3])),
-                             "rogue": (round(0.8698 * self.game_region[2]), round(0.7269 * self.game_region[3]))}
+        self.hero_coords = {"burt": (round(0.8672 * self.game_region[2]), round(0.5417 * self.game_region[3])),
+                            "solaine": (round(0.8698 * self.game_region[2]), round(0.3565 * self.game_region[3])),
+                            "baine": (round(0.7708 * self.game_region[2]), round(0.3565 * self.game_region[3])),
+                            "talia": (round(0.7708 * self.game_region[2]), round(0.5444 * self.game_region[3])),
+                            "benedictus": (round(0.7708 * self.game_region[2]), round(0.7269 * self.game_region[3])),
+                            "rogue": (round(0.8698 * self.game_region[2]), round(0.7269 * self.game_region[3]))}
 
 
+game_coords = GameCoords()

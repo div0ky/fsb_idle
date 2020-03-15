@@ -13,39 +13,9 @@ import requests
 import semver
 from requests import get
 
-
-
-config = configparser.ConfigParser()
-config_file = os.getenv('LOCALAPPDATA') + "/Firestone Bot/config.ini"
-config.read(config_file)
-
-db = IdleBotDB()
-
-version_info = version_info()
-
-if version_info.vStage == "stable":
-    current_version = version_info.version
-else:
-    current_version = version_info.full_version
-
-window = None
-party1 = None
-party2 = None
-party3 = None
-party4 = None
-party5 = None
-
-
-def push(msg):
-    ip = get('https://api.ipify.org').text
-    conn = http.client.HTTPSConnection("api.pushover.net:443")
-    conn.request("POST", "/1/messages.json",
-                 urllib.parse.urlencode({
-                     "token": "anj13d6adu8s3hm66pfmiwacjxwt36",
-                     "user": "uGUQThApDAJfvscP5Levk419xn7yyx",
-                     "message": f"{ip} - {msg}",
-                 }), {"Content-type": "application/x-www-form-urlencoded"})
-    conn.getresponse()
+from .DatabaseManager import database as db
+from .version_info import *
+from .BotLog import log
 
 
 class BotGUI:
@@ -55,10 +25,6 @@ class BotGUI:
         self.license_key = db.license_key
         self.public_id = db.public_id
         self.valid = False
-
-        """
-        DEFINE VERSION INFO
-        """
 
         self.window = Tk()
         self.window.title(f"Firestone Bot v{current_version}")
@@ -442,9 +408,9 @@ class BotGUI:
 
         if db.license_key or key is not None:
             if key is None:
-                response = requests.get(f'https://api.div0ky.com/authenticate?key={db.license_key}&id={db.public_id}&version={version_info.full_version}')
+                response = requests.get(f'https://api.div0ky.com/authenticate?key={db.license_key}&id={db.public_id}&version={full_version}')
             else:
-                response = requests.get(f'https://api.div0ky.com/authenticate?key={key}&id={db.public_id}&version={version_info.full_version}')
+                response = requests.get(f'https://api.div0ky.com/authenticate?key={key}&id={db.public_id}&version={full_version}')
             print(response.text)
             data = response.json()
             if data['success']:

@@ -4,13 +4,14 @@ from time import sleep
 import pytesseract
 import requests
 from PIL import Image
+from .BotLog import log
+from .DatabaseManager import database
+
 # Define where the tesseract engine is installed
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
 
 class CommonFunctions:
     def __init__(self):
-        self.logger = FirestoneLogger()
-        self.log = self.logger.log
         self.pause_length = 5
 
     def pause(self):
@@ -47,7 +48,7 @@ class CommonFunctions:
 
     def ocr(self, file):
         # CONVERTS AN IMAGE INTO A STRING
-        self.log.info("Reading...")
+        log.info("Reading...")
         im = Image.open(file).convert("LA")
         base = int(float(im.size[0] * 1.5))
         wpercent = (base / float(im.size[0]))
@@ -55,7 +56,7 @@ class CommonFunctions:
         im = im.resize((base, hsize), Image.ANTIALIAS)
         im.save(database.ocr_image)
         text = pytesseract.image_to_string(file, lang="eng", config='--psm 7')
-        self.log.info(f"I think it says: {text}")
+        log.info(f"I think it says: {text}")
         return text
 
     def push(self, msg):
