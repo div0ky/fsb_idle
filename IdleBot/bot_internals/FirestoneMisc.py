@@ -4,15 +4,12 @@ from time import sleep
 import pytesseract
 import requests
 from PIL import Image
-from Data.Includes.IdleBotDB import IdleBotDB
-from Data.Includes.FirestoneLogger import Logger
 # Define where the tesseract engine is installed
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
-database = IdleBotDB()
 
-class SharedFunctions:
+class CommonFunctions:
     def __init__(self):
-        self.logger = Logger()
+        self.logger = FirestoneLogger()
         self.log = self.logger.log
         self.pause_length = 5
 
