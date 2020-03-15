@@ -13,8 +13,7 @@ import requests
 import semver
 from requests import get
 
-from Data.Includes.IdleBotDB import IdleBotDB
-from Data.Includes.ver import version_info
+
 
 config = configparser.ConfigParser()
 config_file = os.getenv('LOCALAPPDATA') + "/Firestone Bot/config.ini"
