@@ -1,3 +1,5 @@
+keyboard
+pyautogui
 semver
 pytesseract
 requests

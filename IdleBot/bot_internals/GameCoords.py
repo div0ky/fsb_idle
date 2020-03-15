@@ -8,7 +8,7 @@ class GameCoords:
         # SETUP VOLATILE VARIABLES FOR COORDS
         self.game_region = None
         self.guardian_click_coords = None
-        self.upgrade_coords = None
+        self.upgrade_button = None
         self.close_coords = None
         self.small_close_coords = None
         self.big_close_coords = None
@@ -16,7 +16,7 @@ class GameCoords:
         self.guild_expeditions_coords = None
         self.town_coords = None
         self.back_arrow_coords = None
-        self.upgrades_button_coords = None
+        self.upgrade_progression_button = None
         self.temple_of_eternals_coords = None
         self.hero_coords = {}
         self.party_coords = None
@@ -28,7 +28,7 @@ class GameCoords:
         self.setup_coordinates()
 
     """
-    After much debate, the game is hardset for 1920x1080 resolution for now.
+    After much debate, the game is hard-coded for 1920x1080 resolution for now.
     I have no current plans to support other resolutions.
     """
     def get_game_region(self):  # Calculate the game region based on screen resolution.
@@ -52,7 +52,7 @@ class GameCoords:
         return coords
 
     def setup_coordinates(self):
-        self.upgrade_coords = (self.relative_coords(1840, 660))
+        self.upgrade_button = (self.relative_coords(1840, 660))
         self.guardian_click_coords = (self.game_region[2] / 2, self.game_region[3] / 2)
         self.small_close_coords = (self.relative_coords(1875, 100))
         self.big_close_coords = (self.relative_coords(1820, 75))
@@ -60,7 +60,7 @@ class GameCoords:
         self.guild_coords = (self.relative_coords(1520, 205))
         self.town_coords = (self.relative_coords(1845, 265))
         self.back_arrow_coords = (self.relative_coords(690, 40))
-        self.upgrades_button_coords = (self.relative_coords(1605, 1020))
+        self.upgrade_progression_button = (self.relative_coords(1605, 1020))
         self.temple_of_eternals_coords = (self.relative_coords(915, 250))
         self.party_coords = (self.relative_coords(1845, 520))
         self.exotic_merchant_coords = (self.relative_coords(1445, 735))

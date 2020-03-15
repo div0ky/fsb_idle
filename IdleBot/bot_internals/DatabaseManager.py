@@ -6,7 +6,6 @@ from time import time
 import functools
 from .BotLog import log
 
-
 def singleton(cls):
     # Only ONE instance allowed
     @functools.wraps(cls)
@@ -79,7 +78,7 @@ class DatabaseManager:
         # declare bot function variables
         self.auto_prestige = True
         self.farm_gold = True
-        self.farm_levels = 5
+        self.farm_levels = 10
         self.guardian = 'Dragon'
         self.guild_missions = True
         self.in_guild = True
@@ -105,6 +104,8 @@ class DatabaseManager:
         self.c.execute("INSERT OR REPLACE INTO config VALUES (?,?)", [setting, option])
         self.connection.commit()
         setattr(self, setting, option)
+        log.debug(f"Saving '{setting}' to the database as '{option}'")
+        return
 
     def read_option(self, setting):
         for row in self.c.execute("SELECT option FROM config WHERE setting=?", [setting]):
@@ -113,179 +114,209 @@ class DatabaseManager:
             break
         else:
             variable = False
+        log.debug(f"Read '{setting}' from the database: '{variable}'")
         return variable
 
     def _init_values(self):
         # ocr_fail_count
-        if self.read_option('ocr_fail_count'):
-            self.ocr_fail_count = int(self.read_option('ocr_fail_count'))
+        option = self.read_option('ocr_fail_count')
+        if option:
+            self.ocr_fail_count = int(option)
         else:
             self.save_option('ocr_fail_count', self.ocr_fail_count)
 
         # ocr_succeed_count
-        if self.read_option('ocr_succeed_count'):
-            self.ocr_succeed_count = int(self.read_option('ocr_succeed_count'))
+        option = self.read_option('ocr_succeed_count')
+        if option:
+            self.ocr_succeed_count = int(option)
         else:
             self.save_option('ocr_succeed_count', self.ocr_succeed_count)
 
         # ocr_f_pct
-        if self.read_option('ocr_f_pct'):
-            self.ocr_f_pct = float(self.read_option('ocr_f_pct'))
+        option = self.read_option('ocr_f_pct')
+        if option:
+            self.ocr_f_pct = float(option)
         else:
             self.save_option('ocr_f_pct', self.ocr_f_pct)
 
         # public_id
-        if self.read_option('public_id'):
-            self.public_id = str(self.read_option('public_id'))
+        option = self.read_option('public_id')
+        if option:
+            self.public_id = str(option)
         else:
             self.save_option('public_id', str(uuid.uuid4()))
 
         # license_key
-        if self.read_option('license_key'):
-            self.license_key = str(self.read_option('license_key'))
+        option = self.read_option('license_key')
+        if option:
+            self.license_key = str(option)
 
         # ocr_s_pct
-        if self.read_option('ocr_s_pct'):
-            self.ocr_s_pct = float(self.read_option('ocr_s_pct'))
+        option = self.read_option('ocr_s_pct')
+        if option:
+            self.ocr_s_pct = float(option)
         else:
             self.save_option('ocr_s_pct', self.ocr_s_pct)
 
         # guild_mission_time_left
-        if self.read_option('guild_mission_time_left'):
-            self.guild_mission_time_left = float(self.read_option('guild_mission_time_left'))
+        option = self.read_option('guild_mission_time_left')
+        if option:
+            self.guild_mission_time_left = float(option)
         else:
             self.save_option('guild_mission_time_left', self.guild_mission_time_left)
 
         # prestige_check_time
-        if self.read_option('prestige_check_time'):
-            self.prestige_check_time = float(self.read_option('prestige_check_time'))
+        option = self.read_option('prestige_check_time')
+        if option:
+            self.prestige_check_time = float(option)
         else:
             self.save_option('prestige_check_time', self.prestige_check_time)
 
         # upgrade_status
-        if self.read_option('upgrade_status'):
-            self.upgrade_status = self.read_option('upgrade_status')
+        option = self.read_option('upgrade_status')
+        if option:
+            self.upgrade_status = str(option)
         else:
             self.save_option('upgrade_status', self.upgrade_status)
 
         # fresh_start
-        if self.read_option('fresh_start'):
-            self.fresh_start = bool(self.read_option('fresh_start'))
+        option = self.read_option('fresh_start')
+        if option:
+            self.fresh_start = bool(option)
         else:
             self.save_option('fresh_start', self.fresh_start)
 
         # boss_failed
-        if self.read_option('boss_failed'):
-            self.boss_failed = bool(self.read_option('boss_failed'))
+        option = self.read_option('boss_failed')
+        if option:
+            self.boss_failed = bool(option)
         else:
             self.save_option('boss_failed', self.boss_failed)
 
         # ocr_image
-        if self.read_option('ocr_image'):
-            self.ocr_image = self.read_option('ocr_image')
+        option = self.read_option('ocr_image')
+        if option:
+            self.ocr_image = str(option)
         else:
             self.save_option('ocr_image', self.ocr_image)
 
         # active_missions
-        if self.read_option('active_missions'):
-            self.active_missions = int(self.read_option('active_missions'))
+        option = self.read_option('active_missions')
+        if option:
+            self.active_missions = int(option)
         else:
             self.save_option('active_missions', self.active_missions)
 
         # map_troops
-        if self.read_option('map_troops'):
-            self.map_troops = int(self.read_option('map_troops'))
+        option = self.read_option('map_troops')
+        if option:
+            self.map_troops = int(option)
         else:
             self.save_option('map_troops', self.map_troops)
 
         # heroes
-        if self.read_option('heroes'):
+        option = self.read_option('heroes')
+        if option:
             self.heroes = [x for x in self.read_option('heroes').split(',')]
         else:
             self.heroes = ['Talia', 'Boris', 'Asmondai', 'Burt', 'Muriel', 'Astrid', 'Ina', 'Fini', 'Solaine',
                            'Benedictus', 'Blaze', 'Luana', 'Valerius']
 
         # auto_prestige
-        if self.read_option('auto_prestige'):
-            self.auto_prestige = self.read_option('auto_prestige')
+        option = self.read_option('auto_prestige')
+        if option:
+            self.auto_prestige = bool(option)
         else:
             self.save_option('auto_prestige', self.auto_prestige)
 
         # prestige_level
-        if self.read_option('prestige_level'):
-            self.prestige_level = self.read_option('prestige_level')
+        option = self.read_option('prestige_level')
+        if option:
+            self.prestige_level = int(option)
         else:
             self.save_option('prestige_level', self.prestige_level)
 
         # in_guild
-        if self.read_option('in_guild'):
-            self.in_guild = self.read_option('in_guild')
+        option = self.read_option('in_guild')
+        if option:
+            self.in_guild = bool(option)
         else:
             self.save_option('in_guild', self.in_guild)
 
         # guardian
-        if self.read_option('guardian'):
-            self.guardian = self.read_option('guardian')
+        option = self.read_option('guardian')
+        if option:
+            self.guardian = str(option)
         else:
             self.save_option('guardian', self.guardian)
 
         # guild_missions
-        if self.read_option('guild_missions'):
-            self.guild_missions = self.read_option('guild_missions')
+        option = self.read_option('guild_missions')
+        if option:
+            self.guild_missions = bool(option)
         else:
             self.save_option('guild_missions', self.guild_missions)
 
         # farm_gold
-        if self.read_option('farm_gold'):
-            self.farm_gold = self.read_option('farm_gold')
+        option = self.read_option('farm_gold')
+        if option:
+            self.farm_gold = bool(option)
         else:
             self.save_option('farm_gold', self.farm_gold)
 
         # farm_levels
-        if self.read_option('farm_levels'):
-            self.farm_levels = self.read_option('farm_levels')
+        option = self.read_option('farm_levels')
+        if option:
+            self.farm_levels = int(option)
         else:
             self.save_option('farm_levels', self.farm_levels)
 
         # update channel
-        if self.read_option('channel'):
-            self.channel = self.read_option('channel')
+        option = self.read_option('channel')
+        if option:
+            self.channel = str(option)
         else:
             self.save_option('channel', self.channel)
 
         # party_size
-        if self.read_option('party_size'):
-            self.party_size = self.read_option('party_size')
+        option = self.read_option('party_size')
+        if option:
+            self.party_size = int(option)
         else:
             self.save_option('party_size', self.party_size)
 
         # party_slot_1
-        if self.read_option('party_slot_1'):
-            self.party_slot_1 = self.read_option('party_slot_1')
+        option = self.read_option('party_slot_1')
+        if option:
+            self.party_slot_1 = str(option)
         else:
             self.save_option('party_slot_1', self.party_slot_1)
 
         # party_slot_2
-        if self.read_option('party_slot_2'):
-            self.party_slot_2 = self.read_option('party_slot_2')
+        option = self.read_option('party_slot_2')
+        if option:
+            self.party_slot_2 = str(option)
         else:
             self.save_option('party_slot_2', self.party_slot_2)
 
         # party_slot_3
-        if self.read_option('party_slot_3'):
-            self.party_slot_3 = self.read_option('party_slot_3')
+        option = self.read_option('party_slot_3')
+        if option:
+            self.party_slot_3 = str(option)
         else:
             self.save_option('party_slot_3', self.party_slot_3)
 
         # party_slot_4
-        if self.read_option('party_slot_4'):
-            self.party_slot_4 = self.read_option('party_slot_4')
+        option = self.read_option('party_slot_4')
+        if option:
+            self.party_slot_4 = str(option)
         else:
             self.save_option('party_slot_4', self.party_slot_4)
 
         # party_slot_5
-        if self.read_option('party_slot_5'):
-            self.party_slot_5 = self.read_option('party_slot_5')
+        option = self.read_option('party_slot_5')
+        if option:
+            self.party_slot_5 = str(option)
         else:
             self.save_option('party_slot_5', self.party_slot_5)
 
