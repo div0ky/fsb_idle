@@ -32,7 +32,7 @@ class BotLog:
             datefmt='%Y-%m-%d | %H:%M:%S')
         # Create console handler
         c_handler = logging.StreamHandler()
-        c_handler.setLevel(logging.INFO)
+        c_handler.setLevel(logging.DEBUG)
         c_handler.setFormatter(console_format)
         # Create debug handler
         f_handler = TimedRotatingFileHandler(os.path.expanduser("~") + "/Documents/Firestone Bot/Logs/debug.log",

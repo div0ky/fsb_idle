@@ -18,7 +18,7 @@ from .version_info import *
 from .BotLog import log
 
 
-class BotGUI:
+class Interface:
     def __init__(self):
 
         self.key_info = None
@@ -560,4 +560,4 @@ class BotGUI:
 
 
 if __name__ == "__main__":
-    gui = BotGUI()
+    gui = Interface()

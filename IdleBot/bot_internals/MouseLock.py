@@ -1,5 +1,6 @@
 import threading
 from time import sleep
+from bot_internals.BotLog import log
 
 import pyautogui
 
@@ -14,14 +15,14 @@ class MouseLock:
         threading.Thread(target=self.lockMouse, name="MouseLock", daemon=True).start()
 
     def lockMouse(self):
-        print("Locking...")
+        log.info("Mouse has been locked down.")
         while True:
             # print("Doing stuff.")
             pos = pyautogui.position()
             if pos[0] < self.GAME_REGION[0] or pos[1] < self.GAME_REGION[1] or pos[0] > self.GAME_REGION[2] or pos[1] > \
                     self.GAME_REGION[3]:
                 pyautogui.moveTo(self.RETURN_COORDS)
-                print("Mouse was out of bounds and was rebounded.")
+                log.warning("Mouse was out of bounds and was rebounded.")
             if self.sentinel is True:
                 return
             sleep(0.1)
