@@ -1,10 +1,12 @@
-import sqlite3
-import os
-from sys import platform
-import uuid
-from time import time
 import functools
+import os
+import sqlite3
+import uuid
+from sys import platform
+from time import time
+
 from .BotLog import log
+
 
 def singleton(cls):
     # Only ONE instance allowed
@@ -17,20 +19,22 @@ def singleton(cls):
     wrapper_singleton.instance = None
     return wrapper_singleton
 
+api_address = 'http://127.0.0.1:5000'
+# api_address = 'https://rest.div0ky.com'
 
 @singleton
 class DatabaseManager:
     def __init__(self):
-
+        log.info(f'{__name__} has been initialized.')
         if platform == "linux" or platform == "linux2":
             log.debug("We're using Linux")
         elif platform == "darwin":
             log.debug("We're on MacOS")
-            self.connection = sqlite3.connect(os.path.expanduser('~/Documents/Firestone Bot/memory.db'))
+            self.connection = sqlite3.connect(os.path.expanduser('~/Documents/Firestone Bot/memory.db'), check_same_thread=False)
             self.ocr_image = os.path.expanduser('~/Documents/Firestone Bot/ss.png')
         elif platform == "win32":
             log.debug("We appear to be on a Windows OS")
-            self.connection = sqlite3.connect(os.getenv('LOCALAPPDATA') + "\\Firestone Bot\\memory.db")
+            self.connection = sqlite3.connect(os.getenv('LOCALAPPDATA') + "\\Firestone Bot\\memory.db", check_same_thread=False)
             self.ocr_image = os.getenv('LOCALAPPDATA') + "\\Firestone Bot\\OCR\\ss.png"
 
         # self.connection = sqlite3.connect("http://div0ky.com/repo/memory.db")
@@ -43,6 +47,16 @@ class DatabaseManager:
         self.email = None
         self.license_key = ''
         self.public_id = ''
+        self.activated = False
+        self.token = None
+        self.launch_progress = 0
+        self.launch_running = True
+        self.running = True
+        self.paused = True
+        self.launch_text = 'Authenticating...'
+        self.launch_show_window = True
+        self.updater_finished = False
+        self.license_key_needed = False
 
         """
         declare internal variales
@@ -59,6 +73,7 @@ class DatabaseManager:
         self.prestige_check_time = time() - 5
         self.upgrades_lowered = False
         self.upgrade_status = "Milestone"
+        self.map_nodes = "(393, 350), (620, 425), (265, 635), (245, 960), (590, 772), (715, 735), (800, 975),(875, 875), (1000, 640), (1190, 640), (1270, 795), (1285, 485), (1578, 540), (1578, 365),(410, 725), (815, 775), (1040, 410), (1375, 350), (1570, 365), (1460, 800), (1300, 985),(760, 565), (830, 690), (875, 555), (1440, 645), (1440, 910), (1560, 980), (830, 395),(465, 445), (1550, 740), (1290, 688)"
 
         """
         declare user configurable options
@@ -84,6 +99,20 @@ class DatabaseManager:
         self.in_guild = True
         self.prestige_level = 4
 
+        # declare stats
+        self.total_chests_opened = 0
+        self.total_clicks = 0
+        self.total_daily_checkins = 0
+        self.total_guardian_trainings = 0
+        self.total_guild_expeditions = 0
+        self.total_map_missions = 0
+        self.total_prestiges = 0
+        self.total_restarts = 0
+        self.total_runtime = 0
+        self.total_stages_farmed = 0
+        self.total_tavern_cards = 0
+        self.total_upgrades_purchased = 0
+
         """
         verify that the tables exist and initialize values
         """
@@ -98,13 +127,22 @@ class DatabaseManager:
             self.c.execute("CREATE TABLE config(setting UNIQUE, option TEXT)")
             log.debug("Config tables weren't found. Created necessary tables.")
             self.connection.commit()
-            log.debug("Commited changes to database.")
+            log.debug("Created table 'config' in database")
+
+        self.c.execute("SELECT count(name) FROM sqlite_master WHERE type='table' AND name='stats'")
+        if self.c.fetchone()[0] ==1:
+            log.debug('Stats table exists in database')
+        else:
+            self.c.execute("CREATE TABLE stats(stat UNIQUE, value TEXT)")
+            self.connection.commit()
+            log.debug("Created table 'stats' in database")
 
     def save_option(self, setting, option):
         self.c.execute("INSERT OR REPLACE INTO config VALUES (?,?)", [setting, option])
         self.connection.commit()
         setattr(self, setting, option)
-        log.debug(f"Saving '{setting}' to the database as '{option}'")
+        if setting != 'token':
+            log.debug(f"Saving '{setting}' to the database as '{option}'")
         return
 
     def read_option(self, setting):
@@ -114,10 +152,55 @@ class DatabaseManager:
             break
         else:
             variable = False
-        log.debug(f"Read '{setting}' from the database: '{variable}'")
+        if setting != 'token':
+            log.debug(f"Read '{setting}' from the database: '{variable}'")
+        return variable
+
+    def save_stat(self, stat, value):
+        self.c.execute("INSERT OR REPLACE INTO stats VALUES (?,?)", [stat, value])
+        self.connection.commit()
+        setattr(self, stat, value)
+        log.debug(f"Saving '{stat}' to the database as '{value}'")
+        return
+
+    def read_stat(self, stat):
+        for row in self.c.execute("SELECT value FROM stats WHERE stat=?", [stat]):
+            variable = row[0]
+            # setattr(self, setting, variable)
+            break
+        else:
+            variable = False
+        log.debug(f"Read '{stat}' from the database: '{variable}'")
         return variable
 
     def _init_values(self):
+
+        # email
+        option = self.read_option('email')
+        if option:
+            self.email = str(option)
+
+        # token
+        option = self.read_option('token')
+        if option:
+            self.token = str(option)
+        else:
+            self.save_option('token', self.token)
+
+        # map nodes
+        option = self.read_option('map_nodes')
+        if option:
+            self.map_nodes = str(option)
+        else:
+            self.save_option('map_nodes', self.map_nodes)
+
+        # activated
+        option = self.read_option('activated')
+        if option:
+            self.activated = bool(option)
+        else:
+            self.save_option('activated', self.activated)
+
         # ocr_fail_count
         option = self.read_option('ocr_fail_count')
         if option:
@@ -217,10 +300,9 @@ class DatabaseManager:
         # heroes
         option = self.read_option('heroes')
         if option:
-            self.heroes = [x for x in self.read_option('heroes').split(',')]
+            self.heroes = sorted([x for x in str(option).split(',')])
         else:
-            self.heroes = ['Talia', 'Boris', 'Asmondai', 'Burt', 'Muriel', 'Astrid', 'Ina', 'Fini', 'Solaine',
-                           'Benedictus', 'Blaze', 'Luana', 'Valerius']
+            self.heroes = sorted(['Talia', 'Boris', 'Asmondai', 'Burt', 'Muriel', 'Astrid', 'Ina', 'Fini', 'Solaine','Benedictus', 'Blaze', 'Luana', 'Valerius'])
 
         # auto_prestige
         option = self.read_option('auto_prestige')
@@ -319,6 +401,94 @@ class DatabaseManager:
             self.party_slot_5 = str(option)
         else:
             self.save_option('party_slot_5', self.party_slot_5)
+
+        """
+        Handle initial stats entries
+        """
+
+        # total prestiges
+        option = self.read_stat('total_prestiges')
+        if option:
+            self.total_prestiges = int(option)
+        else:
+            self.save_stat('total_prestiges', self.total_prestiges)
+
+        # total map missions
+        option = self.read_stat('total_map_missions')
+        if option:
+            self.total_map_missions = int(option)
+        else:
+            self.save_stat('total_map_missions', self.total_map_missions)
+
+        # total guild expeditions
+        option = self.read_stat('total_guild_expeditions')
+        if option:
+            self.total_guild_expeditions = int(option)
+        else:
+            self.save_stat('total_guild_expeditions', self.total_guild_expeditions)
+
+        # total chests opened
+        option = self.read_stat('total_chests_opened')
+        if option:
+            self.total_chests_opened = int(option)
+        else:
+            self.save_stat('total_chests_opened', self.total_chests_opened)
+
+        # total guardian trainings
+        option = self.read_stat('total_guardian_trainings')
+        if option:
+            self.total_guardian_trainings = int(option)
+        else:
+            self.save_stat('total_guardian_trainings', self.total_guardian_trainings)
+
+        # total stages farmed
+        option = self.read_stat('total_stages_farmed')
+        if option:
+            self.total_stages_farmed = int(option)
+        else:
+            self.save_stat('total_stages_farmed', self.total_stages_farmed)
+
+        # total tavern cards
+        option = self.read_stat('total_tavern_cards')
+        if option:
+            self.total_tavern_cards = int(option)
+        else:
+            self.save_stat('total_tavern_cards', self.total_tavern_cards)
+
+        # total restarts
+        stat = self.read_stat('total_restarts')
+        if stat:
+            self.total_restarts = int(stat)
+        else:
+            self.save_stat('total_restarts', self.total_restarts)
+
+        # total daily checkins
+        stat = self.read_stat('total_daily_checkins')
+        if stat:
+            self.total_daily_checkins = int(stat)
+        else:
+            self.save_stat('total_daily_checkins', self.total_daily_checkins)
+
+        # total clicks
+        stat = self.read_stat('total_clicks')
+        if stat:
+            self.total_clicks = int(stat)
+        else:
+            self.save_stat('total_clicks', self.total_clicks)
+
+        # total upgrades purchased
+        stat = self.read_stat('total_upgrades_purchased')
+        if stat:
+            self.total_upgrades_purchased = int(stat)
+        else:
+            self.save_stat('total_upgrades_purchased', self.total_upgrades_purchased)
+
+        # total runtime
+        stat = self.read_stat('total_runtime')
+        if stat:
+            self.total_runtime = float(stat)
+        else:
+            self.save_stat('total_runtime', self.total_runtime)
 
 
 database = DatabaseManager()

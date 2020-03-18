@@ -7,6 +7,7 @@ import pyautogui
 
 class MouseLock:
     def __init__(self):
+        log.info(f'{__name__} has been initialized.')
         self.sentinel = False
         self.sWidth, self.sHeight = pyautogui.size()
         self.GAME_REGION = (0, 0, self.sWidth, self.sHeight)
