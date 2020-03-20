@@ -121,11 +121,11 @@ class Interface:
         self.guardian_label.grid(column=0, row=1, padx=15, pady=2, sticky="w")
 
         self.guardian_choice = Combobox(self.options_win, state="readonly")
-        self.guardian_choice['values'] = [x for x in database.read_option('guardians').split(',')]
+        self.guardian_choice['values'] = [x for x in database.guardians]
         if database.guardian == "Fairy":
-            self.guardian_choice.current(0)
-        elif database.guardian == "Dragon":
             self.guardian_choice.current(1)
+        elif database.guardian == "Dragon":
+            self.guardian_choice.current(0)
         self.guardian_choice.grid(column=0, row=2, padx=15, pady=5, sticky="w")
 
         self.guild_missions_state = BooleanVar(self.options_win)
