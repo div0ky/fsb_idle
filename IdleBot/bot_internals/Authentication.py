@@ -9,8 +9,8 @@ from bot_internals.BotLog import log
 from bot_internals.DatabaseManager import database
 from bot_internals.version_info import *
 
-api_address = 'http://127.0.0.1:5000'
-# api_address = 'https://rest.div0ky.com'
+# api_address = 'http://127.0.0.1:5000'
+api_address = 'https://rest.div0ky.com'
 
 class API:
     def __init__(self):

@@ -32,8 +32,8 @@ class IdleBot:
         """
         Let's start some instances from other modules and configure some things.
         """
-        self.mouse_lock = MouseLock()  # Locks the mouse down to the primary screen
-        self.interface = Setup()
+        # self.mouse_lock = MouseLock()  # Locks the mouse down to the primary screen
+        self.setup = Setup()
         while not database.updater_finished:
             time.sleep(0.5)
         self.interface = Thread(target=Interface, daemon=True, name='Interface') # All GUI instances we should need
