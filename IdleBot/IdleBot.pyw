@@ -18,6 +18,7 @@ from bot_functions.LiteFunctions import *
 from bot_internals.GUI import Interface
 from bot_internals.Launcher import Setup
 from bot_internals.MouseLock import MouseLock
+from bot_functions.GuildFunctions import guild_expeditions
 
 
 class IdleBot:
@@ -77,6 +78,8 @@ class IdleBot:
                         buy_upgrades()
                         farm_gold()
                         map_missions()
+                        guild_expeditions()
+                        auto_prestige()
                         self.save_runtime()
                     except FailSafeException:
                         log.info('Fail-safe triggered. Terminating.')

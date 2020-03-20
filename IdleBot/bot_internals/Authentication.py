@@ -98,7 +98,7 @@ class API:
         while True:
             time.sleep(30)
             response = requests.post(f'{api_address}/firestone/alive?token={database.token}&total_chests_opened={database.total_chests_opened}&total_clicks={database.total_clicks}&total_daily_checkins={database.total_daily_checkins}&total_guardian_trainings={database.total_guardian_trainings}&total_guild_expeditions={database.total_guild_expeditions}&total_map_missions={database.total_map_missions}&total_prestiges={database.total_prestiges}&total_restarts={database.total_restarts}&total_runtime={database.total_runtime}&total_stages_farmed={database.total_stages_farmed}&total_tavern_cards={database.total_tavern_cards}&total_upgrades_purchased={database.total_upgrades_purchased}')
-            # print(response.text)
+            print(response.text)
             message = response.json()
             if message['success']:
                 log.info(message['message'])
