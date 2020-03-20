@@ -23,6 +23,7 @@ class Setup:
         # self.startup_procedures()
         self.auth = API()
         self.updater = Updater()
+        database.updater_finished = True
         # self.update = Thread(target=Updater, daemon=True, name='Updater')
         # self.update.start()
         # self.update.join()
