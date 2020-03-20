@@ -19,8 +19,8 @@ def singleton(cls):
     wrapper_singleton.instance = None
     return wrapper_singleton
 
-api_address = 'http://127.0.0.1:5000'
-# api_address = 'https://rest.div0ky.com'
+# api_address = 'http://127.0.0.1:5000'
+api_address = 'https://rest.div0ky.com'
 
 @singleton
 class DatabaseManager:
@@ -83,6 +83,7 @@ class DatabaseManager:
 
         # declare party variables
         self.heroes = None
+        self.guardians = None
         self.party_size = 5
         self.party_slot_1 = 'Boris'
         self.party_slot_2 = 'Solaine'
@@ -303,6 +304,13 @@ class DatabaseManager:
             self.heroes = sorted([x for x in str(option).split(',')])
         else:
             self.heroes = sorted(['Talia', 'Boris', 'Asmondai', 'Burt', 'Muriel', 'Astrid', 'Ina', 'Fini', 'Solaine','Benedictus', 'Blaze', 'Luana', 'Valerius'])
+
+        # guardians
+        option = self.read_option('guardians')
+        if option:
+            self.guardians = sorted([x for x in str(option).split(',')])
+        else:
+            self.guardians = sorted(['Fairy', 'Dragon'])
 
         # auto_prestige
         option = self.read_option('auto_prestige')
