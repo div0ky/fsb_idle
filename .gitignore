@@ -7,3 +7,5 @@ __pycache__
 *.exe
 .vscode
 Data/Includes/.env
+venv
+Documentation
