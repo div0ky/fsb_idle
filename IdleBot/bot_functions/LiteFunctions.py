@@ -10,9 +10,7 @@ pyautogui.PAUSE = 0.1
 
 log.info(f'{__name__} has been initialized.')
 
-"""
-Click the center of the screen to cause damage with your guardian
-"""
+# Click the center of the screen to cause damage with your guardian
 def guardian_click(clicks=15, speed=1):
     ts = time.time()
     log.info('Resuming guardian duties.')
@@ -30,10 +28,8 @@ def guardian_click(clicks=15, speed=1):
     log.debug(f"Spent {round(time.time() - ts, 2)} seconds on guardian duties.")
     database.save_stat('total_clicks', database.total_clicks + clicks)
 
-"""
-Open the upgrades menu, check for any available (re: green) upgrades, and buy them.
-Check starts from top of the list and works its way down.
-"""
+# Open the upgrades menu, check for any available (re: green) upgrades, and buy them.
+# Check starts from top of the list and works its way down.
 def buy_upgrades():
     log.info('Buying any and all upgrades that we can afford.')
     # TODO: possibly open drawer first time and then start looking for dot

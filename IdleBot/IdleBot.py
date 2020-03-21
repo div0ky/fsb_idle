@@ -63,7 +63,7 @@ class MainBot:
         # runtime = str(timedelta(seconds=_runtime_in_seconds))
         runtime = time.strftime('%Hh %Mm %Ss', time.gmtime(_runtime_in_seconds))
         database.save_stat('total_runtime', database.total_runtime + _runtime_in_seconds)
-        log.info(f'Bot ran for {runtime}')
+        log.info(f'Bot has run for {runtime}')
         return
 
     def run(self):
@@ -75,9 +75,10 @@ class MainBot:
                         guardian_click()
                         buy_upgrades()
                         farm_gold()
-                        map_missions()
-                        guild_expeditions()
-                        auto_prestige()
+                        if 'GOLD' in database.edition:
+                            map_missions()
+                            guild_expeditions()
+                            auto_prestige()
                         self.save_runtime()
                     except FailSafeException:
                         log.info('Fail-safe triggered. Terminating.')

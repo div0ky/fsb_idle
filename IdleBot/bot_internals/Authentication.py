@@ -9,7 +9,7 @@ from bot_internals.BotLog import log
 from bot_internals.DatabaseManager import database
 from bot_internals.version_info import *
 
-# api_address = 'http://127.0.0.1:5000'
+# api_address = 'http://div.local:5000'
 api_address = 'https://rest.div0ky.com'
 
 class API:
@@ -45,8 +45,9 @@ class API:
 
     @staticmethod
     def validate():
+        log.debug('Attempting to validate the token.')
         response = requests.post(f'{api_address}/firestone/validate?token={database.token}')
-        # print(response.text)
+        print(response.text)
         message = response.json()
         if message['success']:
             log.info('Token is valid.')
@@ -58,6 +59,7 @@ class API:
             return False
 
     def get_token(self):
+        log.debug('Attempting to obtain a new token.')
         response = requests.get(f'{api_address}/firestone/token?key={database.license_key}&id={database.public_id}&version={full_version}')
         print(response.text)
         message = response.json()
@@ -65,6 +67,7 @@ class API:
             log.info('We received a fresh token.')
             database.save_option('token', message['token'])
             database.save_option('email', message['email'])
+            database.save_option('edition', message['edition'])
             if self.license_was_empty:
                 database.save_option('license_key', database.license_key)
             return True
@@ -74,15 +77,16 @@ class API:
             database.launch_show_window = False
             messagebox.showwarning(f'Firestone Bot v{current_version}', 'Invalid license key.')
             root.destroy()
-            sys.exit()
+            database.save_option('license_key', '')
             return False
 
     @staticmethod
     def get_license_key():
+        log.debug('Attempting to get license key from user.')
         database.license_key_needed = True
         root = Tk()
         root.withdraw()
-        database.launch_show_window = False
+        # database.launch_show_window = False
         lkey = simpledialog.askstring(parent=root, title=f'Firestone Bot v{current_version}', prompt='       PLEASE ENTER YOUR LICENSE KEY:       ')
         database.launch_show_window = True
         root.destroy()
@@ -96,21 +100,21 @@ class API:
     @staticmethod
     def keep_alive():
         while True:
-            time.sleep(30)
             response = requests.post(f'{api_address}/firestone/alive?token={database.token}&total_chests_opened={database.total_chests_opened}&total_clicks={database.total_clicks}&total_daily_checkins={database.total_daily_checkins}&total_guardian_trainings={database.total_guardian_trainings}&total_guild_expeditions={database.total_guild_expeditions}&total_map_missions={database.total_map_missions}&total_prestiges={database.total_prestiges}&total_restarts={database.total_restarts}&total_runtime={database.total_runtime}&total_stages_farmed={database.total_stages_farmed}&total_tavern_cards={database.total_tavern_cards}&total_upgrades_purchased={database.total_upgrades_purchased}')
             print(response.text)
             message = response.json()
             if message['success']:
                 log.info(message['message'])
-                return True
-            else:
-                return False
+            time.sleep(30)
+            #     return True
+            # else:
+            #     return False
 
     # Load in the latest map nodes from API
     @staticmethod
     def map_nodes():
         response = requests.get(f'{api_address}/firestone/map?token={database.token}')
-        # print(response.text)
+        print(response.text)
         message = response.json()
         if message['success']:
             log.info('Succesfully loaded in latest map nodes.')
@@ -123,4 +127,6 @@ class API:
 
 if __name__ == "__main__":
     verify = API()
+    while True:
+        time.sleep(1)
     # verify.keep_alive()
