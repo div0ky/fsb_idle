@@ -1,11 +1,10 @@
 #! python3
 """
-
-Firestone Idle RPG Bot
-
-A bot to handle auto upgrading party members and such as it progresses.
-
+IdleBot.py
+====================================
+The core module of Firestone Idle Bot
 """
+
 import os
 import sys
 
@@ -21,7 +20,8 @@ from bot_internals.MouseLock import MouseLock
 from bot_functions.GuildFunctions import guild_expeditions
 
 
-class IdleBot:
+class MainBot:
+    """This is the primary class that does things and stuff?"""
     def __init__(self):
         os.system('cls')  # clear the console for debug
         log.info(f'{__name__} has been initialized.')
@@ -30,9 +30,8 @@ class IdleBot:
         keyboard.add_hotkey('shift+esc', callback=self.hotkey_quit, suppress=True, trigger_on_release=True)
         keyboard.add_hotkey('ctrl+g', callback=self.hotkey_go, suppress=True, trigger_on_release=True)
 
-        """
-        Let's start some instances from other modules and configure some things.
-        """
+        # Let's start some instances from other modules and configure some things.
+
         # self.mouse_lock = MouseLock()  # Locks the mouse down to the primary screen
         self.setup = Setup()
         while not database.updater_finished:
@@ -42,12 +41,11 @@ class IdleBot:
         self.interface.join()
         # self.interface = Interface()
 
-        """
-        Get a Tk instance going so we can use message boxes.
-        """
+        # Get a Tk instance going so we can use message boxes.
         # TODO: How to handle message boxes. Likely create function in the Interface module?
 
     def hotkey_pause(self):
+        """This does a thing."""
         database.paused = True
         log.warning(f"Pausing operations...")
 
@@ -91,6 +89,6 @@ class IdleBot:
                 sys.exit()
 
 if __name__ == "__main__":
-    bot = IdleBot()
+    bot = MainBot()
     bot.run()
     sys.exit()

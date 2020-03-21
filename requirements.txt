@@ -4,3 +4,4 @@ semver
 pytesseract
 requests
 Flask
+mkdocs
