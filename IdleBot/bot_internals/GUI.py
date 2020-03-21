@@ -329,7 +329,7 @@ class Interface:
         else:
             user = "UNLICENSED"
 
-        messagebox.showinfo(f"ABOUT", f"FIRESTONE IDLE BOT v{current_version}\n\nLICENSED TO: {user}\n\nThank you for supporting Firestone Idle Bot!", parent=self.window)
+        messagebox.showinfo(f"ABOUT", f"FIRESTONE IDLE BOT v{current_version}\n\nLICENSED TO: {user}\n{database.edition}\n\nThank you for supporting Firestone Idle Bot!", parent=self.window)
 
     def options_on_close(self):
         self.window.deiconify()

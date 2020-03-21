@@ -47,6 +47,7 @@ class DatabaseManager:
         self.email = None
         self.license_key = ''
         self.public_id = ''
+        self.edition = ''
         self.activated = False
         self.token = None
         self.launch_progress = 0
@@ -175,6 +176,11 @@ class DatabaseManager:
         return variable
 
     def _init_values(self):
+
+        # edition
+        option = self.read_option('edition')
+        if option:
+            self.edition = str(option)
 
         # email
         option = self.read_option('email')
