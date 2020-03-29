@@ -1,7 +1,6 @@
-import sys
 import time
-from tkinter import simpledialog, Tk, messagebox
 from threading import Thread
+from tkinter import simpledialog, Tk
 
 import requests
 
@@ -17,6 +16,7 @@ class API:
         log.info(f'{__name__} has been initialized.')
         if not database.license_key:
             self.get_license_key()
+            Thread(target=self.keep_alive, daemon=True, name='Keep Alive').start()
         else:
             self.map_nodes()
             Thread(target=self.keep_alive, daemon=True, name='Keep Alive').start()
@@ -29,7 +29,7 @@ class API:
         root = Tk()
         root.withdraw()
         # database.launch_show_window = False
-        lkey = simpledialog.askstring(parent=root, title=f'Firestone Bot v{current_version}', prompt='       PLEASE ENTER YOUR LICENSE KEY:       ')
+        lkey = simpledialog.askstring(parent=root, title=f'FIB v{current_version}', prompt='       PLEASE ENTER YOUR LICENSE KEY:       ')
         database.launch_show_window = True
         root.destroy()
         if lkey is not None:
@@ -46,6 +46,8 @@ class API:
             # print(response.text)
             message = response.json()
             if message['success']:
+                if database.license_key_needed:
+                    database.save_option('license_key', database.license_key)
                 log.info(message['message'])
                 if database.edition != '':
                     database.save_option('edition', message['edition'])

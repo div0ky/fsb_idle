@@ -13,7 +13,7 @@ class Interface:
         log.info(f'{__name__} has been initialized.')
 
         self.window = Tk()
-        self.window.title(f"Firestone Bot v{current_version}")
+        self.window.title(f"FIB v{current_version}")
         self.window.geometry("380x225")
         self.style = Style()
         # if sys.platform == "win32":
@@ -71,13 +71,13 @@ class Interface:
         self.window.withdraw()
         self.window.destroy()
         database.paused = False
-        log.info(f"Firestone Bot v{current_version} was started!")
+        log.info(f"FIB v{current_version} was started!")
 
     def options_win(self, e=None):
         self.window.withdraw()
         self.options_win = Toplevel(self.window)
         self.options_win.protocol("WM_DELETE_WINDOW", self.options_on_close)
-        self.options_win.title(f"Firestone Bot v{current_version}")
+        self.options_win.title(f"FIB v{current_version}")
         # self.options_win.geometry("400x315")
         self.options_win.minsize(width=400, height=315)
         self.options_win.maxsize(width=400, height=315)
@@ -160,7 +160,7 @@ class Interface:
         self.window.withdraw()
         self.party_win = Toplevel(self.window)
         self.party_win.protocol("WM_DELETE_WINDOW", self.party_on_close)
-        self.party_win.title(f"Firestone Bot v{current_version}")
+        self.party_win.title(f"FIB v{current_version}")
         # self.party_win.geometry("350x275")
         self.party_win.minsize(width=400, height=350)
         self.party_win.maxsize(width=400, height=350)

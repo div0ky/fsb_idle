@@ -30,12 +30,12 @@ class DatabaseManager:
             log.debug("We're using Linux")
         elif platform == "darwin":
             log.debug("We're on MacOS")
-            self.connection = sqlite3.connect(os.path.expanduser('~/Documents/Firestone Bot/memory.db'), check_same_thread=False)
-            self.ocr_image = os.path.expanduser('~/Documents/Firestone Bot/ss.png')
+            self.connection = sqlite3.connect(os.path.expanduser('~/Documents/Firestone Idle Bot/memory.db'), check_same_thread=False)
+            self.ocr_image = os.path.expanduser('~/Documents/Firestone Idle Bot/ss.png')
         elif platform == "win32":
             log.debug("We appear to be on a Windows OS")
-            self.connection = sqlite3.connect(os.getenv('LOCALAPPDATA') + "\\Firestone Bot\\memory.db", check_same_thread=False)
-            self.ocr_image = os.getenv('LOCALAPPDATA') + "\\Firestone Bot\\OCR\\ss.png"
+            self.connection = sqlite3.connect(os.getenv('LOCALAPPDATA') + "\\Firestone Idle Bot\\firestone_idle_bot.db", check_same_thread=False)
+            self.ocr_image = os.getenv('LOCALAPPDATA') + "\\Firestone Idle Bot\\OCR\\ss.png"
 
         # self.connection = sqlite3.connect("http://div0ky.com/repo/memory.db")
         self.c = self.connection.cursor()

@@ -47,65 +47,74 @@ def open_chests():
         chests = ['inv_common_chest.png', 'inv_uncommon_chest.png', 'inv_rare_chest.png', 'inv_epic_chest.png']
         found = []
         for chest in chests:
-            img = pyautogui.locateCenterOnScreen(image_path(chest), region=(1530, 315, 390, 665))
+            img = pyautogui.locateCenterOnScreen(image_path(chest), region=(1530, 315, 390, 665), confidence=0.9)
             if img is not None:
                 found.append(img)
         if found:
             log.info('Looks like we have at least one chest. Opening it and any others.')
             pyautogui.click(found[0])
-        time.sleep(0.5)
-        while True:
-            img = pyautogui.locateCenterOnScreen(image_path(chests[0]), region=(1060, 915, 565, 140))
-            if img is not None:
-                pyautogui.click(img)
-                time.sleep(0.5)
-                pyautogui.click(game_coords.big_chest)
-                time.sleep(0.5)
-                pyautogui.click(game_coords.open_chest, clicks=3, interval=1)
-                log.info('Opened a common chest.')
-            else:
-                log.info('All common chests are opened.')
-                break
+            time.sleep(0.5)
+            while True:
+                img = pyautogui.locateCenterOnScreen(image_path(chests[0]), region=(1060, 915, 565, 140))
+                if img is not None:
+                    pyautogui.click(img)
+                    time.sleep(0.5)
+                    pyautogui.click(game_coords.big_chest)
+                    time.sleep(0.5)
+                    pyautogui.click(game_coords.open_chest, clicks=3, interval=1)
+                    log.info('Opened a common chest.')
+                else:
+                    log.info('All common chests are opened.')
+                    break
 
-        while True:
-            img = pyautogui.locateCenterOnScreen(image_path(chests[1]), region=(1060, 915, 565, 140))
-            if img is not None:
-                pyautogui.click(img)
-                time.sleep(0.5)
-                pyautogui.click(game_coords.big_chest)
-                time.sleep(0.5)
-                pyautogui.click(game_coords.open_chest, clicks=5, interval=1)
-                log.info('Opened an uncommon chest.')
-            else:
-                log.info('All uncommon chests are opened.')
-                break
+            while True:
+                img = pyautogui.locateCenterOnScreen(image_path(chests[1]), region=(1060, 915, 565, 140))
+                if img is not None:
+                    pyautogui.click(img)
+                    time.sleep(0.5)
+                    pyautogui.click(game_coords.big_chest)
+                    time.sleep(0.5)
+                    pyautogui.click(game_coords.open_chest, clicks=5, interval=1)
+                    log.info('Opened an uncommon chest.')
+                else:
+                    log.info('All uncommon chests are opened.')
+                    break
 
-        while True:
-            img = pyautogui.locateCenterOnScreen(image_path(chests[2]), region=(1060, 915, 565, 140))
-            if img is not None:
-                pyautogui.click(img)
-                time.sleep(0.5)
-                pyautogui.click(game_coords.big_chest)
-                time.sleep(0.5)
-                pyautogui.click(game_coords.open_chest, clicks=7, interval=1)
-                log.info('Opened a rare chest.')
-            else:
-                log.info('All rare chests are opened.')
-                break
+            while True:
+                img = pyautogui.locateCenterOnScreen(image_path(chests[2]), region=(1060, 915, 565, 140))
+                if img is not None:
+                    pyautogui.click(img)
+                    time.sleep(0.5)
+                    pyautogui.click(game_coords.big_chest)
+                    time.sleep(0.5)
+                    pyautogui.click(game_coords.open_chest, clicks=7, interval=1)
+                    log.info('Opened a rare chest.')
+                else:
+                    log.info('All rare chests are opened.')
+                    break
 
-        while True:
-            img = pyautogui.locateCenterOnScreen(image_path(chests[3]), region=(1060, 915, 565, 140))
-            if img is not None:
-                pyautogui.click(img)
-                time.sleep(0.5)
-                pyautogui.click(game_coords.big_chest)
-                time.sleep(0.5)
-                pyautogui.click(game_coords.open_chest, clicks=9, interval=1)
-                log.info('Opened an epic chest.')
-            else:
-                log.info('All epic chests are opened.')
-                break
+            while True:
+                img = pyautogui.locateCenterOnScreen(image_path(chests[3]), region=(1060, 915, 565, 140), confidence=0.9)
+                if img is not None:
+                    pyautogui.click(img)
+                    time.sleep(0.5)
+                    pyautogui.click(game_coords.big_chest)
+                    time.sleep(0.5)
+                    pyautogui.click(game_coords.open_chest, clicks=9, interval=1)
+                    log.info('Opened an epic chest.')
+                else:
+                    log.info('All epic chests are opened.')
+                    break
+            log.info("I think we're done with chests for now. Going home.")
+            pyautogui.click(game_coords.big_close_coords, clicks=2, interval=0.5)
+            time.sleep(0.5)
+            pyautogui.click(game_coords.small_close_coords)
+        else:
+            pyautogui.click(game_coords.small_close_coords)
+            time.sleep(0.5)
+
     else:
         log.info("It isn't time to check the chests again yet.")
+        # end
 
 

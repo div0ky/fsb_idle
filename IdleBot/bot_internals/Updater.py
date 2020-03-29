@@ -22,13 +22,13 @@ class Updater:
             if semver.compare(latest, current_version) > 0:
                 root = Tk()
                 root.withdraw()
-                ask_update = messagebox.askyesno(title=f"Firestone Bot v{current_version}",
+                ask_update = messagebox.askyesno(title=f"FIB v{current_version}",
                                                  message=f"A new version is availble. You're running v{current_version}. The latest version is v{latest}.\n\nDo you want to download & update?", parent=root)
                 root.destroy()
 
                 if ask_update:
                     update = f"http://div0ky.com/repo/Firestone_Bot_v{latest}.exe"
-                    with open(os.getenv('LOCALAPPDATA') + f"/Firestone Bot/Firestone_Bot_v{latest}.exe", 'wb') as f:
+                    with open(os.getenv('LOCALAPPDATA') + f"/Firestone Idle Bot/Firestone_Bot_v{latest}.exe", 'wb') as f:
                         response = requests.get(update, stream=True)
                         total_size = response.headers.get('content-length')
                         if total_size is None:
@@ -52,7 +52,7 @@ class Updater:
                         # messagebox.showinfo(title="DOWNLOAD COMPLETE", message="Download Complete. Launching Installer...")
                     if db.launch_running:
                         log.info(f"Updated to v{latest}")
-                        os.startfile(os.getenv('LOCALAPPDATA') + f"/Firestone Bot/Firestone_Bot_v{latest}.exe")
+                        os.startfile(os.getenv('LOCALAPPDATA') + f"/Firestone Idle Bot/Firestone_Bot_v{latest}.exe")
                     sys.exit()
 
                 else:

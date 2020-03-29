@@ -75,7 +75,7 @@ def push(msg):
 
 def image_path(filename):
     # A shortcut for joining the 'images/' file path
-    return os.path.join(r"C:\Program Files\Firestone Bot\Data\Images", filename)
+    return os.path.join(r"C:\Program Files\Firestone Idle Bot\Data\Images", filename)
 
 def change_upgrade_progression(option):
     current_progression = database.upgrade_status
