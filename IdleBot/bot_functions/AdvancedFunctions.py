@@ -150,19 +150,24 @@ def setup_party():
 
     if database.party_size >= 1:
         time.sleep(0.5)
-        pyautogui.locateCenterOnScreen(image_path('hero_' + database.party_slot_1.lower() + '.png'))
+        img = pyautogui.locateCenterOnScreen(image_path('hero_' + database.party_slot_1.lower() + '.png'))
+        pyautogui.click(img)
     if database.party_size >= 2:
         time.sleep(0.5)
-        pyautogui.locateCenterOnScreen(image_path('hero_' + database.party_slot_2.lower() + '.png'))
+        img = pyautogui.locateCenterOnScreen(image_path('hero_' + database.party_slot_2.lower() + '.png'))
+        pyautogui.click(img)
     if database.party_size >= 3:
         time.sleep(0.5)
-        pyautogui.locateCenterOnScreen(image_path('hero_' + database.party_slot_3.lower() + '.png'))
+        img = pyautogui.locateCenterOnScreen(image_path('hero_' + database.party_slot_3.lower() + '.png'))
+        pyautogui.click(img)
     if database.party_size >= 4:
         time.sleep(0.5)
-        pyautogui.locateCenterOnScreen(image_path('hero_' + database.party_slot_4.lower() + '.png'))
+        img = pyautogui.locateCenterOnScreen(image_path('hero_' + database.party_slot_4.lower() + '.png'))
+        pyautogui.click(img)
     if database.party_size >= 5:
         time.sleep(0.5)
-        pyautogui.locateCenterOnScreen(image_path('hero_' + database.party_slot_5.lower() + '.png'))
+        img = pyautogui.locateCenterOnScreen(image_path('hero_' + database.party_slot_5.lower() + '.png'))
+        pyautogui.click(img)
 
     time.sleep(0.5)
     pyautogui.click(game_coords.relative_coords(1160, 95))  # Click to save changes
