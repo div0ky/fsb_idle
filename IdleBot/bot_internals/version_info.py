@@ -1,7 +1,7 @@
 # version_info.py
 
-vMajor = 6  # Increments on a BREAKING change
-vMinor = 0  # Increments on a FEATURE change
+vMajor = 0  # Increments on a BREAKING change
+vMinor = 8  # Increments on a FEATURE change
 vPatch = 0  # Increments on a FIX / PATCH
 vStage = "dev.5"
 full_version = f"{vMajor}.{vMinor}.{vPatch}-{vStage}"  # Should be self explanatory

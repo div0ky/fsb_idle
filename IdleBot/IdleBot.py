@@ -18,7 +18,7 @@ from bot_internals.GUI import Interface
 from bot_internals.Launcher import Setup
 from bot_internals.MouseLock import MouseLock
 from bot_functions.GuildFunctions import guild_expeditions
-from bot_functions.silver_functions import guardian_training
+from bot_functions.silver_functions import guardian_training, open_chests
 
 
 class MainBot:
@@ -80,6 +80,7 @@ class MainBot:
                         farm_gold()
                         if 'SILVER' or 'GOLD' in database.edition:
                             guardian_training()
+                            open_chests()
                         if 'GOLD' in database.edition:
                             map_missions()
                             guild_expeditions()
