@@ -18,6 +18,7 @@ from bot_internals.GUI import Interface
 from bot_internals.Launcher import Setup
 from bot_internals.MouseLock import MouseLock
 from bot_functions.GuildFunctions import guild_expeditions
+from bot_functions.silver_functions import guardian_training
 
 
 class MainBot:
@@ -68,16 +69,20 @@ class MainBot:
 
     def run(self):
         self.start_time = time.time()
+        database.save_option('upgrade_status', 'x1')
+        change_upgrade_progression('Milestone')
         while True:
             if database.running:
                 if not database.paused:
                     try:
-                        # guardian_click()
-                        # buy_upgrades()
-                        # farm_gold()
+                        guardian_click()
+                        buy_upgrades()
+                        farm_gold()
+                        if 'SILVER' or 'GOLD' in database.edition:
+                            guardian_training()
                         if 'GOLD' in database.edition:
-                            # map_missions()
-                            # guild_expeditions()
+                            map_missions()
+                            guild_expeditions()
                             auto_prestige()
                         self.save_runtime()
                     except FailSafeException:

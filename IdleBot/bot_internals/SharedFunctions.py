@@ -11,6 +11,7 @@ from PIL import Image
 from .BotLog import log
 from .DatabaseManager import database
 from .GameCoords import game_coords
+import time
 
 # Define where the tesseract engine is installed
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
@@ -92,6 +93,7 @@ def change_upgrade_progression(option):
         else:
             clicks = int(progressions[current_progression][option])
             pyautogui.click(game_coords.upgrade_button)
+            time.sleep(0.5)
             log.debug(f"We need to click {clicks} times to get to {option}")
             pyautogui.click(game_coords.upgrade_progression_button, clicks=clicks, interval=0.5)
             pyautogui.click(game_coords.small_close_coords)

@@ -18,6 +18,7 @@ class GameCoords:
         self.back_arrow_coords = None
         self.upgrade_progression_button = None
         self.temple_of_eternals_coords = None
+        self.magic_quarter = None
         self.hero_coords = {}
         self.party_coords = None
         self.exotic_merchant_coords = None
@@ -62,6 +63,7 @@ class GameCoords:
         self.back_arrow_coords = (self.relative_coords(690, 40))
         self.upgrade_progression_button = (self.relative_coords(1605, 1020))
         self.temple_of_eternals_coords = (self.relative_coords(915, 250))
+        self.magic_quarter = (600, 250)
         self.party_coords = (self.relative_coords(1845, 520))
         self.exotic_merchant_coords = (self.relative_coords(1445, 735))
         self.map_coords = (self.relative_coords(1840, 395))

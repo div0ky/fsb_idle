@@ -66,7 +66,7 @@ def map_missions():
 
 
 def auto_prestige():
-    if database.auto_prestige :
+    if database.auto_prestige and database.prestige_check_time <= time.time():
         time.sleep(0.5)
         pyautogui.click(game_coords.town_coords)
         time.sleep(0.5)
@@ -173,4 +173,7 @@ def setup_party():
     pyautogui.click(game_coords.relative_coords(1160, 95))  # Click to save changes
     time.sleep(0.5)
     pyautogui.click(game_coords.big_close_coords)
+    time.sleep(0.5)
+    database.save_option('upgrade_status', 'x1')
+    change_upgrade_progression('Milestone')
     time.sleep(0.5)
