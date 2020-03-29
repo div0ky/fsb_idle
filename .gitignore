@@ -1,4 +1,4 @@
-﻿.idea
+﻿.idea/
 Data/Images/ss.jpg
 Data/Includes/__pycache__
 Data/Includes/__pycache__
@@ -7,4 +7,4 @@ __pycache__
 *.exe
 .vscode
 Data/Includes/.env
-venv
+venv/
