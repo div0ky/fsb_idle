@@ -1,7 +1,7 @@
 import pyautogui
 from bot_internals.GameCoords import game_coords
 from bot_internals.DatabaseManager import database
-from bot_internals.SharedFunctions import ocr, is_num, change_upgrade_progression
+from bot_internals.SharedFunctions import ocr, is_num, change_upgrade_progression, image_path
 from bot_internals.BotLog import log
 import re, ast
 import time
@@ -66,7 +66,7 @@ def map_missions():
 
 
 def auto_prestige():
-    if database.auto_prestige and time.time() >= database.prestige_check_time:
+    if database.auto_prestige :
         time.sleep(0.5)
         pyautogui.click(game_coords.town_coords)
         time.sleep(0.5)
@@ -95,7 +95,7 @@ def auto_prestige():
             #     pyautogui.screenshot(os.path.expanduser("~") + f"/Documents/Firestone Bot/OCR/Fail_{db.ocr_fail_count}_{round(time(), 5)}.png")
 
         if prestige_level:
-            progress = round((prestige_level / database.prestige_level) * 100)
+            progress = round((prestige_level / int(database.prestige_level)) * 100)
             log.info(f"Current earnings are at {prestige_level}x which is {progress}% of our goal.")
             time.sleep(0.5)
 
@@ -108,7 +108,7 @@ def auto_prestige():
             log.info(f"Will wait {round((snooze / 1000), 2)}min before checking Prestige progress again.")
             time.sleep(0.5)
 
-            if prestige_level >= database.prestige_level:
+            if prestige_level >= int(database.prestige_level):
                 log.info("Firestone earnings are satisfactory. Prestiging...")
                 pyautogui.click(game_coords.relative_coords(1160, 525))  # Click on FREE prestige option
                 time.sleep(15)  # Wait for prestige to finish
@@ -118,7 +118,7 @@ def auto_prestige():
                 setup_party()
                 change_upgrade_progression('Milestone')
 
-        log.info("Going back to home screen.")
+        log.info("Going back to home screen. Prestige not ready.")
         pyautogui.click(game_coords.big_close_coords, clicks=3, interval=0.5)  # Go home because we're not prestiging
 
 
@@ -150,19 +150,19 @@ def setup_party():
 
     if database.party_size >= 1:
         time.sleep(0.5)
-        pyautogui.click(game_coords.hero_coords[database.party_slot_1])
+        pyautogui.locateCenterOnScreen(image_path('hero_' + database.party_slot_1.lower() + '.png'))
     if database.party_size >= 2:
         time.sleep(0.5)
-        pyautogui.click(game_coords.hero_coords[database.party_slot_2])
+        pyautogui.locateCenterOnScreen(image_path('hero_' + database.party_slot_2.lower() + '.png'))
     if database.party_size >= 3:
         time.sleep(0.5)
-        pyautogui.click(game_coords.hero_coords[database.party_slot_3])
+        pyautogui.locateCenterOnScreen(image_path('hero_' + database.party_slot_3.lower() + '.png'))
     if database.party_size >= 4:
         time.sleep(0.5)
-        pyautogui.click(game_coords.hero_coords[database.party_slot_4])
+        pyautogui.locateCenterOnScreen(image_path('hero_' + database.party_slot_4.lower() + '.png'))
     if database.party_size >= 5:
         time.sleep(0.5)
-        pyautogui.click(game_coords.hero_coords[database.party_slot_5])
+        pyautogui.locateCenterOnScreen(image_path('hero_' + database.party_slot_5.lower() + '.png'))
 
     time.sleep(0.5)
     pyautogui.click(game_coords.relative_coords(1160, 95))  # Click to save changes

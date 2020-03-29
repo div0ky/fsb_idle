@@ -72,12 +72,12 @@ class MainBot:
             if database.running:
                 if not database.paused:
                     try:
-                        guardian_click()
-                        buy_upgrades()
-                        farm_gold()
+                        # guardian_click()
+                        # buy_upgrades()
+                        # farm_gold()
                         if 'GOLD' in database.edition:
-                            map_missions()
-                            guild_expeditions()
+                            # map_missions()
+                            # guild_expeditions()
                             auto_prestige()
                         self.save_runtime()
                     except FailSafeException:
