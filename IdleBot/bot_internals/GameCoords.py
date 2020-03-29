@@ -66,12 +66,8 @@ class GameCoords:
         self.exotic_merchant_coords = (self.relative_coords(1445, 735))
         self.map_coords = (self.relative_coords(1840, 395))
 
-        self.hero_coords = {"burt": (round(0.8672 * self.game_region[2]), round(0.5417 * self.game_region[3])),
-                            "solaine": (round(0.8698 * self.game_region[2]), round(0.3565 * self.game_region[3])),
-                            "baine": (round(0.7708 * self.game_region[2]), round(0.3565 * self.game_region[3])),
-                            "talia": (round(0.7708 * self.game_region[2]), round(0.5444 * self.game_region[3])),
-                            "benedictus": (round(0.7708 * self.game_region[2]), round(0.7269 * self.game_region[3])),
-                            "rogue": (round(0.8698 * self.game_region[2]), round(0.7269 * self.game_region[3]))}
+        for hero in database.heroes:
+            setattr(self, f"hero_{hero}", None)
 
 
 game_coords = GameCoords()

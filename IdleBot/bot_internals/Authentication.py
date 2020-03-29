@@ -47,6 +47,8 @@ class API:
             message = response.json()
             if message['success']:
                 log.info(message['message'])
+                if database.edition != '':
+                    database.save_option('edition', message['edition'])
             else:
                 log.error(message['message'])
             time.sleep(180)
@@ -55,7 +57,7 @@ class API:
     @staticmethod
     def map_nodes():
         response = requests.get(f'{api_address}/map?key={database.license_key}')
-        # print(response.text)
+        print(response.text)
         message = response.json()
         if message['success']:
             log.info('Succesfully loaded in latest map nodes.')
