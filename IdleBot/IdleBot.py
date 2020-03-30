@@ -11,6 +11,7 @@ import sys
 import keyboard
 from pyautogui import FailSafeException
 from threading import Thread
+from threading import enumerate as thread_enumerate
 
 from bot_functions.AdvancedFunctions import *
 from bot_functions.LiteFunctions import *
@@ -19,6 +20,7 @@ from bot_internals.Launcher import Setup
 from bot_internals.MouseLock import MouseLock
 from bot_functions.GuildFunctions import guild_expeditions
 from bot_functions.silver_functions import guardian_training, open_chests
+from bot_internals.Authentication import keep_alive
 
 
 class MainBot:
@@ -67,6 +69,20 @@ class MainBot:
         log.info(f'Bot has run for {runtime}')
         return
 
+    @staticmethod
+    def _check_thread_status():
+        thread_names = ['keep alive']
+
+        for thrd in thread_enumerate():
+            if thrd.name.lower() in thread_names:
+                thread_names.remove(thrd.name.lower())
+
+        for i in thread_names:
+            if i == 'keep alive':
+                msg = 'Keep Alive; Thread Crashed'
+                log.error(msg)
+                Thread(target=keep_alive, daemon=True, name='Keep Alive').start()
+
     def run(self):
         self.start_time = time.time()
         database.save_option('upgrade_status', 'x1')
@@ -86,6 +102,7 @@ class MainBot:
                             guild_expeditions()
                             auto_prestige()
                         self.save_runtime()
+                        self._check_thread_status()
                     except FailSafeException:
                         log.info('Fail-safe triggered. Terminating.')
                         break

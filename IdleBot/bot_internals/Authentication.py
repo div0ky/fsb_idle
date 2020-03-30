@@ -11,15 +11,16 @@ from bot_internals.version_info import *
 # api_address = 'http://div.local:5000'
 api_address = 'https://firestone.div0ky.com'
 
+
 class API:
     def __init__(self):
         log.info(f'{__name__} has been initialized.')
         if not database.license_key:
             self.get_license_key()
-            Thread(target=self.keep_alive, daemon=True, name='Keep Alive').start()
+            Thread(target=keep_alive, daemon=True, name='Keep Alive').start()
         else:
             self.map_nodes()
-            Thread(target=self.keep_alive, daemon=True, name='Keep Alive').start()
+            Thread(target=keep_alive, daemon=True, name='Keep Alive').start()
 
 
     @staticmethod
@@ -39,22 +40,6 @@ class API:
         else:
             return False
 
-    @staticmethod
-    def keep_alive():
-        while True:
-            response = requests.get(f'{api_address}/alive?key={database.license_key}')
-            # print(response.text)
-            message = response.json()
-            if message['success']:
-                if database.license_key_needed:
-                    database.save_option('license_key', database.license_key)
-                log.info(message['message'])
-                if database.edition != '':
-                    database.save_option('edition', message['edition'])
-            else:
-                log.error(message['message'])
-            time.sleep(180)
-
     # Load in the latest map nodes from API
     @staticmethod
     def map_nodes():
@@ -71,6 +56,20 @@ class API:
         else:
             log.error('Unable to access latest map nodes from API')
 
+def keep_alive():
+    while True:
+        response = requests.get(f'{api_address}/alive?key={database.license_key}')
+        # print(response.text)
+        message = response.json()
+        if message['success']:
+            if database.license_key_needed:
+                database.save_option('license_key', database.license_key)
+            log.info(message['message'])
+            if database.edition != '':
+                database.save_option('edition', message['edition'])
+        else:
+            log.error(message['message'])
+        time.sleep(180)
 
 if __name__ == "__main__":
     verify = API()

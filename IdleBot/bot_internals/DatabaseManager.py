@@ -4,6 +4,7 @@ import sqlite3
 import uuid
 from sys import platform
 from time import time
+from datetime import datetime, timedelta
 
 from .BotLog import log
 
@@ -65,13 +66,14 @@ class DatabaseManager:
         self.active_missions = 0
         self.boss_failed = False
         self.fresh_start = False
-        self.guild_mission_time_left = time() - 5
+        self.guild_mission_time_left = datetime.now() - timedelta(hours=5)
+        self.chests_timestamp = datetime.now() - timedelta(hours=2)
         self.map_troops = 0
         self.ocr_f_pct = 0
         self.ocr_fail_count = 0
         self.ocr_s_pct = 0
         self.ocr_succeed_count = 0
-        self.prestige_check_time = time() - 5
+        self.prestige_check_time = datetime.now() - timedelta(hours=5)
         self.upgrades_lowered = False
         self.upgrade_status = "Milestone"
         self.map_nodes = "(393, 350), (620, 425), (265, 635), (245, 960), (590, 772), (715, 735), (800, 975),(875, 875), (1000, 640), (1190, 640), (1270, 795), (1285, 485), (1578, 540), (1578, 365),(410, 725), (815, 775), (1040, 410), (1375, 350), (1570, 365), (1460, 800), (1300, 985),(760, 565), (830, 690), (875, 555), (1440, 645), (1440, 910), (1560, 980), (830, 395),(465, 445), (1550, 740), (1290, 688)"
@@ -251,14 +253,20 @@ class DatabaseManager:
         # guild_mission_time_left
         option = self.read_option('guild_mission_time_left')
         if option:
-            self.guild_mission_time_left = float(option)
+            try:
+                self.guild_mission_time_left = datetime.strptime(option, '%Y-%m-%d %H:%M:%S.%f')
+            except:
+                self.save_option('guild_mission_time_left', self.guild_mission_time_left)
         else:
             self.save_option('guild_mission_time_left', self.guild_mission_time_left)
 
         # prestige_check_time
         option = self.read_option('prestige_check_time')
         if option:
-            self.prestige_check_time = float(option)
+            try:
+                self.prestige_check_time = datetime.strptime(option, '%Y-%m-%d %H:%M:%S.%f')
+            except:
+                self.save_option('prestige_check_time', self.prestige_check_time)
         else:
             self.save_option('prestige_check_time', self.prestige_check_time)
 

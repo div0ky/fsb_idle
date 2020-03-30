@@ -1,4 +1,4 @@
-from logging.handlers import TimedRotatingFileHandler
+from logging.handlers import RotatingFileHandler
 import logging
 import os
 import functools
@@ -35,8 +35,7 @@ class BotLog:
         c_handler.setLevel(logging.DEBUG)
         c_handler.setFormatter(console_format)
         # Create debug handler
-        f_handler = TimedRotatingFileHandler(os.path.expanduser("~") + "/Documents/Firestone Bot/Logs/debug.log",
-                                             when="midnight", backupCount=7, interval=1)
+        f_handler = RotatingFileHandler(os.path.expanduser("~") + "/Documents/Firestone Idle Bot/Logs/debug.log", maxBytes=10240, backupCount=10)
         f_handler.setLevel(logging.DEBUG)
         f_handler.setFormatter(file_format)
         # Add handlers to the logger

@@ -3,11 +3,11 @@ from bot_internals.BotLog import log
 from bot_internals.GameCoords import game_coords
 from bot_internals.SharedFunctions import ocr, is_num
 import pyautogui
-from time import time as time
+from datetime import datetime, timedelta
 from time import sleep as sleep
 
 def guild_expeditions():
-    if time() > database.guild_mission_time_left and database.guild_missions:
+    if datetime.now() > database.guild_mission_time_left and database.guild_missions:
         log.info("Checking on Guild Expedition status.")
         sleep(0.5)
         pyautogui.click(game_coords.town_coords)
@@ -40,7 +40,8 @@ def guild_expeditions():
         elif is_num(result):
             database.save_option('ocr_succeed_count', int(database.read_option('ocr_succeed_count')) + 1)
             time_left = int(result.partition(":")[0]) + 1  # Add one minute to whatever minutes are left to be safe
-            database.save_option('guild_mission_time_left', time() + (time_left * 60))
+            snooze = datetime.now() + timedelta(minutes=time_left)
+            database.save_option('guild_mission_time_left', snooze)
             log.info(f"Current mission should complete in {time_left}min. Going Home.")
             pyautogui.click(game_coords.big_close_coords, clicks=3, interval=0.5)  # Go back to main screen
             sleep(0.5)
@@ -76,7 +77,8 @@ def guild_expeditions():
                     else:
                         time_left = int(result.partition(":")[0]) * 60
 
-                    database.save_option('guild_mission_time_left', time() + time_left)  # Set timer
+                    snooze = datetime.now() + timedelta(minutes=time_left)
+                    database.save_option('guild_mission_time_left', snooze)  # Set timer
                     log.info(f"More missions available in {time_left / 60}min. Returning home.")
                     pyautogui.click(game_coords.big_close_coords, clicks=3, interval=0.5)  # Go back to main screen
                     return

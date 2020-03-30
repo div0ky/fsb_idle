@@ -7,8 +7,9 @@ from bot_internals.BotLog import log
 from bot_internals.GameCoords import game_coords
 from bot_internals.SharedFunctions import image_path
 
+from bot_internals.DatabaseManager import database
+
 last_check = datetime.utcnow() - timedelta(minutes=5)
-chests_timestamp = datetime.utcnow() - timedelta(hours=2)
 
 def guardian_training():
     global last_check
@@ -35,9 +36,8 @@ def guardian_training():
         log.info("Waiting to check on Guardian Training")
 
 def open_chests():
-    global chests_timestamp
-    if chests_timestamp + timedelta(hours=2) <= datetime.utcnow():
-        chests_timestamp = datetime.utcnow()
+    if database.chests_timestamp + timedelta(hours=2) <= datetime.now():
+        database.chests_timestamp = datetime.now()
         log.info('Opening any available chests.')
         time.sleep(0.5)
         pyautogui.click(game_coords.inventory)
@@ -107,11 +107,11 @@ def open_chests():
                     break
             log.info("I think we're done with chests for now. Going home.")
             pyautogui.click(game_coords.big_close_coords, clicks=2, interval=0.5)
-            time.sleep(0.5)
-            pyautogui.click(game_coords.small_close_coords)
-        else:
-            pyautogui.click(game_coords.small_close_coords)
-            time.sleep(0.5)
+
+
+        time.sleep(0.5)
+        pyautogui.click(game_coords.inventory_close)
+        time.sleep(0.5)
 
     else:
         log.info("It isn't time to check the chests again yet.")

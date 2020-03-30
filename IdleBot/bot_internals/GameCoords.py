@@ -23,6 +23,7 @@ class GameCoords:
         self.magic_quarter = None
         self.big_chest = None
         self.open_chest = None
+        self.inventory_close = None
         self.hero_coords = {}
         self.party_coords = None
         self.exotic_merchant_coords = None
@@ -69,6 +70,7 @@ class GameCoords:
         self.temple_of_eternals_coords = (self.relative_coords(915, 250))
         self.magic_quarter = (600, 250)
         self.inventory = (1840, 800)
+        self.inventory_close = (1875, 280)
         self.chests_tab = (1785, 200)
         self.big_chest = (500, 325)
         self.open_chest = (500, 540)

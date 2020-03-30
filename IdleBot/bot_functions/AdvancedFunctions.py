@@ -5,6 +5,7 @@ from bot_internals.SharedFunctions import ocr, is_num, change_upgrade_progressio
 from bot_internals.BotLog import log
 import re, ast
 import time
+from datetime import datetime, timedelta
 
 def map_missions():
         spawn_points = [ast.literal_eval(i) for i in re.split('(?<=\)),(?=\()', str(database.map_nodes))]
@@ -66,7 +67,7 @@ def map_missions():
 
 
 def auto_prestige():
-    if database.auto_prestige and database.prestige_check_time <= time.time():
+    if database.auto_prestige and database.prestige_check_time <= datetime.now():
         time.sleep(0.5)
         pyautogui.click(game_coords.town_coords)
         time.sleep(0.5)
@@ -104,7 +105,7 @@ def auto_prestige():
                 snooze = 1000
             elif snooze >= 60000:
                 snooze = 60000
-            database.save_option('prestige_check_time', time.time() + snooze)
+            database.save_option('prestige_check_time', datetime.now() + timedelta(seconds=snooze))
             log.info(f"Will wait {round((snooze / 1000), 2)}min before checking Prestige progress again.")
             time.sleep(0.5)
 
