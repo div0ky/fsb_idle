@@ -2,39 +2,60 @@
 All notable changes to this project will be documented in this file. We are attempting to use [Semantic Versioning](https://semver.org/). We are also attempting to follow the guidelines laid out at [keep a changelog](https://keepachangelog.com).
 
 ## [Unreleased]
-- Tavern
-- Open Chests
+- Tavern Cards
+- Daily Checkins
+
+## [0.9] - 2020-03-30
+
+### Fixed
+- Running Past Midnight; Found a bug in how I was handling time - it had no concept of dates. If it was left running past midnight the timestamps for when to check items again would now be in the evening of the following day. This resulted in the bot not doing anything for hours.
+- Chest Inventory; Found a bug where the chest inventory window didn’t close properly which prevents the bot from checking upgrades for a while.
+
+## [0.8] - 2020-03-29
+
+### Added
+- Guardian Training; The bot will now check to see if the guardian can be trained and, if so, smash that train button.
+- Open Chests; The bot will now open chests for you every 2 hours. How about that?
+
+### Changed
+- Internal Changes; I made a bunch of internal changes to how the bot authenticates user license keys. It be much quicker now and not slow down load times.
+- Version Change; This coming release has some under-the-hood fundamental changes. It will be necessary to completely uninstall any previous versions before installing this one. Due to the nature of the project and for cleanliness... I've reset the versions to an alpha system and we're rocking v0.8 as the latest.
+
+### Fixed
+- Auto Prestige;This has been a known issue for a little while, but I have great news! Auto Prestige is now fixed and better than ever. 
+
 
 ## [5.0.0-dev.9] - 2020-03-13
 
-## Added
+### Added
 - Menu item under Help > Change License Key to change your key on that device
 
 ## [5.0.0-dev.8] - 2020-03-11
 
-## Fixed
+### Fixed
 - Broke auto-updater somewhere along the line. It's fixed now.
 
 ## [5.0.0-dev.7] - 2020-03-11
 
-## Added
+### Added
 - Tesseract is now bundled with the installer
 
 ## [5.0.0-dev.6] - 2020-03-11
 
-## Added
+### Added
 - Support for div API v0.1
 
 ## [5.0.0-dev.2] - 2020-03-06
 
-## Added
+### Added
 - Support for licensing
 
-## Changed
+### Changed
 - BOT NOW REQUIRES A VALID LICENSE KEY TO OPERATE; hence the bump to 5.0.0
 - ConfigManager now checks for a license key and updates older config files to support this
 
-## Fixed
+### Fixed
+
 - Auto updater wasn't working as expected
 - Main window didn't reappear after choosing NOT to update
 - Version numbers are now parsing correctly
