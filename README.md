@@ -1,8 +1,8 @@
-![GitHub last commit](https://img.shields.io/github/last-commit/div0ky/fsb_idle?style=flat-square)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/div0ky/fsb_idle?style=flat-square)
-![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/div0ky/fsb_idle?include_prereleases&style=flat-square)
-![GitHub commits since latest release (by date including pre-releases)](https://img.shields.io/github/commits-since/div0ky/fsb_idle/latest?include_prereleases&style=flat-square)
-![GitHub](https://img.shields.io/github/license/div0ky/fsb_idle?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/div0ky/fsb_idle)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/div0ky/fsb_idle)
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/div0ky/fsb_idle?include_prereleases)
+![GitHub commits since latest release (by date including pre-releases)](https://img.shields.io/github/commits-since/div0ky/fsb_idle/latest?include_prereleases)
+![GitHub](https://img.shields.io/github/license/div0ky/fsb_idle)
 
 # Firestone Idle Bot 
 
