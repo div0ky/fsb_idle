@@ -1,7 +1,3 @@
-<<<<<<< Updated upstream
-# Firestone Idle Bot 
-
-=======
 ![GitHub last commit](https://img.shields.io/github/last-commit/div0ky/fsb_idle?style=flat-square)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/div0ky/fsb_idle?style=flat-square)
 ![GitHub commits since latest release (by date)](https://img.shields.io/github/commits-since/div0ky/fsb_idle/latest?style=flat-square)
@@ -10,7 +6,6 @@
 
 # Firestone Idle Bot 
 
->>>>>>> Stashed changes
 ## Website
 For more information regarding this project you can visit https://firestone.div0ky.com
 
