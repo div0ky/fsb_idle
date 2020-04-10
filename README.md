@@ -3,6 +3,7 @@
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/div0ky/fsb_idle?include_prereleases)
 ![GitHub commits since latest release (by date including pre-releases)](https://img.shields.io/github/commits-since/div0ky/fsb_idle/latest?include_prereleases)
 ![GitHub](https://img.shields.io/github/license/div0ky/fsb_idle)
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
 
 # Firestone Idle Bot 
 
