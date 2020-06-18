@@ -8,7 +8,7 @@
 # Firestone Idle Bot 
 
 ## IMPORTANT NOTE
-I no longer actively maintain this project; however, you can obtain a **FREE** GOLD Edition license by going to this address: http://short.div0ky.com/U6mAdB
+I no longer actively maintain this project; however, you can obtain a **FREE** GOLD Edition license by going to this address: https://div0ky.me/U6mAdB
 
 When it asks you to "Name a fair price" you can just put `0`. If you'd *like* to buy me a coffee (or a beer) a donation is always appreciated. If there's enough interest I may resume maintenance on the project. As of right now it just takes too much time with not enough interest. Cheers!
 
